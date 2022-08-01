@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true, 
+            "args":[
+                "--model_name", "hfl/chinese-macbert-base", 
+                "--num_labels", "2",  
+                "--data_dir", "./data",   
+                "--adversarial_training_param", "2",  
+                "--pred_output_dir", "./submissions" , 
+                "--output_model_dir", "./sample_run ", 
+                "--epoch", "4",  
+                "--batch_size", "8",  
+                "--kfolds", "1",
+                "--split_words", 
+            ]
+        }
+    ]
+}
