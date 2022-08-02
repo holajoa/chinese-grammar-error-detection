@@ -15,9 +15,21 @@ def compute_metrics(eval_pred):
     """
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
-    tp = ((predictions == labels) * (predictions == 1)).sum()
+    accuracy = (predictions==labels).mean()
+
+    tp = ((labels == 1) * (predictions == 1)).sum()
     allp = (predictions == 1).sum()
-    return {'F1':tp/allp, 'accuracy': (predictions==labels).mean()}
+    fn = ((labels == 1) * (predictions == 0)).sum()
+    precision = tp / allp
+    recall = tp / (tp + fn)
+    f1 = 2*precision*recall / (precision + recall)
+
+    return {
+        'F1': f1, 
+        'precision': precision, 
+        'recall': recall,
+        # 'accuracy': accuracy, 
+    }
 
 
 def voting(logits, val_accuracy=None):
