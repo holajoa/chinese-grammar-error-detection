@@ -11,14 +11,17 @@
             "args":[
                 "--model_name", "hfl/chinese-macbert-base", 
                 "--num_labels", "2",  
-                "--data_dir", "./data",   
+                "--data_dir", "./data",  
+                "--maxlength", "64",  
                 "--adversarial_training_param", "2",  
                 "--pred_output_dir", "./submissions" , 
-                "--output_model_dir", "./sample_run ", 
+                "--output_model_dir", "sample_run", 
                 "--epoch", "4",  
                 "--batch_size", "8",  
-                "--kfolds", "1",
-                "--split_words", 
+                "--kfolds", "4",
+                "--num_training_examples", "1000", 
+                "--perform_testing", 
+                "--lr", "5e-5", 
             ]
         }
     ]

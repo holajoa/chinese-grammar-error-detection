@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import numpy as np
 from transformers import AutoModelForSequenceClassification
-from transformers import TrainingArguments, Trainer, EarlyStoppingCallback
+from transformers import EarlyStoppingCallback, TrainerCallback
 
 from utils import *
 from dataset import *
@@ -15,7 +15,9 @@ import argparse
 import os
 import logging
 
-logging.basicConfig(filename='default.log', encoding='utf-8', level=logging.DEBUG)
+
+open('default.log', 'w').close()    # clear logging file
+logging.basicConfig(filename='default.log', encoding='utf-8', level=logging.INFO)
 parser = argparse.ArgumentParser(description='Model and Training Config')
 
 ## model parameters
@@ -35,6 +37,8 @@ parser.add_argument('--emoji_to_text', default=False, action='store_true', help=
 
 ## training parameters
 parser.add_argument('--adversarial_training_param', type=int, default=0, help='Adversarial training parameter. If passed 0 then switched off adversarial traiing.')
+parser.add_argument('--alpha', type=float, default=0.5, help='alpha parameter for focal loss. Change the weights of positive examples.')
+parser.add_argument('--gamma', type=float, default=0, help='gamma parameter for focal loss. Change how strict the labelling is.')
 parser.add_argument('--batch_size', type=int, default=8, help='batch size', required=False)
 parser.add_argument('--epoch', type=int, default=10, help='epoch', required=False)
 parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate ', required=False)
@@ -117,6 +121,8 @@ arguments = AdversarialTrainingArguments(
     load_best_model_at_end=True,
     # report_to="tensorboard", # for submissions
     epsilon=args.adversarial_training_param, 
+    alpha=args.alpha, 
+    gamma=args.gamma, 
 )
 
 
@@ -126,6 +132,13 @@ folds = generate_folds(L, k)
 val_accuracies = []
 if args.perform_testing:
     logits = []
+
+
+# class LoggingCallback(TrainerCallback):
+#     def on_log(self, args, state, control, logs=None, **kwargs):
+#         _ = logs.pop('total_flos', None)
+#         if state.is_local_process_zero:
+#             logging.info(logs)
 
 
 for i in range(k):
@@ -150,7 +163,7 @@ for i in range(k):
         train_dataset=train.dataset['train'], 
         eval_dataset=train.dataset['val'],  
         tokenizer=train.tokenizer, 
-        compute_metrics=compute_metrics, 
+        compute_metrics=compute_metrics
     )
 
     trainer.add_callback(EarlyStoppingCallback(
@@ -170,6 +183,11 @@ for i in range(k):
     val_accuracy = (val_pred == train.dataset['val']['labels'].numpy()).mean()
     val_accuracies.append(val_accuracy)
 
+    # Print the predictions
+    # logging.info("Full model trained...")
+    # logging.info(f"True labels:      {train.dataset['val']['input_ids']}")
+    # logging.info(f'Predicted labels: {val_pred}')
+
     if args.perform_testing:
         # Get logits on the test set
         hiddens = trainer.predict(test.dataset['train']).predictions
@@ -180,6 +198,7 @@ for i in range(k):
 
 
 if args.perform_testing:
+    logging.info('Doing predictions on test set ...')
     # Ensemble by logits
     # predictions = averaging(logits, val_accuracies, weighted=args.weighted_averaging)
     hiddens = np.array(logits).mean(0)
@@ -189,5 +208,5 @@ if args.perform_testing:
     # Write results
     out_path = os.path.join(args.pred_output_dir, 'submission.csv')
 
-    with open(out_path, 'w+') as f:
+    with open(out_path, 'a+') as f:
         result.to_csv(out_path, index=False)

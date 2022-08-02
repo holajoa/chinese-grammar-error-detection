@@ -15,9 +15,9 @@ def compute_metrics(eval_pred):
     """
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
-    tp = np.argwhere((predictions == labels) * (predictions == 1)).sum()
+    tp = ((predictions == labels) * (predictions == 1)).sum()
     allp = (predictions == 1).sum()
-    return {'F1':tp/allp, 'accuracy': np.mean(predictions==labels)}
+    return {'F1':tp/allp, 'accuracy': (predictions==labels).mean()}
 
 
 def voting(logits, val_accuracy=None):
