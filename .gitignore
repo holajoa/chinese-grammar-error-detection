@@ -1,4 +1,4 @@
-sample_run/
+*_run/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -3,13 +3,14 @@ import torch
 import pandas as pd
 import re
 import numpy as np
-from transformers import AutoModelForSequenceClassification
-from transformers import EarlyStoppingCallback, TrainerCallback
+from transformers import AutoModelForSequenceClassification, AutoModelForTokenClassification, pipeline
+from transformers import EarlyStoppingCallback
 
 from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
+from ner import *
 
 import argparse
 import os
@@ -23,6 +24,10 @@ parser = argparse.ArgumentParser(description='Model and Training Config')
 ## model parameters
 parser.add_argument('--model_name', type=str, help='Huggingface model code', required=True)
 parser.add_argument('--num_labels', type=int, default=2, help='Number of classes in the dataset', required=True)
+
+## NER arguments
+parser.add_argument('--ner', default=False, action='store_true', help='Whether to scale loss based on whether it is a news-like statement using NER pipeline.')
+parser.add_argument('--ner_model_name', type=str, help='Huggingface model code for the NER model.')
 
 ## dataset parameters
 parser.add_argument('--data_dir', type=str, help='Path to directory storing train.csv and test.csv files.', required=True)
@@ -74,6 +79,7 @@ if args.perform_testing:
 else: 
     logging.info('No testing stage.')
 
+
 k = args.kfolds
 train_val_split = 1 - 1/k
 
@@ -89,6 +95,10 @@ train_dataset_config = {
     'emoji_to_text':args.emoji_to_text,
 }
 
+if args.ner:
+    assert args.ner_model_name, 'Must pass a model pipeline for named entity recognition.'
+    train_dataset_config['ner_config'] = args.ner_model_name
+
 if args.perform_testing:
     test_dataset_config = {
         'model_name':args.model_name,
@@ -102,9 +112,13 @@ if args.perform_testing:
         'emoji_to_text':args.emoji_to_text,
     }
 
+    if args.ner:
+        test_dataset_config['ner_config'] = args.ner_model_name
+
     logging.info(f'Constructing test dataset object, with the following config:')
     logging.info(test_dataset_config)
     test = SimpleDataset(df=test_df, **test_dataset_config)
+    logging.info(f'Retrieving NER scores of {len(test_df)} test samples - this might take a while.')
     test.tokenize()
     test.construct_dataset()
 
@@ -123,10 +137,11 @@ for i in range(k):
     logging.info(f'Constructing {k}-fold training dataset object, with the following config:')
     logging.info(train_dataset_config)
     train = SimpleDataset(df=train_df_use, **train_dataset_config)
+    logging.info(f'Retrieving NER scores of {len(train_df_use)} training samples - this might take a while.')
     train.tokenize()
     train.construct_dataset(val_idx=val_idx)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model = AutoModelForSequenceClassification.from_pretrained(
         args.model_name, num_labels=args.num_labels,
     )   
@@ -148,6 +163,7 @@ for i in range(k):
         epsilon=args.adversarial_training_param, 
         alpha=args.alpha, 
         gamma=args.gamma, 
+        ner=args.ner, 
     )
 
     trainer = AdversarialTrainer(
@@ -173,7 +189,7 @@ for i in range(k):
     
     # Get pred accuracy on the dev set 
     val_pred = np.argmax(trainer.predict(train.dataset['val']).predictions, 1)
-    val_accuracy = (val_pred == train.dataset['val']['labels'].numpy()).mean()
+    val_accuracy = (torch.tensor(val_pred == train.dataset['val']['labels']).numpy()).mean()
     val_accuracies.append(val_accuracy)
 
     # Print the predictions

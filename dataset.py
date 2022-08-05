@@ -27,12 +27,14 @@ class SimpleDataset(torch.utils.data.Dataset):
                 )
 
     def __getitem__(self, index):
-        input_ids = torch.tensor(self.inputs["input_ids"][index]).squeeze()
-        attn_ids = torch.tensor(self.inputs["attention_mask"][index]).squeeze()
+        data_dict = {}
+        for key, value in self.inputs.items():
+            indexed_value = torch.tensor(value[index]).squeeze()
+            data_dict[key] = indexed_value
         if not self.test_stage:
-            label_ids = torch.tensor(self.labels[index].values).squeeze()
-            return Dataset.from_dict({"input_ids": input_ids, "labels": label_ids, "attention_mask":attn_ids,})
-        return Dataset.from_dict({"input_ids": input_ids, "attention_mask":attn_ids})
+            data_dict['labels'] = torch.tensor(self.labels[index].values).squeeze()
+        dataset_obj = Dataset.from_dict(data_dict)
+        return dataset_obj
 
     def construct_dataset(self, val_idx=None):
         if val_idx is not None or 1 > self.train_val_split > 0:

@@ -19,9 +19,11 @@
                 "--epoch", "4",  
                 "--batch_size", "8",  
                 "--kfolds", "4",
-                "--num_training_examples", "1000", 
+                "--num_training_examples", "100", 
                 "--perform_testing", 
                 "--lr", "5e-5", 
+                "--ner",
+                "--ner_model_name", "uer/roberta-base-finetuned-cluener2020-chinese", 
             ]
         }
     ]
