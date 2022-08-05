@@ -14,10 +14,10 @@ from wrapper import *
 import argparse
 import os
 import logging
+from time import time
 
-
-open('default.log', 'w').close()    # clear logging file
-logging.basicConfig(filename='default.log', encoding='utf-8', level=logging.INFO)
+# open('.log', 'w').close()    # clear logging file
+logging.basicConfig(filename=os.path.join('logs', str(time()).split('.')[1]+'.log'), encoding='utf-8', level=logging.INFO)
 parser = argparse.ArgumentParser(description='Model and Training Config')
 
 ## model parameters
