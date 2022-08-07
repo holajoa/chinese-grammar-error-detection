@@ -10,6 +10,7 @@
             "justMyCode": true, 
             "args":[
                 "--model_name", "hfl/chinese-macbert-base", 
+                "--ner_model_name", "uer/roberta-base-finetuned-cluener2020-chinese", 
                 "--num_labels", "2",  
                 "--data_dir", "./data",  
                 "--maxlength", "64",  
@@ -17,11 +18,13 @@
                 "--pred_output_dir", "./sample-submissions" , 
                 "--output_model_dir", "sample_run", 
                 "--epoch", "4",  
-                "--batch_size", "8",  
+                "--batch_size", "16",  
                 "--kfolds", "5",
-                "--num_training_examples", "100", 
+                "--num_training_examples", "1000", 
                 "--perform_testing", 
                 "--lr", "1e-5", 
+                "--alpha", "0.3", 
+                "--gamma", "0.2", 
             ]
         }
     ]

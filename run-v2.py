@@ -10,6 +10,7 @@ from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
+from models import BertWithNER
 
 import argparse
 import os
@@ -21,8 +22,9 @@ logging.basicConfig(filename=os.path.join('logs', str(time()).split('.')[1]+'.lo
 parser = argparse.ArgumentParser(description='Model and Training Config')
 
 ## model parameters
-parser.add_argument('--model_name', type=str, help='Huggingface model code', required=True)
+parser.add_argument('--model_name', type=str, help='Huggingface model code for the Bert model', required=True)
 parser.add_argument('--num_labels', type=int, default=2, help='Number of classes in the dataset', required=True)
+parser.add_argument('--ner_model_name', type=str, help='Finetuned model for named entities recognition boosting')
 
 ## dataset parameters
 parser.add_argument('--data_dir', type=str, help='Path to directory storing train.csv and test.csv files.', required=True)
@@ -127,9 +129,17 @@ for i in range(k):
     train.construct_dataset(val_idx=val_idx)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = AutoModelForSequenceClassification.from_pretrained(
-        args.model_name, num_labels=args.num_labels,
-    )   
+
+    if args.ner_model_name:
+        model = BertWithNER(
+            bert_model=args.model_name, 
+            ner_model='uer/roberta-base-finetuned-cluener2020-chinese', 
+            n_labels=2, 
+        )
+    else:
+        model = AutoModelForSequenceClassification.from_pretrained(
+            args.model_name, num_labels=args.num_labels,
+        )   
 
     model.cuda()
 
@@ -144,7 +154,7 @@ for i in range(k):
         save_strategy="epoch",  # save checkpoint at each epoch
         learning_rate=args.lr, 
         load_best_model_at_end=True,
-        # report_to="tensorboard", # for submissions
+        label_names=['labels'],   # need to specify this to pass the labels to the trainer
         epsilon=args.adversarial_training_param, 
         alpha=args.alpha, 
         gamma=args.gamma, 

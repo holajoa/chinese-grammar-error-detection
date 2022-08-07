@@ -4,13 +4,12 @@ python run-v2.py \
     --num_labels 2 \
     --data_dir ./data \
     --maxlength 64 \
-    --pred_output_dir ./submissions \
-    --output_model_dir ./sample_run \
-    --num_training_examples 1000 \
+    --pred_output_dir ./submissions-ner \
+    --output_model_dir ./ner_run \
     --epoch 8 \
     --batch_size 16 \
-    --kfolds 5 \
+    --kfolds 4 \
     --lr 1e-5 \
-    --alpha 0.4 \
+    --alpha 0.3 \
     --gamma 0.3 \
     --perform_testing \

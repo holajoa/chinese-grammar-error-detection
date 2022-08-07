@@ -58,7 +58,7 @@ python run.py \
 - focal loss进行调整（NER score高 -> focal loss gamma取接近0） focal_loss中的gamma改为gamma*1-(score**5)(1-mean_NER_score)
   - 不可以，因为prediction阶段不需要计算loss
 - 用每个词的confidence score在hidden states上进行调整，然后再放进MLP head训练？
-  - 尝试把ner model的hidden states输出和分类模型的相加（看看加个weight），然后再训练MLP head
+  - 尝试把ner model的hidden states输出和分类模型的相加（看看加个weight），然后再训练MLP head - 这样focal loss 参数要调整
 
 
 
