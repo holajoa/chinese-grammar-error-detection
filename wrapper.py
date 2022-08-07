@@ -4,7 +4,7 @@ from transformers import TrainingArguments, Trainer
 from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING_NAMES
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
-from torch.nn import CrossEntropyLoss
+from torch import nn
 
 
 class AdversarialTrainingArguments(TrainingArguments):
@@ -16,7 +16,7 @@ class AdversarialTrainingArguments(TrainingArguments):
         # focal loss = -alpha*(1-pred)^{gamma} * log(pred)   if ture_label=1
         # focal loss = -(1-alpha)*pred^{gamma} * log(1-pred) if ture_label=0
         self.alpha = alpha
-        self.gamma = gamma    
+        self.gamma = gamma
 
 
 class AdversarialTrainer(Trainer):
@@ -25,18 +25,18 @@ class AdversarialTrainer(Trainer):
         
         # Extract embeddings
         # shape=(vocab_size, hidden_size)
-        embeddings = model.base_model.embeddings.word_embeddings.weight
+        embeddings = model.bert.embeddings.word_embeddings.weight
 
         # get gradients from embeddinglayer
         inputs = self._prepare_inputs(inputs)
         loss = self.compute_loss(model, inputs)
         loss.backward(inputs=embeddings)
-        grads = model.base_model.embeddings.word_embeddings.weight.grad.cpu()
+        grads = model.bert.embeddings.word_embeddings.weight.grad.cpu()
 
         # Add perturbations (Fast Gradient Method/FGM)
         delta = self.args.epsilon * grads / (np.sqrt((grads**2).sum()) + 1e-8)
         with torch.no_grad():
-            model.base_model.embeddings.word_embeddings.weight += delta.cuda()
+            model.bert.embeddings.word_embeddings.weight += delta.cuda()
 
         # Compute loss and backprop as usual
         loss = self.compute_loss(model, inputs)
@@ -62,7 +62,7 @@ class AdversarialTrainer(Trainer):
 
         # Remove the perturbations
         with torch.no_grad():
-            model.base_model.embeddings.word_embeddings.weight -= delta.cuda()
+            model.bert.embeddings.word_embeddings.weight -= delta.cuda()
 
         return loss.detach()
 
@@ -85,15 +85,14 @@ class AdversarialTrainer(Trainer):
         How the loss is computed by Trainer. By default, all models return the loss in the first element.
         Subclass and override for custom behavior.
         """
-        if self.label_smoother is not None and "labels" in inputs:
-            labels = inputs.pop("labels")
-        else:
-            labels = None
         outputs = model(**inputs)
 
         true_labels = inputs['labels']
-        logits = outputs.logits
-        # pred_labels = torch.argmax(logits, axis=1)
+        if torch.is_tensor(outputs):
+            logits = outputs
+        else:
+            logits = outputs['logits']
+    
         loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma)
 
         ## Logging
@@ -102,6 +101,8 @@ class AdversarialTrainer(Trainer):
         # logging.info(f'loss = {loss}\n')
 
         return (loss, outputs) if return_outputs else loss
+
+
 
 def binary_focal_loss(logits, true_labels, alpha=0.5, gamma=0):
     pos_idx = torch.Tensor(true_labels == 1).long()
