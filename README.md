@@ -16,7 +16,7 @@ python run.py --model_name hfl/chinese-macbert-base --num_labels 2 --data_dir .\
 **解决：**
 1. 看下训练loss - 好像会上升。
     - 病句：正确句子=7:3，病句太多，只predict语病也能在dev set上取得不错结果。
-    - 降低learning rate + 用 focal loss? 有改善, dev set F1 on 1000 examples ~0.8
+    - 降低learning rate + 用 focal loss? 有改善, dev set F1 on 1000 examples ~0.8 ***（但是F1score给正负样本权重相同，和focal loss不一致。怎么办？）***
       - 观察：f1分数浮动很大
       - 调参：
         - 一定不能加对抗训练！！加了就只会报1 - 正确的句子加入随机扰动，很有可能就变成带语病的了。
@@ -58,7 +58,11 @@ python run.py \
 - focal loss进行调整（NER score高 -> focal loss gamma取接近0） focal_loss中的gamma改为gamma*1-(score**5)(1-mean_NER_score)
   - 不可以，因为prediction阶段不需要计算loss
 - 用每个词的confidence score在hidden states上进行调整，然后再放进MLP head训练？
-  - 尝试把ner model的hidden states输出和分类模型的相加（看看加个weight），然后再训练MLP head - 这样focal loss 参数要调整
+  - 尝试把ner model的hidden states输出和分类模型的concatenate，然后再训练MLP head 
+    - 这样focal loss 参数要调整
+    - learning rate 也要适当减小，epoch=3就已经开始过拟合了（为什么？）
+      - lr=1e-5
+      - lr=2e-6
 
 
 

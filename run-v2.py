@@ -81,6 +81,7 @@ train_val_split = 1 - 1/k
 
 train_dataset_config = {
     'model_name':args.model_name,
+    'aux_model_name':args.ner_model_name, 
     'maxlength':args.maxlength,
     'train_val_split':train_val_split,
     'test':False, 
@@ -94,6 +95,7 @@ train_dataset_config = {
 if args.perform_testing:
     test_dataset_config = {
         'model_name':args.model_name,
+        'aux_model_name':args.ner_model_name, 
         'maxlength':args.maxlength,
         'train_val_split':-1,
         'test':True, 
@@ -106,7 +108,7 @@ if args.perform_testing:
 
     logging.info(f'Constructing test dataset object, with the following config:')
     logging.info(test_dataset_config)
-    test = SimpleDataset(df=test_df, **test_dataset_config)
+    test = DatasetWithAuxiliaryEmbeddings(df=test_df, **test_dataset_config)
     test.tokenize()
     test.construct_dataset()
 
@@ -124,7 +126,7 @@ for i in range(k):
     logging.info(f'Training stage {i+1}/{k} ...')
     logging.info(f'Constructing {k}-fold training dataset object, with the following config:')
     logging.info(train_dataset_config)
-    train = SimpleDataset(df=train_df_use, **train_dataset_config)
+    train = DatasetWithAuxiliaryEmbeddings(df=train_df_use, **train_dataset_config)
     train.tokenize()
     train.construct_dataset(val_idx=val_idx)
 
@@ -133,7 +135,7 @@ for i in range(k):
     if args.ner_model_name:
         model = BertWithNER(
             bert_model=args.model_name, 
-            ner_model='uer/roberta-base-finetuned-cluener2020-chinese', 
+            ner_model=args.ner_model_name, 
             n_labels=2, 
         )
     else:
@@ -154,6 +156,7 @@ for i in range(k):
         save_strategy="epoch",  # save checkpoint at each epoch
         learning_rate=args.lr, 
         load_best_model_at_end=True,
+        metric_for_best_model='F1', 
         label_names=['labels'],   # need to specify this to pass the labels to the trainer
         epsilon=args.adversarial_training_param, 
         alpha=args.alpha, 

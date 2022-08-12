@@ -1,4 +1,5 @@
 *_run/
+ner_run_v*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

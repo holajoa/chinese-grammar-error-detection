@@ -4,6 +4,16 @@ import numpy as np
 def generate_folds(L, k=5):
     return np.random.permutation(np.arange(L)).reshape(k, -1)
 
+def easy_ensenble_generate_kfolds(L, k, minority_idx):
+    s_fold = L // k
+    majority_idx = np.array(list(set(range(L)) - set(minority_idx)))
+    folds = []
+    for _ in range(k):
+        minor_sample = np.random.choice(minority_idx, size=s_fold//2, replace=False)
+        major_sample = np.random.choice(majority_idx, size=s_fold//2, replace=False)
+        fold = np.concatenate((minor_sample, major_sample))
+        folds.append(fold)
+    return np.array(folds)
 
 def compute_metrics(eval_pred):
     """

@@ -5,11 +5,11 @@ python run-v2.py \
     --data_dir ./data \
     --maxlength 64 \
     --pred_output_dir ./submissions-ner \
-    --output_model_dir ./ner_run \
-    --epoch 8 \
+    --output_model_dir ./ner_run_v2 \
+    --epoch 4 \
     --batch_size 16 \
-    --kfolds 4 \
-    --lr 1e-5 \
+    --kfolds 8 \
+    --lr 2e-5 \
     --alpha 0.3 \
-    --gamma 0.3 \
+    --gamma 0.8 \
     --perform_testing \
