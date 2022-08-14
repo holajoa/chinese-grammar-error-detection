@@ -14,7 +14,8 @@ class BertWithNER(nn.Module):
         self.classifier = nn.Sequential(
             nn.Dropout(p=0.1),
             nn.Linear(768*2, 768, bias=True),
-            nn.Tanh(),
+            # nn.Tanh(),
+            nn.LeakyReLU(), 
             nn.Dropout(p=0.1),
             nn.Linear(768, n_labels, bias=True)
         )

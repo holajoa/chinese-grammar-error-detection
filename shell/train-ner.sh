@@ -6,10 +6,10 @@ python run-v2.py \
     --maxlength 64 \
     --pred_output_dir ./submissions-ner \
     --output_model_dir ./ner_run_v2 \
-    --epoch 4 \
+    --epoch 3 \
     --batch_size 16 \
     --kfolds 8 \
-    --lr 2e-5 \
+    --lr 5e-5 \
     --alpha 0.3 \
     --gamma 0.8 \
     --perform_testing \

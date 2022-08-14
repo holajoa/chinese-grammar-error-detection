@@ -54,17 +54,16 @@ python run.py \
 
 ### 改进
 #### 新闻类句子被错误识别为病句
-*Approach 1:* 开箱用NER模型，专有名词出现多的句子，
+*Approach 1:* 开箱用NER模型，理解专有名词
 - focal loss进行调整（NER score高 -> focal loss gamma取接近0） focal_loss中的gamma改为gamma*1-(score**5)(1-mean_NER_score)
   - 不可以，因为prediction阶段不需要计算loss
 - 用每个词的confidence score在hidden states上进行调整，然后再放进MLP head训练？
   - 尝试把ner model的hidden states输出和分类模型的concatenate，然后再训练MLP head 
     - 这样focal loss 参数要调整
-    - learning rate 也要适当减小，epoch=3就已经开始过拟合了（为什么？）
-      - lr=1e-5
-      - lr=2e-6
-
-
+    - lr=2e-5
+    - best model metric 用 F1
+- Easy ensemble - F1 capped at ~80
+- bad case analysis？
 
 ### 未完成想法
 1. 用POS tagging模型out-of-the-box检测句子结构问题 - 成分残缺

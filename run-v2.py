@@ -45,6 +45,7 @@ parser.add_argument('--batch_size', type=int, default=8, help='batch size', requ
 parser.add_argument('--epoch', type=int, default=10, help='epoch', required=False)
 parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate ', required=False)
 parser.add_argument('--kfolds', type=int, default=5, help='k-fold k', required=False)
+parser.add_argument('--easy_ensemble', default=False, action='store_true', help='Whether to use easy ensemble to balance data labels.')
 parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
 
 ## output parameters
@@ -79,6 +80,8 @@ else:
 k = args.kfolds
 train_val_split = 1 - 1/k
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 train_dataset_config = {
     'model_name':args.model_name,
     'aux_model_name':args.ner_model_name, 
@@ -90,6 +93,7 @@ train_dataset_config = {
     'remove_punctuation':args.remove_punctuation, 
     'to_simplified':args.to_simplified, 
     'emoji_to_text':args.emoji_to_text,
+    'device':device, 
 }
 
 if args.perform_testing:
@@ -104,6 +108,7 @@ if args.perform_testing:
         'remove_punctuation':args.remove_punctuation, 
         'to_simplified':args.to_simplified, 
         'emoji_to_text':args.emoji_to_text,
+        'device':device, 
     }
 
     logging.info(f'Constructing test dataset object, with the following config:')
@@ -115,7 +120,11 @@ if args.perform_testing:
 
 logging.info(f'Setting up {k}-fold CV.')
 L = len(train_df_use)
-folds = generate_folds(L, k)
+if args.easy_ensemble:
+    minority_idx = np.array(train_df_use.index[train_df_use.label == 0].tolist())
+    folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx)
+else:
+    folds = generate_folds(L, k) 
 val_accuracies = []
 if args.perform_testing:
     logits = []
@@ -129,8 +138,6 @@ for i in range(k):
     train = DatasetWithAuxiliaryEmbeddings(df=train_df_use, **train_dataset_config)
     train.tokenize()
     train.construct_dataset(val_idx=val_idx)
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     if args.ner_model_name:
         model = BertWithNER(

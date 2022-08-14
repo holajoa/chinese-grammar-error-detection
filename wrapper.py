@@ -1,10 +1,8 @@
 import numpy as np
 import torch
 from transformers import TrainingArguments, Trainer
-from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING_NAMES
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
-from torch import nn
 
 
 class AdversarialTrainingArguments(TrainingArguments):
