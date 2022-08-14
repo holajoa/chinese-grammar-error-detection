@@ -23,18 +23,18 @@ class AdversarialTrainer(Trainer):
         
         # Extract embeddings
         # shape=(vocab_size, hidden_size)
-        embeddings = model.bert.embeddings.word_embeddings.weight
+        embeddings = model.base_model.embeddings.word_embeddings.weight
 
         # get gradients from embeddinglayer
         inputs = self._prepare_inputs(inputs)
         loss = self.compute_loss(model, inputs)
         loss.backward(inputs=embeddings)
-        grads = model.bert.embeddings.word_embeddings.weight.grad.cpu()
+        grads = model.base_model.embeddings.word_embeddings.weight.grad.cpu()
 
         # Add perturbations (Fast Gradient Method/FGM)
         delta = self.args.epsilon * grads / (np.sqrt((grads**2).sum()) + 1e-8)
         with torch.no_grad():
-            model.bert.embeddings.word_embeddings.weight += delta.cuda()
+            model.base_model.embeddings.word_embeddings.weight += delta.cuda()
 
         # Compute loss and backprop as usual
         loss = self.compute_loss(model, inputs)
@@ -60,7 +60,7 @@ class AdversarialTrainer(Trainer):
 
         # Remove the perturbations
         with torch.no_grad():
-            model.bert.embeddings.word_embeddings.weight -= delta.cuda()
+            model.base_model.embeddings.word_embeddings.weight -= delta.cuda()
 
         return loss.detach()
 

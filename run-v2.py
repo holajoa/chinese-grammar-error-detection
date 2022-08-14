@@ -10,7 +10,7 @@ from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
-from models import BertWithNER
+from models import BertWithNER, AutoModelWithNER
 
 import argparse
 import os
@@ -140,8 +140,13 @@ for i in range(k):
     train.construct_dataset(val_idx=val_idx)
 
     if args.ner_model_name:
-        model = BertWithNER(
-            bert_model=args.model_name, 
+        # model = BertWithNER(
+        #     bert_model=args.model_name, 
+        #     ner_model=args.ner_model_name, 
+        #     n_labels=2, 
+        # )
+        model = AutoModelWithNER(
+            model=args.model_name, 
             ner_model=args.ner_model_name, 
             n_labels=2, 
         )
