@@ -2,7 +2,8 @@ import numpy as np
 
 
 def generate_folds(L, k=5):
-    return np.random.permutation(np.arange(L)).reshape(k, -1)
+    permuted = np.random.permutation(np.arange(L))
+    return np.array_split(permuted, k)
 
 def easy_ensenble_generate_kfolds(L, k, minority_idx):
     s_fold = L // k
@@ -38,7 +39,7 @@ def compute_metrics(eval_pred):
         'F1': f1, 
         'precision': precision, 
         'recall': recall,
-        # 'accuracy': accuracy, 
+        'accuracy': accuracy, 
     }
 
 

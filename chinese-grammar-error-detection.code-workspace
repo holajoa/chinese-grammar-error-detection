@@ -4,5 +4,45 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.defaultInterpreterPath": "D:/Apps/Anaconda3/envs/general-torch/python.exe",
+		"python.autoComplete.extraPaths": [
+			"D:/Develop/chinese-grammar-error-detection", 
+		],
+		"python.analysis.extraPaths": [
+			"D:/Develop/chinese-grammar-error-detection"
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Python: Current File",
+				"type": "python",
+				"request": "launch",
+				"program": "D:/Develop/chinese-grammar-error-detection/run-v2.py",
+				"python": "D:/Apps/Anaconda3/envs/general-torch/python.exe", 
+				"console": "integratedTerminal",
+				"justMyCode": true, 
+				"args":[
+					"--model_name", "hfl/chinese-macbert-base", 
+					"--ner_model_name", "uer/roberta-base-finetuned-cluener2020-chinese", 
+					"--num_labels", "2",  
+					"--data_dir", "./data",  
+					"--maxlength", "128",  
+					"--adversarial_training_param", "2",  
+					"--pred_output_dir", "submissions-ner" , 
+					"--output_model_dir", "ner_run_2", 
+					"--epoch", "2",  
+					"--batch_size", "8",  
+					"--kfolds", "10",
+					"--perform_testing", 
+					"--lr", "1e-5", 
+					"--alpha", "0.3", 
+					"--gamma", "0.8", 
+					"-folds", "ner_run_2/folds.txt",
+				]
+			}
+		]
+	}
 }

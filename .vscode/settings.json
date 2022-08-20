@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "D:/Apps/Anaconda3/envs/general-torch/python.exe",
+    "python.autoComplete.extraPaths": [
+        "D:/Develop/chinese-grammar-error-detection", 
+    ]
+}

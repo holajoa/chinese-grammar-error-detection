@@ -3,14 +3,17 @@ import torch
 import pandas as pd
 import re
 import numpy as np
+from torch.utils.tensorboard import SummaryWriter
 from transformers import AutoModelForSequenceClassification
-from transformers import EarlyStoppingCallback, TrainerCallback
+from transformers import EarlyStoppingCallback
+from transformers.integrations import TensorBoardCallback
 
 from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
-from models import BertWithNER, AutoModelWithNER
+from models import AutoModelWithNER
+import random
 
 import argparse
 import os
@@ -25,6 +28,7 @@ parser = argparse.ArgumentParser(description='Model and Training Config')
 parser.add_argument('--model_name', type=str, help='Huggingface model code for the Bert model', required=True)
 parser.add_argument('--num_labels', type=int, default=2, help='Number of classes in the dataset', required=True)
 parser.add_argument('--ner_model_name', type=str, help='Finetuned model for named entities recognition boosting')
+parser.add_argument('--single_layer_cls_head', default=False, action='store_true')
 
 ## dataset parameters
 parser.add_argument('--data_dir', type=str, help='Path to directory storing train.csv and test.csv files.', required=True)
@@ -38,6 +42,7 @@ parser.add_argument('--to_simplified', default=False, action='store_true', help=
 parser.add_argument('--emoji_to_text', default=False, action='store_true', help='Whether to translate emojis to texts. Default to True.')
 
 ## training parameters
+parser.add_argument('--seed', type=int)
 parser.add_argument('--adversarial_training_param', type=int, default=0, help='Adversarial training parameter. If passed 0 then switched off adversarial traiing.')
 parser.add_argument('--alpha', type=float, default=0.5, help='alpha parameter for focal loss. Change the weights of positive examples.')
 parser.add_argument('--gamma', type=float, default=0, help='gamma parameter for focal loss. Change how strict the labelling is.')
@@ -45,8 +50,13 @@ parser.add_argument('--batch_size', type=int, default=8, help='batch size', requ
 parser.add_argument('--epoch', type=int, default=10, help='epoch', required=False)
 parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate ', required=False)
 parser.add_argument('--kfolds', type=int, default=5, help='k-fold k', required=False)
+parser.add_argument('--folds', type=str, help='Directory to txt file storing the fold indices used for training.')
 parser.add_argument('--easy_ensemble', default=False, action='store_true', help='Whether to use easy ensemble to balance data labels.')
 parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
+parser.add_argument('--best_by_f1', default=False, action='store_true', help='Call back to best model by F1 score.')
+
+parser.add_argument('--resume_fold_idx', type=int, help='On which fold to resume training.')
+parser.add_argument('--checkpoint', type=str, help='previous model checkpoint.')
 
 ## output parameters
 parser.add_argument('--perform_testing', help='Whether to use the trained model on a test set', default=False, action='store_true')
@@ -54,7 +64,10 @@ parser.add_argument('--pred_output_dir', type=str, help='Directory to store fina
 # parser.add_argument('--weighted_averaging', default=True, help='Whether to weight the logits of the model based on their dev set accuracy when creating ensemble.')
 args = parser.parse_args()
 
-
+def set_seed(args):
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
 
 data_files = [os.path.join(args.data_dir, 'train.csv')]
 if args.perform_testing:
@@ -118,19 +131,37 @@ if args.perform_testing:
     test.construct_dataset()
 
 
-logging.info(f'Setting up {k}-fold CV.')
 L = len(train_df_use)
-if args.easy_ensemble:
-    minority_idx = np.array(train_df_use.index[train_df_use.label == 0].tolist())
-    folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx)
+if args.folds:
+    with open(args.folds, 'r') as f:
+        lines = f.readlines()
+        folds = [np.array(list(map(int, line.rstrip().split(' ')))) for line in lines]
+    assert sum(map(len, folds)) == L, 'Provided folds does not match with number of training examples'
+    k = len(folds)
+    if args.kfolds and args.kfolds != k:
+        logging.warning('Provided folds does not match with provided k.')
 else:
-    folds = generate_folds(L, k) 
+    if args.easy_ensemble:
+        minority_idx = np.array(train_df_use.index[train_df_use.label == 0].tolist())
+        folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx)
+    else:
+        folds = generate_folds(L, k)
+
+    if not os.path.exists(args.output_model_dir):
+        os.makedirs(args.output_model_dir)
+    with open(os.path.join(args.output_model_dir, 'folds.txt'), 'w+') as fp:
+        for item in folds:
+            fp.write(' '.join(list(map(str, item))) + '\n')
+
+logging.info(f'Set up {k}-fold CV.')
+
 val_accuracies = []
 if args.perform_testing:
     logits = []
 
+irange = range(k) if not args.resume_fold_idx else range(args.resume_fold_idx+1, k)
 
-for i in range(k):
+for i in irange:
     val_idx = folds[i]
     logging.info(f'Training stage {i+1}/{k} ...')
     logging.info(f'Constructing {k}-fold training dataset object, with the following config:')
@@ -138,18 +169,19 @@ for i in range(k):
     train = DatasetWithAuxiliaryEmbeddings(df=train_df_use, **train_dataset_config)
     train.tokenize()
     train.construct_dataset(val_idx=val_idx)
+    single_layer_cls = True if args.single_layer_cls_head else False
 
     if args.ner_model_name:
-        # model = BertWithNER(
-        #     bert_model=args.model_name, 
-        #     ner_model=args.ner_model_name, 
-        #     n_labels=2, 
-        # )
         model = AutoModelWithNER(
             model=args.model_name, 
             ner_model=args.ner_model_name, 
             n_labels=2, 
+            single_layer_cls=single_layer_cls
         )
+        if args.checkpoint is not None and i == args.resume_fold_idx + 1:
+            assert 'fold'+str(args.resume_fold_idx) in args.checkpoint
+            state_dict = torch.load(args.checkpoint, map_location=device)
+            model.load_state_dict(state_dict)
     else:
         model = AutoModelForSequenceClassification.from_pretrained(
             args.model_name, num_labels=args.num_labels,
@@ -157,10 +189,16 @@ for i in range(k):
 
     model.cuda()
 
+
     logging.info('Defining TrainingArguments.')
     # Define training arguments
+    output_dir = os.path.join(args.output_model_dir, 'fold'+str(i))
+    # Initialise tensorboard
+    tb_writer = SummaryWriter(os.path.join(output_dir, 'runs'))
+    seed = args.seed if args.seed else 42
+    metric_for_best_model = 'F1' if args.best_by_f1 else 'loss'
     arguments = AdversarialTrainingArguments(
-        output_dir=os.path.join(args.output_model_dir, 'fold'+str(i)),  # output directory
+        output_dir=output_dir,  # output directory
         per_device_train_batch_size=args.batch_size, 
         per_device_eval_batch_size=args.batch_size, 
         num_train_epochs=args.epoch,
@@ -168,11 +206,14 @@ for i in range(k):
         save_strategy="epoch",  # save checkpoint at each epoch
         learning_rate=args.lr, 
         load_best_model_at_end=True,
-        metric_for_best_model='F1', 
+        metric_for_best_model=metric_for_best_model, 
         label_names=['labels'],   # need to specify this to pass the labels to the trainer
         epsilon=args.adversarial_training_param, 
         alpha=args.alpha, 
         gamma=args.gamma, 
+        seed=seed,
+        report_to='tensorboard',
+        push_to_hub=False, 
     )
 
     trainer = AdversarialTrainer(
@@ -188,6 +229,7 @@ for i in range(k):
         early_stopping_patience=4, 
         early_stopping_threshold=0.0, 
     ))  # apply early stopping - stop training immediately if the loss cease to decrease
+    trainer.add_callback(TensorBoardCallback(tb_writer=tb_writer))
 
     # Train the model
     trainer.train()
