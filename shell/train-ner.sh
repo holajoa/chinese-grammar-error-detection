@@ -6,7 +6,7 @@ python run-v2.py \
     --maxlength 128 \
     --pred_output_dir submissions-ner \
     --output_model_dir ner_run_2 \
-    --epoch 3 \
+    --epoch 2 \
     --batch_size 8 \
     --kfolds 10 \
     --lr 1e-5 \
