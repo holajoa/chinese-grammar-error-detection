@@ -1,6 +1,14 @@
 import numpy as np
 
 
+def ntf(file="https://notificationsounds.com/storage/sounds/file-sounds-1228-so-proud.mp3"):
+    # from pydub import AudioSegment
+    # from pydub.playback import play
+    # song = AudioSegment.from_mp3(file)
+    # play(song)
+    from playsound import playsound
+    playsound(file)
+
 def generate_folds(L, k=5):
     permuted = np.random.permutation(np.arange(L))
     return np.array_split(permuted, k)

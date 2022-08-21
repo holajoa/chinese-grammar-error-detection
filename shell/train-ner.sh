@@ -6,10 +6,13 @@ python run-v2.py \
     --maxlength 128 \
     --pred_output_dir submissions-ner \
     --output_model_dir ner_run \
-    --epoch 2 \
+    --epoch 3 \
     --batch_size 8 \
     --kfolds 10 \
     --lr 1e-5 \
-    --alpha 0.3 \
+    --alpha 0.4 \
     --gamma 0.8 \
     --perform_testing \
+    --best_by_f1 \
+    --num_training_examples 5000 \
+    --add_up_hiddens \
