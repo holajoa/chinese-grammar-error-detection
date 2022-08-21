@@ -102,6 +102,7 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
         if val_idx is not None or 1 > self.train_val_split > 0:
             if val_idx is None: 
                val_idx = np.random.randint(0, self.__len__(), size=int(self.__len__() * (1-self.train_val_split)))
+            self.val_idx = val_idx
             train_idx = np.array(list(set(np.arange(self.__len__())) - set(val_idx)))
     
             self.dataset = DatasetDict(
@@ -112,7 +113,6 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
         else:
             self.dataset = DatasetDict(train=self.__getitem__(np.arange(self.__len__())))
         self.dataset.set_format(type="pytorch")
-
 
     @classmethod
     def classes(self):

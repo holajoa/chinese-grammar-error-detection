@@ -102,12 +102,16 @@ class AdversarialTrainer(Trainer):
 
 
 
-def binary_focal_loss(logits, true_labels, alpha=0.5, gamma=0):
+def binary_focal_loss(logits, true_labels, alpha=0.5, gamma=0, sum=True):
     pos_idx = torch.Tensor(true_labels == 1).long()
     neg_idx = torch.Tensor(true_labels == 0).long()
     pred_probs = torch.nn.Softmax(dim=1)(logits)[:, 1]
 
-    loss_pos = - alpha * torch.sum(((1 - pred_probs)**gamma * torch.log(pred_probs)) * pos_idx)
-    loss_neg = - (1-alpha) * torch.sum((pred_probs**gamma * torch.log(1-pred_probs)) * neg_idx)
+    loss_pos = - alpha * ((1 - pred_probs)**gamma * torch.log(pred_probs)) * pos_idx
+    loss_neg = -(1-alpha) * (pred_probs**gamma * torch.log(1-pred_probs)) * neg_idx
+
+    if sum:
+        loss_pos = torch.sum(loss_pos)
+        loss_neg = torch.sum(loss_neg)
     loss = loss_pos + loss_neg
     return loss

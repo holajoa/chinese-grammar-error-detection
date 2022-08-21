@@ -5,7 +5,7 @@ python run-v2.py \
     --data_dir data \
     --maxlength 128 \
     --pred_output_dir submissions-ner \
-    --output_model_dir ner_run_2 \
+    --output_model_dir ner_run \
     --epoch 2 \
     --batch_size 8 \
     --kfolds 10 \
@@ -13,4 +13,3 @@ python run-v2.py \
     --alpha 0.3 \
     --gamma 0.8 \
     --perform_testing \
-    --folds ner_run_2/folds.txt
