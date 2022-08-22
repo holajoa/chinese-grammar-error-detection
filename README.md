@@ -19,7 +19,7 @@ python run.py --model_name hfl/chinese-macbert-base --num_labels 2 --data_dir .\
     - 降低learning rate + 用 focal loss? 有改善, dev set F1 on 1000 examples ~0.8 ***（但是F1score给正负样本权重相同，和focal loss不一致。怎么办？）***
       - 观察：f1分数浮动很大
       - 调参：
-        - 一定不能加对抗训练！！加了就只会报1 - 正确的句子加入随机扰动，很有可能就变成带语病的了。
+        - 一定不能加对抗训练！！加了就只会报1 - 正确的句子加入随机扰动，很有可能就变成带语病的了。 
         - Focal loss的`gamma` 取0.5就好，再大也只会报1了
         - 去标点？有recall极低的情况。为什么？
         - 分词？f1略低于不分，推测是因为分词有的时候会复制词，对语病检测有伤害（比如用词重复）
@@ -60,12 +60,38 @@ python run.py \
 - 用每个词的confidence score在hidden states上进行调整，然后再放进MLP head训练？
   - 尝试把ner model的hidden states输出和分类模型的concatenate，然后再训练MLP head 
     - 这样focal loss 参数要调整
-    - lr=2e-5
+    - lr=1e-5
     - best model metric 用 F1
-- Easy ensemble - F1 capped at ~80
-- bad case analysis？
+- 不用Easy ensemble - F1 capped at ~80
+  
+初步实验结果：
+- FP/FN $\approx 2:1$
+    改进想法：gamma和alpha调参。目前：
+      ```
+      python run-v2.py \
+        --model_name hfl/chinese-macbert-base \
+        --ner_model_name uer/roberta-base-finetuned-cluener2020-chinese \
+        --num_labels 2 \
+        --data_dir data \
+        --maxlength 128 \
+        --pred_output_dir submissions-ner \
+        --output_model_dir ner_run \
+        --epoch 3 \
+        --batch_size 8 \
+        --kfolds 10 \
+        --lr 1e-5 \
+        --alpha 0.4 \
+        --gamma 0.8 \
+        --perform_testing \
+        --best_by_f1 \
+        --num_training_examples 5000 \
+        --add_up_hiddens \
+      ```
+- 数据增强
+  - 
 
 ### 未完成想法
-1. 用POS tagging模型out-of-the-box检测句子结构问题 - 成分残缺
-2. 开箱用困惑度模型，检测搭配？
-3. 
+1. 数据增强
+   1. 正样本随机换位，添词删词
+   2. 替换命名体
+2. 

@@ -70,23 +70,33 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
         self.device = device
         if not self.test_stage:
             self.labels = df.label
+        self.dataset = None
 
-    def eda(self, df, **kwargs):
-        cleaned = df.text.map(DataPreprocessor(**kwargs))
-        return cleaned
-
+    def prepare_dataset(self, val_idx=None):
+        self.val_idx = val_idx
+        self.tokenize()
+        self.construct_dataset(val_idx)
+    
     def tokenize(self):
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.initialise_tokenizer()
         self.inputs = self.tokenizer(
             self.texts.tolist(), padding='max_length', max_length=self.maxlength,  
             truncation=True, return_tensors='pt', 
         ).to(self.device)
         if self.aux_model_name:
-            self.aux_tokenizer = AutoTokenizer.from_pretrained(self.aux_model_name)
             self.inputs['auxiliary_input_ids'] = self.aux_tokenizer(
                 self.texts.tolist(), padding='max_length', max_length=self.maxlength,  
                 truncation=True, return_tensors='pt', 
             )['input_ids'].to(self.device)
+
+    def eda(self, df, **kwargs):
+        cleaned = df.text.map(DataPreprocessor(**kwargs))
+        return cleaned
+
+    def initialise_tokenizer(self):
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        if self.aux_model_name:
+            self.aux_tokenizer = AutoTokenizer.from_pretrained(self.aux_model_name)
 
     def __getitem__(self, index):
         data_dict = {}

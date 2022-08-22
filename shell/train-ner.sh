@@ -5,14 +5,13 @@ python run-v2.py \
     --data_dir data \
     --maxlength 128 \
     --pred_output_dir submissions-ner \
-    --output_model_dir ner_run \
+    --output_model_dir finetuned_models/ner_run_main \
     --epoch 3 \
     --batch_size 8 \
     --kfolds 10 \
     --lr 1e-5 \
     --alpha 0.4 \
-    --gamma 0.8 \
+    --gamma 0.5 \
     --perform_testing \
-    --best_by_f1 \
-    --num_training_examples 5000 \
+    --num_training_examples 10000 \
     --add_up_hiddens \
