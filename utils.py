@@ -33,7 +33,8 @@ def compute_metrics(eval_pred):
         (a) logit scores output by model, and
         (b) ground truth labels
     """
-    logits, labels = eval_pred
+    outputs, labels = eval_pred
+    logits, _ = outputs
     if logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
         max_idx = (logits[..., 1] - logits[..., 0]).argmax(1)
         logits = logits[range(logits.shape[0]), max_idx]

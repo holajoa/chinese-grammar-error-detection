@@ -12,7 +12,3 @@ python run-v2.py \
     --alpha 0.5 \
     --gamma 1 \
     --perform_testing \
-    --single_layer_cls_head \
-    --resume_fold_idx 1 \
-    --checkpoint finetuned_models/ner_run_aug_mini/fold5/checkpoint-900/pytorch_model.bin \
-    --from_another_run

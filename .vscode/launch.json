@@ -13,10 +13,9 @@
                 "--model_name", "hfl/chinese-macbert-base", 
                 "--num_labels", "2",  
                 "--data_dir", "./data-aug-mini",  
-                "--maxlength", "128",  
-                "--adversarial_training_param", "2",  
+                "--maxlength", "128",   
                 "--pred_output_dir", "submissions-aug" , 
-                "--output_model_dir", "finetuned_models/ner_run_aug_mini", 
+                "--output_model_dir", "finetuned_models/ner_run_aug_mi", 
                 "--epoch", "3",  
                 "--batch_size", "32",  
                 "--kfolds", "10",
@@ -24,8 +23,7 @@
                 "--lr", "1e-5", 
                 "--alpha", "1", 
                 "--gamma", "0", 
-                "--single_layer_cls_head",
-                "--num_training_examples", "1000"
+                "--num_training_examples", "100"
             ]
         }
     ]

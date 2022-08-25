@@ -96,6 +96,7 @@ class PipelineGED:
         device:torch.device, 
         raw_outputs:bool=True, 
         output_probabilities:bool=False, 
+        display=True, 
     ) -> np.ndarray:
         test = DatasetWithAuxiliaryEmbeddings(df=self.map_to_df(texts), **self.data_configs)
         test.prepare_dataset()
@@ -103,13 +104,19 @@ class PipelineGED:
         #     print(txt)
         
         probs, seq_probs = self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
-        self.display_error_chars(seq_probs, test.texts.values)
-        return probs, seq_probs
+        err_char_lst = self.display_error_chars(seq_probs, test.texts.values, print=display)
+        return probs, seq_probs, err_char_lst
 
     @staticmethod
-    def display_error_chars(seq_probs, texts):
+    def display_error_chars(seq_probs, texts, print=True):
+        err_char_lst = []
         for probs, txt in zip(seq_probs, texts):
             err_idx = np.argwhere(probs[1:1+len(txt), 1] > probs[1:1+len(txt), 0])
-            print(txt)
-            print(np.array(list(txt))[err_idx].flatten())
-        
+            err_chars = np.array(list(txt))[err_idx].flatten()
+            if print:
+                print(txt)
+                print(err_chars)
+            err_char_lst.append(err_chars)
+        return err_char_lst
+            
+            
