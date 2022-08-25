@@ -131,7 +131,8 @@ class ImbalancedTrainer(Trainer):
     
         loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma)
 
-        ## Logging
+        ## Loggingcompute_loss
+    
         # logging.info(f"True labels:      {inputs['labels'].cpu().numpy()}")
         # logging.info(f'Predicted labels: {np.argmax(outputs.logits.cpu().detach().numpy(), axis=1)}')
         # logging.info(f'loss = {loss}\n')

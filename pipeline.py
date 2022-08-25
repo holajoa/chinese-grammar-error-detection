@@ -4,12 +4,18 @@ from typing import List, Union
 from utils import *
 from dataset import *
 from torch.utils.data import DataLoader
+from models import BertWithClassificationHead
 
 
 class PipelineGED:
     def __init__(self, model_name:str, data_configs=None):
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            model_name, num_labels=2, 
+        # self.model = AutoModelForSequenceClassification.from_pretrained(
+        #     model_name, num_labels=2, 
+        # )
+        self.model = BertWithClassificationHead(
+            model_name, 
+            n_labels=2, 
+            single_layer_cls=True, 
         )
         if data_configs:
             self.data_configs = data_configs
@@ -36,6 +42,7 @@ class PipelineGED:
         output_probabilities:bool=False, 
     ) -> np.ndarray:
         output_tensors = []
+        output_sequence_logits = []
 
         for cp in checkpoints:
             state_dict = torch.load(cp, map_location=device)
@@ -46,6 +53,7 @@ class PipelineGED:
                 self.model.cuda()
 
             logits = []
+            sequence_logits = []
             dataloader = DataLoader(ds.dataset['train'].with_format('torch'), batch_size=16)
 
             for batch in dataloader:
@@ -54,16 +62,26 @@ class PipelineGED:
                 with torch.no_grad():
                     output = self.model(**inputs)
                 logits.append(output['logits'])
-
+                sequence_logits.append(output['sequence_logits'])
             output_tensors.append(torch.concat(logits))
+            output_sequence_logits.append(torch.concat(sequence_logits, dim=0))
+
+        output_sequence_logits_agg = torch.stack(output_sequence_logits, dim=3).mean(-1)
 
         if output_probabilities:
             from torch.nn import Softmax
             sm = Softmax(dim=1)
-            return sm(torch.stack(output_tensors).mean(0)).cpu().numpy()
+            return (
+                Softmax(dim=1)(torch.stack(output_tensors).mean(0)).cpu().numpy(), 
+                Softmax(dim=2)(output_sequence_logits_agg).cpu().numpy(), 
+            )
+            
         if raw_outputs:
-            return torch.stack(output_tensors).mean(0).cpu().numpy()
-        return torch.stack(output_tensors).mean(0).argmax(1).cpu().numpy()
+            return (
+                torch.stack(output_tensors).mean(0).cpu().numpy(), 
+                output_sequence_logits_agg.cpu().numpy()
+            )
+        return (torch.stack(output_tensors).mean(0).argmax(1).cpu().numpy(), output_sequence_logits_agg.argmax(2).cpu().numpy())
 
     @staticmethod
     def map_to_df(texts:str) -> pd.DataFrame:
@@ -81,6 +99,17 @@ class PipelineGED:
     ) -> np.ndarray:
         test = DatasetWithAuxiliaryEmbeddings(df=self.map_to_df(texts), **self.data_configs)
         test.prepare_dataset()
-        for txt in test.texts.values:
+        # for txt in test.texts.values:
+        #     print(txt)
+        
+        probs, seq_probs = self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
+        self.display_error_chars(seq_probs, test.texts.values)
+        return probs, seq_probs
+
+    @staticmethod
+    def display_error_chars(seq_probs, texts):
+        for probs, txt in zip(seq_probs, texts):
+            err_idx = np.argwhere(probs[1:1+len(txt), 1] > probs[1:1+len(txt), 0])
             print(txt)
-        return self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
+            print(np.array(list(txt))[err_idx].flatten())
+        

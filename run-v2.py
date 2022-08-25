@@ -54,6 +54,7 @@ parser.add_argument('--folds', type=str, help='Directory to txt file storing the
 parser.add_argument('--easy_ensemble', default=False, action='store_true', help='Whether to use easy ensemble to balance data labels.')
 parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
 parser.add_argument('--best_by_f1', default=False, action='store_true', help='Call back to best model by F1 score.')
+parser.add_argument('--calibration_temperature', type=float, default=1)
 
 parser.add_argument('--resume_fold_idx', type=int, help='On which fold to resume training.')
 parser.add_argument('--checkpoint', type=str, help='previous model checkpoint.')
@@ -191,6 +192,7 @@ for i in irange:
             args.model_name, 
             n_labels=args.num_labels, 
             single_layer_cls=single_layer_cls, 
+            calibration_temperature=args.calibration_temperature, 
         )
         # model = AutoModelForSequenceClassification(args.model_name, num_labels=args.num_labels)
     if args.checkpoint is not None and i == args.resume_fold_idx - 1:

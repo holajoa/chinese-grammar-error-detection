@@ -84,9 +84,10 @@ class AutoModelWithNER(nn.Module):
         return {'logits':output}
 
 class BertWithClassificationHead(nn.Module):
-    def __init__(self, bert_model, n_labels=2, cls_hidden_size=768, single_layer_cls=False):
+    def __init__(self, bert_model, n_labels=2, cls_hidden_size=768, single_layer_cls=False, calibration_temperature=1.):
         super(BertWithClassificationHead, self).__init__()
         self.base_model = AutoModelForMaskedLM.from_pretrained(bert_model) 
+        self.calibration_temperature = calibration_temperature
 
         if single_layer_cls:
             # self.classifier = nn.Linear(self.base_model.config.vocab_size, n_labels)
@@ -104,5 +105,6 @@ class BertWithClassificationHead(nn.Module):
 
     def forward(self, input_ids, attention_mask, **kwargs):
         MLM_logits = self.base_model(input_ids, attention_mask=attention_mask, output_hidden_states=True).hidden_states[-1]
-        output = postprocess_logits(self.classifier(MLM_logits))
-        return {'logits':output}
+        sequence_logits = self.classifier(MLM_logits)
+        output = postprocess_logits(sequence_logits, attention_mask, self.calibration_temperature)
+        return {'logits':output, 'sequence_logits':sequence_logits}

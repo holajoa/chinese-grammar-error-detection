@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 def ntf(file="https://notificationsounds.com/storage/sounds/file-sounds-1228-so-proud.mp3"):
@@ -77,8 +78,14 @@ def averaging(logits, val_accuracy, weighted=True):
     ensemble_logits = (np.array(logits) * np.expand_dims(weights, axis=(1, 2))).sum(0)
     return np.argmax(ensemble_logits, axis=1)
 
-
-def postprocess_logits(logits):
-    max_idx = (logits[..., 1] - logits[..., 0]).argmax(1)
-    logits = logits[range(logits.shape[0]), max_idx]
-    return logits
+def postprocess_logits(logits, attention_mask, calibration_temperature=1.):  # logits shape=(batch_size, 128, 2)
+    x, y = torch.argwhere(attention_mask).T
+    max_idx = torch.ones(logits.size(0), dtype=torch.int, device=attention_mask.device)
+    for sample_idx in range(logits.size(0)):
+        mask_is = torch.argwhere(x == sample_idx).flatten()
+        xi, yi = x[mask_is], y[mask_is]
+        assert torch.equal(xi, torch.ones(len(mask_is), dtype=xi.dtype, device=xi.device)*sample_idx)
+        max_idx[sample_idx] = yi[(logits[sample_idx, yi, 1] - logits[sample_idx, yi, 0]).argmax(-1)]
+    # logits = (logits[:, :(1+end_idx), 1] - logits[:, :(1+end_idx), 0]).argmax(1)
+    logits = logits[range(logits.shape[0]), max_idx.long()]
+    return logits / calibration_temperature
