@@ -3,11 +3,12 @@ import torch
 from transformers import TrainingArguments, Trainer
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
+from utils import postprocess_logits
 
 
-class AdversarialTrainingArguments(TrainingArguments):
+class MyTrainingArguments(TrainingArguments):
     def __init__(self, epsilon, alpha=0.5, gamma=0, *args, **kwargs):
-        super(AdversarialTrainingArguments, self).__init__(*args, **kwargs)
+        super(MyTrainingArguments, self).__init__(*args, **kwargs)
         self.epsilon = epsilon    # add a perturbation parameter
 
         #### Define focal loss parameters: 
@@ -25,7 +26,7 @@ class AdversarialTrainer(Trainer):
         # shape=(vocab_size, hidden_size)
         embeddings = model.base_model.embeddings.word_embeddings.weight
 
-        # get gradients from embeddinglayer
+        # get gradients from embedding layer
         inputs = self._prepare_inputs(inputs)
         loss = self.compute_loss(model, inputs)
         loss.backward(inputs=embeddings)
@@ -101,14 +102,52 @@ class AdversarialTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
 
 
+class ImbalancedTrainer(Trainer):
+    def log(self, logs):
+        """Overwrite original log method to log to external file."""
+        if self.state.epoch is not None:
+            logs["epoch"] = round(self.state.epoch, 2)
 
-def binary_focal_loss(logits, true_labels, alpha=0.5, gamma=0, sum=True):
+        output = {**logs, **{"step": self.state.global_step}}
+        self.state.log_history.append(output)
+        self.control = self.callback_handler.on_log(self.args, self.state, self.control, logs)
+
+        # log to external file
+        logging.info(output)
+    
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        """
+        How the loss is computed by Trainer. By default, all models return the loss in the first element.
+        Subclass and override for custom behavior.
+        """
+        outputs = model(**inputs)
+
+        true_labels = inputs['labels']
+        if torch.is_tensor(outputs):
+            logits = outputs
+        else:
+            logits = outputs['logits']
+    
+        loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma)
+
+        ## Logging
+        # logging.info(f"True labels:      {inputs['labels'].cpu().numpy()}")
+        # logging.info(f'Predicted labels: {np.argmax(outputs.logits.cpu().detach().numpy(), axis=1)}')
+        # logging.info(f'loss = {loss}\n')
+
+        return (loss, outputs) if return_outputs else loss
+
+
+def binary_focal_loss(logits, true_labels, alpha=1, gamma=0, sum=True):
     pos_idx = torch.Tensor(true_labels == 1).long()
     neg_idx = torch.Tensor(true_labels == 0).long()
-    pred_probs = torch.nn.Softmax(dim=1)(logits)[:, 1]
+    # if logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than 0)
+    #     logits = postprocess_logits(logits)
+    pred_probs = torch.nn.Softmax(dim=1)(logits)[:, -1]
 
     loss_pos = - alpha * ((1 - pred_probs)**gamma * torch.log(pred_probs)) * pos_idx
-    loss_neg = -(1-alpha) * (pred_probs**gamma * torch.log(1-pred_probs)) * neg_idx
+    loss_neg = - (pred_probs**gamma * torch.log(1-pred_probs)) * neg_idx
 
     if sum:
         loss_pos = torch.sum(loss_pos)

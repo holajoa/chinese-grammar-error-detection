@@ -33,6 +33,9 @@ def compute_metrics(eval_pred):
         (b) ground truth labels
     """
     logits, labels = eval_pred
+    if logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
+        max_idx = (logits[..., 1] - logits[..., 0]).argmax(1)
+        logits = logits[range(logits.shape[0]), max_idx]
     predictions = np.argmax(logits, axis=-1)
     accuracy = (predictions==labels).mean()
 
@@ -73,3 +76,9 @@ def averaging(logits, val_accuracy, weighted=True):
         weights = np.ones(len(logits)) / len(logits)
     ensemble_logits = (np.array(logits) * np.expand_dims(weights, axis=(1, 2))).sum(0)
     return np.argmax(ensemble_logits, axis=1)
+
+
+def postprocess_logits(logits):
+    max_idx = (logits[..., 1] - logits[..., 0]).argmax(1)
+    logits = logits[range(logits.shape[0]), max_idx]
+    return logits

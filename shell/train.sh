@@ -1,15 +1,18 @@
-python run.py \
+python run-v2.py \
     --model_name hfl/chinese-macbert-base \
     --num_labels 2 \
-    --data_dir ./data \
-    --maxlength 64 \
-    --pred_output_dir ./submissions \
-    --output_model_dir ./sample_run \
-    --epoch 4 \
+    --data_dir data-aug \
+    --maxlength 128 \
+    --pred_output_dir submissions-aug \
+    --output_model_dir finetuned_models/ner_run_aug \
+    --epoch 3 \
     --batch_size 16 \
-    --kfolds 8 \
-    --lr 1e-5 \
-    --alpha 0.3 \
-    --gamma 0.5 \
-    --perform_testing 
-    # --num_training_examples 1000 \
+    --kfolds 10 \
+    --lr 2e-5 \
+    --alpha 0.5 \
+    --gamma 1 \
+    --perform_testing \
+    --single_layer_cls_head \
+    --resume_fold_idx 1 \
+    --checkpoint finetuned_models/ner_run_aug_mini/fold5/checkpoint-900/pytorch_model.bin \
+    --from_another_run

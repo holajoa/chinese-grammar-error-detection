@@ -11,21 +11,21 @@
             "justMyCode": true, 
             "args":[
                 "--model_name", "hfl/chinese-macbert-base", 
-                "--ner_model_name", "uer/roberta-base-finetuned-cluener2020-chinese", 
                 "--num_labels", "2",  
-                "--data_dir", "./data",  
+                "--data_dir", "./data-aug-mini",  
                 "--maxlength", "128",  
                 "--adversarial_training_param", "2",  
-                "--pred_output_dir", "submissions-ner" , 
-                "--output_model_dir", "ner_run_2", 
-                "--epoch", "2",  
-                "--batch_size", "8",  
+                "--pred_output_dir", "submissions-aug" , 
+                "--output_model_dir", "finetuned_models/ner_run_aug_mini", 
+                "--epoch", "3",  
+                "--batch_size", "32",  
                 "--kfolds", "10",
                 "--perform_testing", 
                 "--lr", "1e-5", 
-                "--alpha", "0.3", 
-                "--gamma", "0.8", 
-                "--folds", "ner_run_2/folds.txt",
+                "--alpha", "1", 
+                "--gamma", "0", 
+                "--single_layer_cls_head",
+                "--num_training_examples", "1000"
             ]
         }
     ]

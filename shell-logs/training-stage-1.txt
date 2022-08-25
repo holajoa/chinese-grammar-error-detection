@@ -1,0 +1,1644 @@
+(general-torch) PS D:\Develop\chinese-grammar-error-detection> sh shell\train.sh
+Building prefix dict from the default dictionary ...
+Loading model from cache C:\Users\holaj\AppData\Local\Temp\jieba.cache
+Loading model cost 0.522 seconds.
+Prefix dict has been built successfully.
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14371
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:12<14:07,  1.06it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.143494606018066, 'eval_F1': 0.9153924566768603, 'eval_precision': 0.8439849624060151, 'eval_recall': 1.0, 'eval_accuracy': 0.8440826549780839, 'eval_runtime': 11.0994, 'eval_samples_per_second': 143.882, 'eval_steps_per_second': 4.505, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:23<14:07,  1.06it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold0\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-450\special_tokens_map.json
+{'loss': 13.7822, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [18:51<07:08,  1.05it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 12.711761474609375, 'eval_F1': 0.8993435448577679, 'eval_precision': 0.8838709677419355, 'eval_recall': 0.9153674832962138, 'eval_accuracy': 0.8271759549154665, 'eval_runtime': 11.1382, 'eval_samples_per_second': 143.381, 'eval_steps_per_second': 4.489, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:02<07:08,  1.05it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold0\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-900\special_tokens_map.json
+{'loss': 11.562, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [28:32<00:00,  1.04it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 12.958361625671387, 'eval_F1': 0.8902346707040121, 'eval_precision': 0.9081081081081082, 'eval_recall': 0.8730512249443207, 'eval_accuracy': 0.8184095178459612, 'eval_runtime': 11.1402, 'eval_samples_per_second': 143.355, 'eval_steps_per_second': 4.488, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [28:43<00:00,  1.04it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold0\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold0\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold0\checkpoint-900 (score: 12.711761474609375).
+{'train_runtime': 1726.0386, 'train_samples_per_second': 24.978, 'train_steps_per_second': 0.782, 'train_loss': 11.886800853587962, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [28:46<00:00,  1.28s/it]
+***** Running Prediction *****
+  Num examples = 1597
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.61it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:06<00:00,  4.74it/s]
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/vocab.txt from cache at C:\Users\holaj/.cache\huggingface\transformers\229ce68be3619b81ba7498cc40301675d5d923a5c43f20e1db15d4b15f5c2006.accd894ff58c6ff7bd4f3072890776c14f4ea34fcc08e79cd88c2d157756dceb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9dff099b9b46efd82fbc99787839c808ef5a7aa3dde3ed8fe0bfd8416b81e627.660ed5c7513bf13d4607410502a84e0de517eb889ff8c401068a1688868e1ccb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/added_tokens.json from cache at C:\Users\holaj/.cache\huggingface\transformers\6ee5a7f5e3aa2ba5afa7127d6be5c3451dbaf5d467557686094617bdf2beab74.5cc6e825eb228a7a5cfd27cb4d7151e97a79fb962b31aaf1813aa102e746584b
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/special_tokens_map.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9f382d012cf0761684535742ec8cf1096e0be52359ee0389a418eaada1265367.dd8bd9bfd3664b530ea4e645105f557769387b3da9f79bdb55ed556bdd80611d
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer_config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\28fd86fdb44cd30e24e9793d571ae709f73ce1aa12fb0d3e60e826d7c250a5a8.d23f50bbddc3fb34db5a76d47fa9bdd5d75bf4201ad2d49abbcca25629b3e562
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading weights file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/pytorch_model.bin from cache at C:\Users\holaj/.cache\huggingface\transformers\f350d12c99d2a8d00f4299b8e292c2248422676424702a2c45a8a3d65646f738.749c1a543002a65141e104ba5e040263fd8eabc9d2dcfb537bf681345565ef45
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14371
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:26<14:12,  1.06it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 12.865179061889648, 'eval_F1': 0.9146757679180889, 'eval_precision': 0.8432976714915041, 'eval_recall': 0.9992542878448919, 'eval_accuracy': 0.8434564809016907, 'eval_runtime': 11.18, 'eval_samples_per_second': 142.845, 'eval_steps_per_second': 4.472, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:37<14:12,  1.06it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold1\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-450\special_tokens_map.json
+{'loss': 13.2641, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:07<07:24,  1.01it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 12.028834342956543, 'eval_F1': 0.8757396449704142, 'eval_precision': 0.9296482412060302, 'eval_recall': 0.8277404921700223, 'eval_accuracy': 0.8027551659361303, 'eval_runtime': 11.2076, 'eval_samples_per_second': 142.493, 'eval_steps_per_second': 4.461, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:19<07:24,  1.01it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold1\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-900\special_tokens_map.json
+{'loss': 9.9318, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [28:51<00:00,  1.04it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.528894424438477, 'eval_F1': 0.8585485854858548, 'eval_precision': 0.953551912568306, 'eval_recall': 0.7807606263982103, 'eval_accuracy': 0.7839699436443331, 'eval_runtime': 11.1791, 'eval_samples_per_second': 142.856, 'eval_steps_per_second': 4.473, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:02<00:00,  1.04it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold1\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold1\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold1\checkpoint-900 (score: 12.028834342956543).
+{'train_runtime': 1744.3039, 'train_samples_per_second': 24.716, 'train_steps_per_second': 0.774, 'train_loss': 10.493794487847222, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:04<00:00,  1.29s/it]
+***** Running Prediction *****
+  Num examples = 1597
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.60it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:06<00:00,  4.72it/s]
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/vocab.txt from cache at C:\Users\holaj/.cache\huggingface\transformers\229ce68be3619b81ba7498cc40301675d5d923a5c43f20e1db15d4b15f5c2006.accd894ff58c6ff7bd4f3072890776c14f4ea34fcc08e79cd88c2d157756dceb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9dff099b9b46efd82fbc99787839c808ef5a7aa3dde3ed8fe0bfd8416b81e627.660ed5c7513bf13d4607410502a84e0de517eb889ff8c401068a1688868e1ccb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/added_tokens.json from cache at C:\Users\holaj/.cache\huggingface\transformers\6ee5a7f5e3aa2ba5afa7127d6be5c3451dbaf5d467557686094617bdf2beab74.5cc6e825eb228a7a5cfd27cb4d7151e97a79fb962b31aaf1813aa102e746584b
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/special_tokens_map.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9f382d012cf0761684535742ec8cf1096e0be52359ee0389a418eaada1265367.dd8bd9bfd3664b530ea4e645105f557769387b3da9f79bdb55ed556bdd80611d
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer_config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\28fd86fdb44cd30e24e9793d571ae709f73ce1aa12fb0d3e60e826d7c250a5a8.d23f50bbddc3fb34db5a76d47fa9bdd5d75bf4201ad2d49abbcca25629b3e562
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading weights file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/pytorch_model.bin from cache at C:\Users\holaj/.cache\huggingface\transformers\f350d12c99d2a8d00f4299b8e292c2248422676424702a2c45a8a3d65646f738.749c1a543002a65141e104ba5e040263fd8eabc9d2dcfb537bf681345565ef45
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14371
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:26<14:29,  1.03it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.577574729919434, 'eval_F1': 0.9062170706006322, 'eval_precision': 0.8531746031746031, 'eval_recall': 0.9662921348314607, 'eval_accuracy': 0.8328115216030056, 'eval_runtime': 11.1744, 'eval_samples_per_second': 142.916, 'eval_steps_per_second': 4.475, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:37<14:29,  1.03it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold2\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-450\special_tokens_map.json
+{'loss': 13.0553, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:11<07:12,  1.04it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 12.136865615844727, 'eval_F1': 0.8901601830663616, 'eval_precision': 0.9067599067599068, 'eval_recall': 0.8741573033707866, 'eval_accuracy': 0.8196618659987477, 'eval_runtime': 11.1684, 'eval_samples_per_second': 142.993, 'eval_steps_per_second': 4.477, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:22<07:12,  1.04it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold2\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-900\special_tokens_map.json
+{'loss': 9.1371, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [28:54<00:00,  1.06it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.420035362243652, 'eval_F1': 0.8689818468823993, 'eval_precision': 0.9182652210175146, 'eval_recall': 0.8247191011235955, 'eval_accuracy': 0.7921102066374452, 'eval_runtime': 11.1521, 'eval_samples_per_second': 143.201, 'eval_steps_per_second': 4.483, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:06<00:00,  1.06it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold2\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold2\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold2\checkpoint-900 (score: 12.136865615844727).
+{'train_runtime': 1748.4071, 'train_samples_per_second': 24.658, 'train_steps_per_second': 0.772, 'train_loss': 9.989432689525463, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:08<00:00,  1.30s/it]
+***** Running Prediction *****
+  Num examples = 1597
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.59it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:06<00:00,  4.72it/s]
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/vocab.txt from cache at C:\Users\holaj/.cache\huggingface\transformers\229ce68be3619b81ba7498cc40301675d5d923a5c43f20e1db15d4b15f5c2006.accd894ff58c6ff7bd4f3072890776c14f4ea34fcc08e79cd88c2d157756dceb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9dff099b9b46efd82fbc99787839c808ef5a7aa3dde3ed8fe0bfd8416b81e627.660ed5c7513bf13d4607410502a84e0de517eb889ff8c401068a1688868e1ccb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/added_tokens.json from cache at C:\Users\holaj/.cache\huggingface\transformers\6ee5a7f5e3aa2ba5afa7127d6be5c3451dbaf5d467557686094617bdf2beab74.5cc6e825eb228a7a5cfd27cb4d7151e97a79fb962b31aaf1813aa102e746584b
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/special_tokens_map.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9f382d012cf0761684535742ec8cf1096e0be52359ee0389a418eaada1265367.dd8bd9bfd3664b530ea4e645105f557769387b3da9f79bdb55ed556bdd80611d
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer_config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\28fd86fdb44cd30e24e9793d571ae709f73ce1aa12fb0d3e60e826d7c250a5a8.d23f50bbddc3fb34db5a76d47fa9bdd5d75bf4201ad2d49abbcca25629b3e562
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading weights file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/pytorch_model.bin from cache at C:\Users\holaj/.cache\huggingface\transformers\f350d12c99d2a8d00f4299b8e292c2248422676424702a2c45a8a3d65646f738.749c1a543002a65141e104ba5e040263fd8eabc9d2dcfb537bf681345565ef45
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14371
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:26<14:24,  1.04it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 12.431600570678711, 'eval_F1': 0.9146383270483374, 'eval_precision': 0.8491406747294716, 'eval_recall': 0.9910846953937593, 'eval_accuracy': 0.8440826549780839, 'eval_runtime': 11.1517, 'eval_samples_per_second': 143.207, 'eval_steps_per_second': 4.484, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:38<14:24,  1.04it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold3\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-450\special_tokens_map.json
+{'loss': 13.3816, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:09<07:13,  1.04it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.49122142791748, 'eval_F1': 0.8772886638098949, 'eval_precision': 0.9221949221949222, 'eval_recall': 0.836552748885587, 'eval_accuracy': 0.8027551659361303, 'eval_runtime': 11.1525, 'eval_samples_per_second': 143.196, 'eval_steps_per_second': 4.483, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:20<07:13,  1.04it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold3\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-900\special_tokens_map.json
+{'loss': 10.0965, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [28:50<00:00,  1.05it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 14.025850296020508, 'eval_F1': 0.874015748031496, 'eval_precision': 0.9296482412060302, 'eval_recall': 0.8246656760772659, 'eval_accuracy': 0.799624295554164, 'eval_runtime': 11.152, 'eval_samples_per_second': 143.203, 'eval_steps_per_second': 4.483, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:02<00:00,  1.05it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold3\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold3\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold3\checkpoint-450 (score: 12.431600570678711).
+{'train_runtime': 1744.3874, 'train_samples_per_second': 24.715, 'train_steps_per_second': 0.774, 'train_loss': 10.645088252314816, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:04<00:00,  1.29s/it]
+***** Running Prediction *****
+  Num examples = 1597
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.61it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:06<00:00,  4.73it/s]
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/vocab.txt from cache at C:\Users\holaj/.cache\huggingface\transformers\229ce68be3619b81ba7498cc40301675d5d923a5c43f20e1db15d4b15f5c2006.accd894ff58c6ff7bd4f3072890776c14f4ea34fcc08e79cd88c2d157756dceb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9dff099b9b46efd82fbc99787839c808ef5a7aa3dde3ed8fe0bfd8416b81e627.660ed5c7513bf13d4607410502a84e0de517eb889ff8c401068a1688868e1ccb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/added_tokens.json from cache at C:\Users\holaj/.cache\huggingface\transformers\6ee5a7f5e3aa2ba5afa7127d6be5c3451dbaf5d467557686094617bdf2beab74.5cc6e825eb228a7a5cfd27cb4d7151e97a79fb962b31aaf1813aa102e746584b
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/special_tokens_map.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9f382d012cf0761684535742ec8cf1096e0be52359ee0389a418eaada1265367.dd8bd9bfd3664b530ea4e645105f557769387b3da9f79bdb55ed556bdd80611d
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer_config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\28fd86fdb44cd30e24e9793d571ae709f73ce1aa12fb0d3e60e826d7c250a5a8.d23f50bbddc3fb34db5a76d47fa9bdd5d75bf4201ad2d49abbcca25629b3e562
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading weights file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/pytorch_model.bin from cache at C:\Users\holaj/.cache\huggingface\transformers\f350d12c99d2a8d00f4299b8e292c2248422676424702a2c45a8a3d65646f738.749c1a543002a65141e104ba5e040263fd8eabc9d2dcfb537bf681345565ef45
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14371
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [20:08<14:12,  1.06it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 12.725695610046387, 'eval_F1': 0.9095254353021509, 'eval_precision': 0.8340638697557922, 'eval_recall': 1.0, 'eval_accuracy': 0.8340638697557922, 'eval_runtime': 11.2113, 'eval_samples_per_second': 142.445, 'eval_steps_per_second': 4.46, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [20:19<14:12,  1.06it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold4\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-450\special_tokens_map.json
+{'loss': 13.3289, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [29:45<07:06,  1.05it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.041916847229004, 'eval_F1': 0.8694962316541056, 'eval_precision': 0.9217830109335576, 'eval_recall': 0.8228228228228228, 'eval_accuracy': 0.793988728866625, 'eval_runtime': 11.1635, 'eval_samples_per_second': 143.056, 'eval_steps_per_second': 4.479, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [29:56<07:06,  1.05it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold4\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-900\special_tokens_map.json
+{'loss': 9.8855, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [39:29<00:00,  1.04it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.653552055358887, 'eval_F1': 0.8666127728375099, 'eval_precision': 0.9387040280210157, 'eval_recall': 0.8048048048048048, 'eval_accuracy': 0.7933625547902317, 'eval_runtime': 11.1821, 'eval_samples_per_second': 142.818, 'eval_steps_per_second': 4.471, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [39:40<00:00,  1.04it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold4\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold4\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold4\checkpoint-450 (score: 12.725695610046387).
+{'train_runtime': 2383.6033, 'train_samples_per_second': 18.087, 'train_steps_per_second': 0.566, 'train_loss': 10.542700014467593, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [39:43<00:00,  1.77s/it]
+***** Running Prediction *****
+  Num examples = 1597
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.61it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:06<00:00,  4.73it/s]
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/vocab.txt from cache at C:\Users\holaj/.cache\huggingface\transformers\229ce68be3619b81ba7498cc40301675d5d923a5c43f20e1db15d4b15f5c2006.accd894ff58c6ff7bd4f3072890776c14f4ea34fcc08e79cd88c2d157756dceb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9dff099b9b46efd82fbc99787839c808ef5a7aa3dde3ed8fe0bfd8416b81e627.660ed5c7513bf13d4607410502a84e0de517eb889ff8c401068a1688868e1ccb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/added_tokens.json from cache at C:\Users\holaj/.cache\huggingface\transformers\6ee5a7f5e3aa2ba5afa7127d6be5c3451dbaf5d467557686094617bdf2beab74.5cc6e825eb228a7a5cfd27cb4d7151e97a79fb962b31aaf1813aa102e746584b
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/special_tokens_map.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9f382d012cf0761684535742ec8cf1096e0be52359ee0389a418eaada1265367.dd8bd9bfd3664b530ea4e645105f557769387b3da9f79bdb55ed556bdd80611d
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer_config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\28fd86fdb44cd30e24e9793d571ae709f73ce1aa12fb0d3e60e826d7c250a5a8.d23f50bbddc3fb34db5a76d47fa9bdd5d75bf4201ad2d49abbcca25629b3e562
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading weights file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/pytorch_model.bin from cache at C:\Users\holaj/.cache\huggingface\transformers\f350d12c99d2a8d00f4299b8e292c2248422676424702a2c45a8a3d65646f738.749c1a543002a65141e104ba5e040263fd8eabc9d2dcfb537bf681345565ef45
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14371
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:27<14:35,  1.03it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.979035377502441, 'eval_F1': 0.8920810313075508, 'eval_precision': 0.8897869213813373, 'eval_recall': 0.8943870014771049, 'eval_accuracy': 0.8165309956167814, 'eval_runtime': 11.1791, 'eval_samples_per_second': 142.856, 'eval_steps_per_second': 4.473, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:38<14:35,  1.03it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold5\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-450\special_tokens_map.json
+{'loss': 13.2221, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:13<07:15,  1.03it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 11.797623634338379, 'eval_F1': 0.8919330289193304, 'eval_precision': 0.9199372056514914, 'eval_recall': 0.8655834564254062, 'eval_accuracy': 0.8221665623043206, 'eval_runtime': 11.1692, 'eval_samples_per_second': 142.982, 'eval_steps_per_second': 4.477, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:24<07:15,  1.03it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold5\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-900\special_tokens_map.json
+{'loss': 9.2264, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [28:58<00:00,  1.05it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.188070297241211, 'eval_F1': 0.8703192747339378, 'eval_precision': 0.9332206255283179, 'eval_recall': 0.8153618906942393, 'eval_accuracy': 0.793988728866625, 'eval_runtime': 11.1753, 'eval_samples_per_second': 142.904, 'eval_steps_per_second': 4.474, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:09<00:00,  1.05it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold5\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold5\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold5\checkpoint-900 (score: 11.797623634338379).
+{'train_runtime': 1751.7298, 'train_samples_per_second': 24.612, 'train_steps_per_second': 0.771, 'train_loss': 10.072935836226852, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:11<00:00,  1.30s/it]
+***** Running Prediction *****
+  Num examples = 1597
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.59it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:06<00:00,  4.72it/s]
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/vocab.txt from cache at C:\Users\holaj/.cache\huggingface\transformers\229ce68be3619b81ba7498cc40301675d5d923a5c43f20e1db15d4b15f5c2006.accd894ff58c6ff7bd4f3072890776c14f4ea34fcc08e79cd88c2d157756dceb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9dff099b9b46efd82fbc99787839c808ef5a7aa3dde3ed8fe0bfd8416b81e627.660ed5c7513bf13d4607410502a84e0de517eb889ff8c401068a1688868e1ccb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/added_tokens.json from cache at C:\Users\holaj/.cache\huggingface\transformers\6ee5a7f5e3aa2ba5afa7127d6be5c3451dbaf5d467557686094617bdf2beab74.5cc6e825eb228a7a5cfd27cb4d7151e97a79fb962b31aaf1813aa102e746584b
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/special_tokens_map.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9f382d012cf0761684535742ec8cf1096e0be52359ee0389a418eaada1265367.dd8bd9bfd3664b530ea4e645105f557769387b3da9f79bdb55ed556bdd80611d
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer_config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\28fd86fdb44cd30e24e9793d571ae709f73ce1aa12fb0d3e60e826d7c250a5a8.d23f50bbddc3fb34db5a76d47fa9bdd5d75bf4201ad2d49abbcca25629b3e562
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading weights file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/pytorch_model.bin from cache at C:\Users\holaj/.cache\huggingface\transformers\f350d12c99d2a8d00f4299b8e292c2248422676424702a2c45a8a3d65646f738.749c1a543002a65141e104ba5e040263fd8eabc9d2dcfb537bf681345565ef45
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14371
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:30<14:37,  1.03it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 12.846210479736328, 'eval_F1': 0.9094017094017094, 'eval_precision': 0.8338557993730408, 'eval_recall': 1.0, 'eval_accuracy': 0.8340638697557922, 'eval_runtime': 11.1635, 'eval_samples_per_second': 143.055, 'eval_steps_per_second': 4.479, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:41<14:37,  1.03it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold6\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-450\special_tokens_map.json
+{'loss': 13.2525, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:19<07:17,  1.03it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 11.296930313110352, 'eval_F1': 0.9024390243902438, 'eval_precision': 0.8873546511627907, 'eval_recall': 0.9180451127819549, 'eval_accuracy': 0.8346900438321854, 'eval_runtime': 11.1981, 'eval_samples_per_second': 142.614, 'eval_steps_per_second': 4.465, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:30<07:17,  1.03it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold6\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-900\special_tokens_map.json
+{'loss': 10.1613, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:09<00:00,  1.05it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.392525672912598, 'eval_F1': 0.8656237464901725, 'eval_precision': 0.9277730008598453, 'eval_recall': 0.8112781954887218, 'eval_accuracy': 0.7902316844082655, 'eval_runtime': 11.1744, 'eval_samples_per_second': 142.916, 'eval_steps_per_second': 4.475, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:20<00:00,  1.05it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold6\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold6\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold6\checkpoint-900 (score: 11.296930313110352).
+{'train_runtime': 1763.0886, 'train_samples_per_second': 24.453, 'train_steps_per_second': 0.766, 'train_loss': 10.63305031105324, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:23<00:00,  1.31s/it]
+***** Running Prediction *****
+  Num examples = 1597
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.60it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:06<00:00,  4.72it/s]
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/vocab.txt from cache at C:\Users\holaj/.cache\huggingface\transformers\229ce68be3619b81ba7498cc40301675d5d923a5c43f20e1db15d4b15f5c2006.accd894ff58c6ff7bd4f3072890776c14f4ea34fcc08e79cd88c2d157756dceb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9dff099b9b46efd82fbc99787839c808ef5a7aa3dde3ed8fe0bfd8416b81e627.660ed5c7513bf13d4607410502a84e0de517eb889ff8c401068a1688868e1ccb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/added_tokens.json from cache at C:\Users\holaj/.cache\huggingface\transformers\6ee5a7f5e3aa2ba5afa7127d6be5c3451dbaf5d467557686094617bdf2beab74.5cc6e825eb228a7a5cfd27cb4d7151e97a79fb962b31aaf1813aa102e746584b
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/special_tokens_map.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9f382d012cf0761684535742ec8cf1096e0be52359ee0389a418eaada1265367.dd8bd9bfd3664b530ea4e645105f557769387b3da9f79bdb55ed556bdd80611d
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer_config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\28fd86fdb44cd30e24e9793d571ae709f73ce1aa12fb0d3e60e826d7c250a5a8.d23f50bbddc3fb34db5a76d47fa9bdd5d75bf4201ad2d49abbcca25629b3e562
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading weights file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/pytorch_model.bin from cache at C:\Users\holaj/.cache\huggingface\transformers\f350d12c99d2a8d00f4299b8e292c2248422676424702a2c45a8a3d65646f738.749c1a543002a65141e104ba5e040263fd8eabc9d2dcfb537bf681345565ef45
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14371
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:31<14:32,  1.03it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.153016090393066, 'eval_F1': 0.9113837764144512, 'eval_precision': 0.8371947401377583, 'eval_recall': 1.0, 'eval_accuracy': 0.8371947401377583, 'eval_runtime': 11.1653, 'eval_samples_per_second': 143.033, 'eval_steps_per_second': 4.478, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:42<14:32,  1.03it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold7\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-450\special_tokens_map.json
+{'loss': 13.3056, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:19<07:21,  1.02it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 11.915569305419922, 'eval_F1': 0.8951734539969834, 'eval_precision': 0.9026615969581749, 'eval_recall': 0.8878085265519821, 'eval_accuracy': 0.8259236067626801, 'eval_runtime': 11.2108, 'eval_samples_per_second': 142.452, 'eval_steps_per_second': 4.46, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:30<07:21,  1.02it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold7\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-900\special_tokens_map.json
+{'loss': 10.248, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:07<00:00,  1.04it/s]***** Running Evaluation *****
+  Num examples = 1597
+  Batch size = 32
+{'eval_loss': 13.226985931396484, 'eval_F1': 0.8695996829171622, 'eval_precision': 0.9249578414839797, 'eval_recall': 0.8204936424831712, 'eval_accuracy': 0.793988728866625, 'eval_runtime': 11.1928, 'eval_samples_per_second': 142.681, 'eval_steps_per_second': 4.467, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:18<00:00,  1.04it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold7\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold7\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold7\checkpoint-900 (score: 11.915569305419922).
+{'train_runtime': 1760.7248, 'train_samples_per_second': 24.486, 'train_steps_per_second': 0.767, 'train_loss': 10.739289098668982, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:20<00:00,  1.30s/it]
+***** Running Prediction *****
+  Num examples = 1597
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.60it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:06<00:00,  4.72it/s]
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/vocab.txt from cache at C:\Users\holaj/.cache\huggingface\transformers\229ce68be3619b81ba7498cc40301675d5d923a5c43f20e1db15d4b15f5c2006.accd894ff58c6ff7bd4f3072890776c14f4ea34fcc08e79cd88c2d157756dceb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9dff099b9b46efd82fbc99787839c808ef5a7aa3dde3ed8fe0bfd8416b81e627.660ed5c7513bf13d4607410502a84e0de517eb889ff8c401068a1688868e1ccb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/added_tokens.json from cache at C:\Users\holaj/.cache\huggingface\transformers\6ee5a7f5e3aa2ba5afa7127d6be5c3451dbaf5d467557686094617bdf2beab74.5cc6e825eb228a7a5cfd27cb4d7151e97a79fb962b31aaf1813aa102e746584b
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/special_tokens_map.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9f382d012cf0761684535742ec8cf1096e0be52359ee0389a418eaada1265367.dd8bd9bfd3664b530ea4e645105f557769387b3da9f79bdb55ed556bdd80611d
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer_config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\28fd86fdb44cd30e24e9793d571ae709f73ce1aa12fb0d3e60e826d7c250a5a8.d23f50bbddc3fb34db5a76d47fa9bdd5d75bf4201ad2d49abbcca25629b3e562
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading weights file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/pytorch_model.bin from cache at C:\Users\holaj/.cache\huggingface\transformers\f350d12c99d2a8d00f4299b8e292c2248422676424702a2c45a8a3d65646f738.749c1a543002a65141e104ba5e040263fd8eabc9d2dcfb537bf681345565ef45
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14372
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [20:15<14:03,  1.07it/s]***** Running Evaluation *****
+  Num examples = 1596
+  Batch size = 32
+{'eval_loss': 12.142663955688477, 'eval_F1': 0.9155888359428181, 'eval_precision': 0.8448492462311558, 'eval_recall': 0.9992570579494799, 'eval_accuracy': 0.8446115288220551, 'eval_runtime': 10.9242, 'eval_samples_per_second': 146.098, 'eval_steps_per_second': 4.577, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [20:26<14:03,  1.07it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold8\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-450\special_tokens_map.json
+{'loss': 13.3783, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [29:50<07:16,  1.03it/s]***** Running Evaluation *****
+  Num examples = 1596
+  Batch size = 32
+{'eval_loss': 10.770813941955566, 'eval_F1': 0.9179131703757754, 'eval_precision': 0.9017921146953405, 'eval_recall': 0.9346210995542348, 'eval_accuracy': 0.8590225563909775, 'eval_runtime': 11.198, 'eval_samples_per_second': 142.526, 'eval_steps_per_second': 4.465, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [30:01<07:16,  1.03it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold8\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-900\special_tokens_map.json
+{'loss': 9.8117, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [39:33<00:00,  1.02it/s]***** Running Evaluation *****
+  Num examples = 1596
+  Batch size = 32
+{'eval_loss': 12.835968971252441, 'eval_F1': 0.8835027365129008, 'eval_precision': 0.9323432343234324, 'eval_recall': 0.8395245170876672, 'eval_accuracy': 0.8132832080200502, 'eval_runtime': 11.1998, 'eval_samples_per_second': 142.503, 'eval_steps_per_second': 4.464, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [39:45<00:00,  1.02it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold8\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold8\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold8\checkpoint-900 (score: 10.770813941955566).
+{'train_runtime': 2387.9514, 'train_samples_per_second': 18.056, 'train_steps_per_second': 0.565, 'train_loss': 10.477337782118056, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [39:47<00:00,  1.77s/it]
+***** Running Prediction *****
+  Num examples = 1596
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.58it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:07<00:00,  4.71it/s]
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/vocab.txt from cache at C:\Users\holaj/.cache\huggingface\transformers\229ce68be3619b81ba7498cc40301675d5d923a5c43f20e1db15d4b15f5c2006.accd894ff58c6ff7bd4f3072890776c14f4ea34fcc08e79cd88c2d157756dceb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9dff099b9b46efd82fbc99787839c808ef5a7aa3dde3ed8fe0bfd8416b81e627.660ed5c7513bf13d4607410502a84e0de517eb889ff8c401068a1688868e1ccb
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/added_tokens.json from cache at C:\Users\holaj/.cache\huggingface\transformers\6ee5a7f5e3aa2ba5afa7127d6be5c3451dbaf5d467557686094617bdf2beab74.5cc6e825eb228a7a5cfd27cb4d7151e97a79fb962b31aaf1813aa102e746584b
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/special_tokens_map.json from cache at C:\Users\holaj/.cache\huggingface\transformers\9f382d012cf0761684535742ec8cf1096e0be52359ee0389a418eaada1265367.dd8bd9bfd3664b530ea4e645105f557769387b3da9f79bdb55ed556bdd80611d
+loading file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/tokenizer_config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\28fd86fdb44cd30e24e9793d571ae709f73ce1aa12fb0d3e60e826d7c250a5a8.d23f50bbddc3fb34db5a76d47fa9bdd5d75bf4201ad2d49abbcca25629b3e562
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+D:\Develop\chinese-grammar-error-detection\dataset.py:104: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  indexed_value = torch.tensor(value[index]).squeeze()
+loading configuration file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/config.json from cache at C:\Users\holaj/.cache\huggingface\transformers\dfbc5cae1d1506a97fa3e0014d34afdd480ea8cce63302d8df982725a3e5b77a.ddc6437c26ae4493a14d93f62bb62ae67d1e46c0de74ff95524ad468354a19f7
+Model config BertConfig {
+  "_name_or_path": "hfl/chinese-macbert-base",
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "classifier_dropout": null,
+  "directionality": "bidi",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "pad_token_id": 0,
+  "pooler_fc_size": 768,
+  "pooler_num_attention_heads": 12,
+  "pooler_num_fc_layers": 3,
+  "pooler_size_per_head": 128,
+  "pooler_type": "first_token_transform",
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.21.0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 21128
+}
+
+loading weights file https://huggingface.co/hfl/chinese-macbert-base/resolve/main/pytorch_model.bin from cache at C:\Users\holaj/.cache\huggingface\transformers\f350d12c99d2a8d00f4299b8e292c2248422676424702a2c45a8a3d65646f738.749c1a543002a65141e104ba5e040263fd8eabc9d2dcfb537bf681345565ef45
+Some weights of the model checkpoint at hfl/chinese-macbert-base were not used when initializing BertForSequenceClassification: ['cls.predictions.decoder.bias', 'cls.seq_relationship.weight', 'cls.predictions.decoder.weight', 'cls.seq_relationship.bias', 'cls.predictions.transform.dense.bias', 'cls.predictions.transform.LayerNorm.weight', 'cls.predictions.transform.dense.weight', 'cls.predictions.bias', 'cls.predictions.transform.LayerNorm.bias']
+- This IS expected if you are initializing BertForSequenceClassification from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing BertForSequenceClassification from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at hfl/chinese-macbert-base and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+PyTorch: setting up devices
+You are adding a <class 'transformers.integrations.TensorBoardCallback'> to the callbacks of this Trainer, but there is already one. The currentlist of callbacks is
+:DefaultFlowCallback
+TensorBoardCallback
+ProgressCallback
+EarlyStoppingCallback
+D:\Apps\Anaconda3\envs\general-torch\lib\site-packages\transformers\optimization.py:306: FutureWarning: This implementation of AdamW is deprecated and will be removed in a futureversion. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+***** Running training *****
+  Num examples = 14372
+  Num Epochs = 3
+  Instantaneous batch size per device = 32
+  Total train batch size (w. parallel, distributed & accumulation) = 32
+  Gradient Accumulation steps = 1
+  Total optimization steps = 1350
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:28<14:48,  1.01it/s]***** Running Evaluation *****
+  Num examples = 1596
+  Batch size = 32
+{'eval_loss': 12.084905624389648, 'eval_F1': 0.9201623815967523, 'eval_precision': 0.8521303258145363, 'eval_recall': 1.0, 'eval_accuracy': 0.8521303258145363, 'eval_runtime': 11.2113, 'eval_samples_per_second': 142.357, 'eval_steps_per_second': 4.46, 'epoch': 1.0}
+ 33%|██████████████████████████████████████████████                                                                                            | 450/1350 [09:40<14:48,  1.01it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold9\checkpoint-450
+Configuration saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-450\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-450\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-450\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-450\special_tokens_map.json
+{'loss': 13.5409, 'learning_rate': 6.296296296296297e-06, 'epoch': 1.11}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:14<07:18,  1.03it/s]***** Running Evaluation *****
+  Num examples = 1596
+  Batch size = 32
+{'eval_loss': 11.719907760620117, 'eval_F1': 0.9084870848708487, 'eval_precision': 0.9118518518518518, 'eval_recall': 0.9051470588235294, 'eval_accuracy': 0.8446115288220551, 'eval_runtime': 11.2108, 'eval_samples_per_second': 142.362, 'eval_steps_per_second': 4.46, 'epoch': 2.0}
+ 67%|████████████████████████████████████████████████████████████████████████████████████████████                                              | 900/1350 [19:25<07:18,  1.03it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold9\checkpoint-900
+Configuration saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-900\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-900\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-900\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-900\special_tokens_map.json
+{'loss': 10.7995, 'learning_rate': 2.5925925925925925e-06, 'epoch': 2.22}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:01<00:00,  1.04it/s]***** Running Evaluation *****
+  Num examples = 1596
+  Batch size = 32
+{'eval_loss': 13.73796558380127, 'eval_F1': 0.8602150537634409, 'eval_precision': 0.9383145091225021, 'eval_recall': 0.7941176470588235, 'eval_accuracy': 0.7800751879699248, 'eval_runtime': 11.2293, 'eval_samples_per_second': 142.128, 'eval_steps_per_second': 4.453, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:13<00:00,  1.04it/s]Saving model checkpoint to finetuned_models/ner_run_aug_mini\fold9\checkpoint-1350
+Configuration saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-1350\config.json
+Model weights saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-1350\pytorch_model.bin
+tokenizer config file saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-1350\tokenizer_config.json
+Special tokens file saved in finetuned_models/ner_run_aug_mini\fold9\checkpoint-1350\special_tokens_map.json
+
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+Loading best model from finetuned_models/ner_run_aug_mini\fold9\checkpoint-900 (score: 11.719907760620117).
+{'train_runtime': 1755.3485, 'train_samples_per_second': 24.563, 'train_steps_per_second': 0.769, 'train_loss': 11.206357421875, 'epoch': 3.0}
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1350/1350 [29:15<00:00,  1.30s/it]
+***** Running Prediction *****
+  Num examples = 1596
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 50/50 [00:10<00:00,  4.56it/s]
+***** Running Prediction *****
+  Num examples = 1039
+  Batch size = 32
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 33/33 [00:07<00:00,  4.67it/s]
+Traceback (most recent call last):
+  File "D:\Develop\chinese-grammar-error-detection\run-v2.py", line 277, in <module>
+    with open(out_path, 'a+') as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'submissions-aug\\submission.csv'
+(general-torch) PS D:\Develop\chinese-grammar-error-detection>

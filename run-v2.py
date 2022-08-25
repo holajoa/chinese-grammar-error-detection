@@ -1,7 +1,6 @@
 from urllib.parse import DefragResult
 import torch
 import pandas as pd
-import re
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 from transformers import AutoModelForSequenceClassification
@@ -12,7 +11,7 @@ from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
-from models import AutoModelWithNER
+from models import AutoModelWithNER, BertWithClassificationHead
 import random
 
 import argparse
@@ -45,8 +44,8 @@ parser.add_argument('--emoji_to_text', default=False, action='store_true', help=
 ## training parameters
 parser.add_argument('--seed', type=int)
 parser.add_argument('--adversarial_training_param', type=int, default=0, help='Adversarial training parameter. If passed 0 then switched off adversarial traiing.')
-parser.add_argument('--alpha', type=float, default=0.5, help='alpha parameter for focal loss. Change the weights of positive examples.')
-parser.add_argument('--gamma', type=float, default=0, help='gamma parameter for focal loss. Change how strict the labelling is.')
+parser.add_argument('--alpha', type=float, default=1, help='alpha parameter for focal loss. Change the weights of positive examples.')
+parser.add_argument('--gamma', type=float, default=0, help='gamma parameter for focal loss. Change how strict the positive labelling is.')
 parser.add_argument('--batch_size', type=int, default=8, help='batch size', required=False)
 parser.add_argument('--epoch', type=int, default=10, help='epoch', required=False)
 parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate ', required=False)
@@ -58,6 +57,7 @@ parser.add_argument('--best_by_f1', default=False, action='store_true', help='Ca
 
 parser.add_argument('--resume_fold_idx', type=int, help='On which fold to resume training.')
 parser.add_argument('--checkpoint', type=str, help='previous model checkpoint.')
+parser.add_argument('--from_another_run', default=False, action='store_true')
 
 ## output parameters
 parser.add_argument('--perform_testing', help='Whether to use the trained model on a test set', default=False, action='store_true')
@@ -108,6 +108,8 @@ train_dataset_config = {
     'to_simplified':args.to_simplified, 
     'emoji_to_text':args.emoji_to_text,
     'device':device, 
+    'split_words':True, 
+    'cut_all':False, 
 }
 
 if args.perform_testing:
@@ -123,6 +125,8 @@ if args.perform_testing:
         'to_simplified':args.to_simplified, 
         'emoji_to_text':args.emoji_to_text,
         'device':device, 
+        'split_words':True, 
+        'cut_all':False, 
     }
 
     logging.info(f'Constructing test dataset object, with the following config:')
@@ -141,6 +145,7 @@ if args.folds:
     k = len(folds)
     if args.kfolds and args.kfolds != k:
         logging.warning('Provided folds does not match with provided k.')
+    logging.info(f'Loaded folds indices from {args.folds}.')
 else:
     if args.easy_ensemble:
         minority_idx = np.array(train_df_use.index[train_df_use.label == 0].tolist())
@@ -160,7 +165,7 @@ val_accuracies = []
 if args.perform_testing:
     logits = []
 
-irange = range(k) if not args.resume_fold_idx else range(args.resume_fold_idx+1, k)
+irange = range(k) if not args.resume_fold_idx else range(args.resume_fold_idx-1, k)
 
 for i in irange:
     val_idx = folds[i]
@@ -181,15 +186,18 @@ for i in irange:
             single_layer_cls=single_layer_cls, 
             concatenate=concat,
         )
-        if args.checkpoint is not None and i == args.resume_fold_idx + 1:
-            assert 'fold'+str(args.resume_fold_idx) in args.checkpoint
-            state_dict = torch.load(args.checkpoint, map_location=device)
-            model.load_state_dict(state_dict)
     else:
-        model = AutoModelForSequenceClassification.from_pretrained(
-            args.model_name, num_labels=args.num_labels,
-        )   
-
+        model = BertWithClassificationHead(
+            args.model_name, 
+            n_labels=args.num_labels, 
+            single_layer_cls=single_layer_cls, 
+        )
+        # model = AutoModelForSequenceClassification(args.model_name, num_labels=args.num_labels)
+    if args.checkpoint is not None and i == args.resume_fold_idx - 1:
+        if not args.from_another_run:
+            assert 'fold'+str(args.resume_fold_idx-1) in args.checkpoint
+        state_dict = torch.load(args.checkpoint, map_location=device)
+        model.load_state_dict(state_dict) 
     model.cuda()
 
 
@@ -200,7 +208,7 @@ for i in irange:
     tb_writer = SummaryWriter(os.path.join(output_dir, 'runs'))
     seed = args.seed if args.seed else 42
     metric_for_best_model = 'F1' if args.best_by_f1 else 'loss'
-    arguments = AdversarialTrainingArguments(
+    arguments = MyTrainingArguments(
         output_dir=output_dir,  # output directory
         per_device_train_batch_size=args.batch_size, 
         per_device_eval_batch_size=args.batch_size, 
@@ -219,7 +227,7 @@ for i in irange:
         push_to_hub=False, 
     )
 
-    trainer = AdversarialTrainer(
+    trainer = ImbalancedTrainer(
         model=model, 
         args=arguments, 
         train_dataset=train.dataset['train'], 
@@ -242,7 +250,10 @@ for i in irange:
     # soft_labels.append(dev_labels)
     
     # Get pred accuracy on the dev set 
-    val_pred = np.argmax(trainer.predict(train.dataset['val']).predictions, 1)
+    val_pred_logits = trainer.predict(train.dataset['val']).predictions
+    if val_pred_logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
+        val_pred_logits = postprocess_logits(val_pred_logits)
+    val_pred = np.argmax(val_pred_logits, 1)
     val_accuracy = (val_pred == train.dataset['val']['labels'].numpy()).mean()
     val_accuracies.append(val_accuracy)
 
