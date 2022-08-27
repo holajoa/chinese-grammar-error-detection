@@ -252,9 +252,9 @@ for i in irange:
     # soft_labels.append(dev_labels)
     
     # Get pred accuracy on the dev set 
-    val_pred_logits = trainer.predict(train.dataset['val']).predictions
+    val_pred_logits = trainer.predict(train.dataset['val']).predictions[0]
     if val_pred_logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
-        val_pred_logits = postprocess_logits(val_pred_logits)
+        val_pred_logits = postprocess_logits(val_pred_logits, train.dataset['val']['attention_mask'], args.calibration_tempreture)
     val_pred = np.argmax(val_pred_logits, 1)
     val_accuracy = (val_pred == train.dataset['val']['labels'].numpy()).mean()
     val_accuracies.append(val_accuracy)
@@ -266,7 +266,9 @@ for i in irange:
 
     if args.perform_testing:
         # Get logits on the test set
-        hiddens = trainer.predict(test.dataset['train']).predictions
+        hiddens = trainer.predict(test.dataset['train']).predictions[0]
+        if hiddens.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
+            hiddens = postprocess_logits(hiddens, test.dataset['train']['attention_mask'], args.calibration_tempreture)
         logits.append(hiddens)
 
     del model
@@ -284,5 +286,5 @@ if args.perform_testing:
     # Write results
     out_path = os.path.join(args.pred_output_dir, 'submission.csv')
 
-    with open(out_path, 'a+') as f:
+    with open(out_path, 'a') as f:
         result.to_csv(out_path, index=False)

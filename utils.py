@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+import logging
 
 
 def ntf(file="https://notificationsounds.com/storage/sounds/file-sounds-1228-so-proud.mp3"):
@@ -22,7 +23,9 @@ def easy_ensenble_generate_kfolds(L, k, minority_idx):
         minor_sample = np.random.choice(minority_idx, size=s_fold//2, replace=False)
         major_sample = np.random.choice(majority_idx, size=s_fold//2, replace=False)
         fold = np.concatenate((minor_sample, major_sample))
+        fold = np.random.permutation(fold)
         folds.append(fold)
+    logging.info(f'Using easy ensemble - each fold has {len(minor_sample)} negatives in the training set, paired with {len(major_sample)} positives')
     return np.array(folds)
 
 def compute_metrics(eval_pred):
@@ -56,9 +59,14 @@ def compute_metrics(eval_pred):
     }
 
 
-def voting(logits, val_accuracy=None):
-    labels, count = np.unique(logits, axis=0, return_counts=True)
-    return labels[np.argmax(count)]
+def voting(logits:torch.Tensor, val_accuracy=None):
+    agg_labels = []
+    model_id = 0
+    for single_examples_pred_labels in logits.argmax(-1).T:
+        labels, counts = torch.unique(single_examples_pred_labels, return_counts=True)
+        agg_labels.append(labels[torch.argmax(counts)])
+    model_id += 1
+    return torch.tensor(agg_labels).long()
 
 
 # def averaging(logits, val_accuracy, weighted=True):
@@ -87,6 +95,6 @@ def postprocess_logits(logits, attention_mask, calibration_temperature=1.):  # l
         xi, yi = x[mask_is], y[mask_is]
         assert torch.equal(xi, torch.ones(len(mask_is), dtype=xi.dtype, device=xi.device)*sample_idx)
         max_idx[sample_idx] = yi[(logits[sample_idx, yi, 1] - logits[sample_idx, yi, 0]).argmax(-1)]
-    # logits = (logits[:, :(1+end_idx), 1] - logits[:, :(1+end_idx), 0]).argmax(1)
+    assert torch.all(max_idx < attention_mask.sum(1))
     logits = logits[range(logits.shape[0]), max_idx.long()]
     return logits / calibration_temperature

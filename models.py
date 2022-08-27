@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from transformers import BertModel, AutoModel, AutoModelForMaskedLM
 from utils import postprocess_logits
+from torchcrf import CRF
 
 class BertWithNER(nn.Module):
     def __init__(self, bert_model, ner_model, n_labels=2, concatenate=True):
@@ -90,13 +91,11 @@ class BertWithClassificationHead(nn.Module):
         self.calibration_temperature = calibration_temperature
 
         if single_layer_cls:
-            # self.classifier = nn.Linear(self.base_model.config.vocab_size, n_labels)
             self.classifier = nn.Linear(self.base_model.config.hidden_size, n_labels)
         else:
             self.classifier = nn.Sequential(
                 nn.Dropout(p=0.1),
                 nn.Linear(self.base_model.config.hidden_size, cls_hidden_size, bias=True),
-                # nn.Linear(self.base_model.config.vocab_size, cls_hidden_size, bias=True),
                 # nn.Tanh(),
                 nn.ReLU(), 
                 nn.Dropout(p=0.1),
@@ -106,5 +105,32 @@ class BertWithClassificationHead(nn.Module):
     def forward(self, input_ids, attention_mask, **kwargs):
         MLM_logits = self.base_model(input_ids, attention_mask=attention_mask, output_hidden_states=True).hidden_states[-1]
         sequence_logits = self.classifier(MLM_logits)
+        output = postprocess_logits(sequence_logits, attention_mask, self.calibration_temperature)
+        return {'logits':output, 'sequence_logits':sequence_logits}
+
+
+class BertWithCRFHead(nn.Module):
+    def __init__(self, bert_model, n_labels=2, cls_hidden_size=768, single_layer_cls=False, calibration_temperature=1.):
+        super(BertWithClassificationHead, self).__init__()
+        self.base_model = AutoModelForMaskedLM.from_pretrained(bert_model) 
+        self.calibration_temperature = calibration_temperature
+
+        if single_layer_cls:
+            self.classifier = nn.Linear(self.base_model.config.hidden_size, n_labels)
+        else:
+            self.classifier = nn.Sequential(
+                nn.Dropout(p=0.1),
+                nn.Linear(self.base_model.config.hidden_size, cls_hidden_size, bias=True),
+                # nn.Tanh(),
+                nn.ReLU(), 
+                nn.Dropout(p=0.1),
+                nn.Linear(cls_hidden_size, n_labels, bias=True)
+            )
+        self.crf = CRF(n_labels, batch_first=True)
+
+    def forward(self, input_ids, attention_mask, **kwargs):
+        MLM_logits = self.base_model(input_ids, attention_mask=attention_mask, output_hidden_states=True).hidden_states[-1]
+        sequence_logits = self.classifier(MLM_logits)
+        sequence_logits = self.crf.decode(sequence_logits, attention_mask)
         output = postprocess_logits(sequence_logits, attention_mask, self.calibration_temperature)
         return {'logits':output, 'sequence_logits':sequence_logits}
