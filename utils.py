@@ -28,6 +28,22 @@ def easy_ensenble_generate_kfolds(L, k, minority_idx):
     logging.info(f'Using easy ensemble - each fold has {len(minor_sample)} negatives in the training set, paired with {len(major_sample)} positives')
     return np.array(folds)
 
+
+def extract_predictions(logits):
+    contain_bool = np.vectorize(lambda x: x in np.array([0, 1]))
+    pass_label = contain_bool(np.unique(logits).flatten()).all()
+    
+    if logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
+        max_idx = (logits[..., 1] - logits[..., 0]).argmax(1)
+        logits = logits[range(logits.shape[0]), max_idx]
+    
+    if pass_label:
+        predictions = logits.any(axis=-1).astype(int)
+
+    else:
+        predictions = np.argmax(logits, axis=-1)
+    return predictions
+
 def compute_metrics(eval_pred):
     """
     Called at the end of validation - compute F1 score and/or accuracy.
@@ -36,12 +52,10 @@ def compute_metrics(eval_pred):
         (a) logit scores output by model, and
         (b) ground truth labels
     """
+    
     outputs, labels = eval_pred
-    logits, _ = outputs
-    if logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
-        max_idx = (logits[..., 1] - logits[..., 0]).argmax(1)
-        logits = logits[range(logits.shape[0]), max_idx]
-    predictions = np.argmax(logits, axis=-1)
+    logits = outputs[0] if isinstance(outputs, tuple) else outputs
+    predictions = extract_predictions(logits)
     accuracy = (predictions==labels).mean()
 
     tp = ((labels == 1) * (predictions == 1)).sum()
@@ -65,7 +79,7 @@ def voting(logits:torch.Tensor, val_accuracy=None):
     for single_examples_pred_labels in logits.argmax(-1).T:
         labels, counts = torch.unique(single_examples_pred_labels, return_counts=True)
         agg_labels.append(labels[torch.argmax(counts)])
-    model_id += 1
+        model_id += 1
     return torch.tensor(agg_labels).long()
 
 

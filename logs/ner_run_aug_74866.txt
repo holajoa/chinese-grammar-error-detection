@@ -1,0 +1,350 @@
+python run-v2.py \
+    --model_name hfl/chinese-macbert-base \
+    --num_labels 2 \
+    --data_dir data-aug \
+    --maxlength 128 \
+    --pred_output_dir submissions-aug \
+    --output_model_dir finetuned_models/ner_run_aug \
+    --epoch 3 \
+    --batch_size 16 \
+    --kfolds 10 \
+    --lr 2e-5 \
+    --alpha 0.5 \
+    --gamma 1 \
+    --perform_testing \
+    --single_layer_cls_head \
+    --resume_fold_idx 1 \
+    --checkpoint finetuned_models/ner_run_aug_mini/fold5/checkpoint-900/pytorch_model.bin \
+    --from_another_run
+
+INFO:root:Reading training data from data-aug\train.csv...
+INFO:root:Using full training set.
+INFO:root:Reading test data from data-aug\test.csv...
+INFO:root:Constructing test dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': -1, 'test': True, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+DEBUG:jieba:Building prefix dict from the default dictionary ...
+DEBUG:jieba:Loading model from cache C:\Users\holaj\AppData\Local\Temp\jieba.cache
+DEBUG:jieba:Loading model cost 0.444 seconds.
+DEBUG:jieba:Prefix dict has been built successfully.
+INFO:root:Set up 10-fold CV.
+INFO:root:Training stage 1/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.3249, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.183, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.1768, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.0258, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.0214, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 1.8574, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 1.9389, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 1.7907, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 1.6519722938537598, 'eval_F1': 0.9222927807486632, 'eval_precision': 0.9327361838769647, 'eval_recall': 0.9120806478268055, 'eval_accuracy': 0.871298090229726, 'eval_runtime': 63.0064, 'eval_samples_per_second': 114.687, 'eval_steps_per_second': 7.174, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.3897, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.3277, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.2773, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.2478, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.296, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.1602, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.2433, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.1436, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 2.060117483139038, 'eval_F1': 0.9166161572430515, 'eval_precision': 0.9627137140778464, 'eval_recall': 0.8747314493472154, 'eval_accuracy': 0.8667312482701356, 'eval_runtime': 62.0409, 'eval_samples_per_second': 116.472, 'eval_steps_per_second': 7.286, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 0.8735, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 0.8577, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 0.9335, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 0.9268, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 0.9774, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 0.9037, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 0.9258, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 0.8138, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.6445345878601074, 'eval_F1': 0.9353124736442606, 'eval_precision': 0.955046503616948, 'eval_recall': 0.9163774582713601, 'eval_accuracy': 0.8938555217270966, 'eval_runtime': 62.1298, 'eval_samples_per_second': 116.305, 'eval_steps_per_second': 7.275, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 4787.7489, 'train_samples_per_second': 40.748, 'train_steps_per_second': 2.547, 'total_flos': 0.0, 'train_loss': 1.3946399496343596, 'epoch': 3.0, 'step': 12195}
+INFO:root:Training stage 2/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.8496, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.5314, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.4559, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.2172, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.174, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 2.1157, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 2.0201, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 1.9798, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 1.9249153137207031, 'eval_F1': 0.8778776978417265, 'eval_precision': 0.9494261816767166, 'eval_recall': 0.8163572503763171, 'eval_accuracy': 0.8120675339053418, 'eval_runtime': 62.03, 'eval_samples_per_second': 116.492, 'eval_steps_per_second': 7.287, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.5983, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.4596, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.4298, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.3623, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.4298, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.3729, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.2805, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.3613, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 1.7579476833343506, 'eval_F1': 0.9177105080027835, 'eval_precision': 0.9561355809316657, 'eval_recall': 0.8822545576183308, 'eval_accuracy': 0.8690838638250761, 'eval_runtime': 62.1157, 'eval_samples_per_second': 116.331, 'eval_steps_per_second': 7.277, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 1.0301, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 0.9769, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 1.0318, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 0.9422, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 1.0415, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 1.0216, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 1.1455, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 0.9733, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.3675761222839355, 'eval_F1': 0.9313381787088499, 'eval_precision': 0.9527641707487754, 'eval_recall': 0.9108546579695601, 'eval_accuracy': 0.8888735123166344, 'eval_runtime': 62.0044, 'eval_samples_per_second': 116.54, 'eval_steps_per_second': 7.29, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 4673.0916, 'train_samples_per_second': 41.748, 'train_steps_per_second': 2.61, 'total_flos': 0.0, 'train_loss': 1.565481855166452, 'epoch': 3.0, 'step': 12195}
+INFO:root:Training stage 3/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.7238, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.5029, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.3996, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.2014, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.1924, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 2.1099, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 2.0513, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 1.9702, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 1.7475591897964478, 'eval_F1': 0.8990256100715702, 'eval_precision': 0.9474736459469284, 'eval_recall': 0.8552912223133716, 'eval_accuracy': 0.8379463050096873, 'eval_runtime': 62.372, 'eval_samples_per_second': 115.853, 'eval_steps_per_second': 7.247, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.5521, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.4919, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.4193, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.4026, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.375, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.3855, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.3163, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.3911, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 1.8669766187667847, 'eval_F1': 0.9231031543052004, 'eval_precision': 0.9607808340727595, 'eval_recall': 0.8882690730106645, 'eval_accuracy': 0.8751729864378632, 'eval_runtime': 61.8586, 'eval_samples_per_second': 116.815, 'eval_steps_per_second': 7.307, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 0.967, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 1.0758, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 1.0226, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 1.084, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 1.0388, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 1.1253, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 1.0461, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 1.0548, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.2683489322662354, 'eval_F1': 0.9306177638806727, 'eval_precision': 0.9595677936563263, 'eval_recall': 0.903363412633306, 'eval_accuracy': 0.8863825076114032, 'eval_runtime': 61.916, 'eval_samples_per_second': 116.707, 'eval_steps_per_second': 7.3, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 4679.8624, 'train_samples_per_second': 41.687, 'train_steps_per_second': 2.606, 'total_flos': 0.0, 'train_loss': 1.5693894364785932, 'epoch': 3.0, 'step': 12195}
+INFO:root:Training stage 4/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.8621, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.5677, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.3001, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.1888, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.233, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 2.127, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 2.03, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 1.9798, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 2.0234851837158203, 'eval_F1': 0.869191512221327, 'eval_precision': 0.9530728450814844, 'eval_recall': 0.7988808426596445, 'eval_accuracy': 0.7978134514254083, 'eval_runtime': 62.0704, 'eval_samples_per_second': 116.416, 'eval_steps_per_second': 7.282, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.5961, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.5139, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.4378, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.392, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.3664, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.3979, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.3299, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.3011, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 1.737483263015747, 'eval_F1': 0.9321100917431192, 'eval_precision': 0.9448765640852215, 'eval_recall': 0.9196840026333114, 'eval_accuracy': 0.8873512316634375, 'eval_runtime': 62.1722, 'eval_samples_per_second': 116.226, 'eval_steps_per_second': 7.27, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 1.0239, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 1.0312, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 1.0008, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 1.0656, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 1.0191, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 1.0536, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 0.9517, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 0.9781, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.1873605251312256, 'eval_F1': 0.9323549257759784, 'eval_precision': 0.9562283737024222, 'eval_recall': 0.9096445029624753, 'eval_accuracy': 0.889011901466925, 'eval_runtime': 62.5614, 'eval_samples_per_second': 115.503, 'eval_steps_per_second': 7.225, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 4682.961, 'train_samples_per_second': 41.66, 'train_steps_per_second': 2.604, 'total_flos': 0.0, 'train_loss': 1.565195599282653, 'epoch': 3.0, 'step': 12195}
+INFO:root:Training stage 5/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.8749, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.6611, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.3932, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.356, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.1982, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 2.1246, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 2.0185, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 2.0109, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 1.7384974956512451, 'eval_F1': 0.9034512143161483, 'eval_precision': 0.9393939393939394, 'eval_recall': 0.8701575837163493, 'eval_accuracy': 0.8432050927207307, 'eval_runtime': 62.3045, 'eval_samples_per_second': 115.979, 'eval_steps_per_second': 7.255, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.581, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.491, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.5309, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.4054, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.4443, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.3344, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.3857, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.3497, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 1.911338448524475, 'eval_F1': 0.9021729644820665, 'eval_precision': 0.9631078814980436, 'eval_recall': 0.8484898227183191, 'eval_accuracy': 0.8448657625242181, 'eval_runtime': 62.1015, 'eval_samples_per_second': 116.358, 'eval_steps_per_second': 7.278, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 0.9566, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 1.0383, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 1.0456, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 1.1208, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 1.025, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 1.0637, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 0.9663, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 1.0059, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.399937152862549, 'eval_F1': 0.9239904988123514, 'eval_precision': 0.9561095505617978, 'eval_recall': 0.8939592908732764, 'eval_accuracy': 0.876003321339607, 'eval_runtime': 61.9349, 'eval_samples_per_second': 116.671, 'eval_steps_per_second': 7.298, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 4684.879, 'train_samples_per_second': 41.642, 'train_steps_per_second': 2.603, 'total_flos': 0.0, 'train_loss': 1.5880917657443177, 'epoch': 3.0, 'step': 12195}
+INFO:root:Training stage 6/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.7639, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.4961, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.3162, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.1898, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.1404, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 1.9675, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 1.8819, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 1.9529, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 1.8289748430252075, 'eval_F1': 0.8869426751592357, 'eval_precision': 0.9555852077773542, 'eval_recall': 0.8275008253549027, 'eval_accuracy': 0.8231386659285912, 'eval_runtime': 62.0392, 'eval_samples_per_second': 116.475, 'eval_steps_per_second': 7.286, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.4238, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.3902, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.3165, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.3017, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.3245, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.3004, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.2851, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.3031, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 2.0893125534057617, 'eval_F1': 0.909360292835977, 'eval_precision': 0.9632570162481536, 'eval_recall': 0.8611753053813139, 'eval_accuracy': 0.8560752836977581, 'eval_runtime': 62.3626, 'eval_samples_per_second': 115.871, 'eval_steps_per_second': 7.248, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 0.9188, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 0.9472, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 0.9874, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 0.9745, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 1.0449, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 0.9502, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 0.9634, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 0.8742, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.730842351913452, 'eval_F1': 0.9278735876306177, 'eval_precision': 0.955890075266935, 'eval_recall': 0.9014526246285903, 'eval_accuracy': 0.882507611403266, 'eval_runtime': 62.2811, 'eval_samples_per_second': 116.022, 'eval_steps_per_second': 7.257, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 4679.0972, 'train_samples_per_second': 41.694, 'train_steps_per_second': 2.606, 'total_flos': 0.0, 'train_loss': 1.493005120847107, 'epoch': 3.0, 'step': 12195}
+INFO:root:Training stage 7/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.82, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.497, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.3613, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.2629, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.1715, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 2.0765, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 2.0082, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 1.9544, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 2.01100492477417, 'eval_F1': 0.8626532083633742, 'eval_precision': 0.967455023246412, 'eval_recall': 0.7783379411286389, 'eval_accuracy': 0.7890657439446367, 'eval_runtime': 64.2816, 'eval_samples_per_second': 112.396, 'eval_steps_per_second': 7.032, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.5113, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.4268, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.4162, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.4715, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.3884, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.3541, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.3087, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.322, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 1.827980875968933, 'eval_F1': 0.9049554613854536, 'eval_precision': 0.9663834503140007, 'eval_recall': 0.8508700601723858, 'eval_accuracy': 0.8478892733564014, 'eval_runtime': 63.0152, 'eval_samples_per_second': 114.655, 'eval_steps_per_second': 7.173, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 1.0588, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 0.9456, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 1.01, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 1.0492, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 1.0747, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 1.0755, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 0.9892, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 1.096, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.343777656555176, 'eval_F1': 0.9303490896943377, 'eval_precision': 0.9562231759656652, 'eval_recall': 0.9058383476988128, 'eval_accuracy': 0.8845674740484429, 'eval_runtime': 63.0992, 'eval_samples_per_second': 114.502, 'eval_steps_per_second': 7.163, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 4881.0952, 'train_samples_per_second': 39.969, 'train_steps_per_second': 2.498, 'total_flos': 0.0, 'train_loss': 1.559799916297503, 'epoch': 3.0, 'step': 12195}
+INFO:root:Training stage 8/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.7282, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.5346, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.4007, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.2122, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.0821, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 2.0467, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 1.9797, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 1.972, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 1.9662963151931763, 'eval_F1': 0.8668781150883553, 'eval_precision': 0.9602489459947802, 'eval_recall': 0.7900561612157252, 'eval_accuracy': 0.7966782006920415, 'eval_runtime': 63.1911, 'eval_samples_per_second': 114.336, 'eval_steps_per_second': 7.153, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.503, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.4435, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.3907, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.3633, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.3819, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.3108, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.3509, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.3537, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 1.7414666414260864, 'eval_F1': 0.9315391084945333, 'eval_precision': 0.9489376285126799, 'eval_recall': 0.9147670961347869, 'eval_accuracy': 0.8873356401384083, 'eval_runtime': 61.2361, 'eval_samples_per_second': 117.986, 'eval_steps_per_second': 7.381, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 0.9079, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 1.0122, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 0.9928, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 0.9829, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 1.0679, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 1.0297, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 1.0832, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 0.97, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.5984385013580322, 'eval_F1': 0.9314744402196874, 'eval_precision': 0.9534682580868362, 'eval_recall': 0.9104724149322762, 'eval_accuracy': 0.8877508650519031, 'eval_runtime': 63.1565, 'eval_samples_per_second': 114.398, 'eval_steps_per_second': 7.157, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 5597.1298, 'train_samples_per_second': 34.856, 'train_steps_per_second': 2.179, 'total_flos': 0.0, 'train_loss': 1.5365128220374, 'epoch': 3.0, 'step': 12195}
+INFO:root:Training stage 9/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.9151, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.6137, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.4959, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.2553, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.1536, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 2.0893, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 2.0142, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 1.9746, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 1.7256653308868408, 'eval_F1': 0.9235409194652755, 'eval_precision': 0.918450064850843, 'eval_recall': 0.9286885245901639, 'eval_accuracy': 0.8701730103806229, 'eval_runtime': 61.5639, 'eval_samples_per_second': 117.358, 'eval_steps_per_second': 7.342, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.4865, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.4893, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.4396, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.4959, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.4197, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.4053, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.3541, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.3433, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 1.856618046760559, 'eval_F1': 0.9145409258782102, 'eval_precision': 0.9604907090023453, 'eval_recall': 0.8727868852459016, 'eval_accuracy': 0.8622837370242215, 'eval_runtime': 61.6712, 'eval_samples_per_second': 117.154, 'eval_steps_per_second': 7.329, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 1.0789, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 0.9924, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 1.0858, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 1.0914, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 1.14, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 0.9817, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 0.9544, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 1.1392, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.302615165710449, 'eval_F1': 0.9320567733266145, 'eval_precision': 0.9555708627518512, 'eval_recall': 0.909672131147541, 'eval_accuracy': 0.8880276816608996, 'eval_runtime': 61.4231, 'eval_samples_per_second': 117.627, 'eval_steps_per_second': 7.359, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 4714.4149, 'train_samples_per_second': 41.382, 'train_steps_per_second': 2.587, 'total_flos': 0.0, 'train_loss': 1.587280807714083, 'epoch': 3.0, 'step': 12195}
+INFO:root:Training stage 10/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 128, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 2.8571, 'learning_rate': 1.9179991799918e-05, 'epoch': 0.12, 'step': 500}
+INFO:root:{'loss': 2.7436, 'learning_rate': 1.8359983599836e-05, 'epoch': 0.25, 'step': 1000}
+INFO:root:{'loss': 2.4828, 'learning_rate': 1.7539975399753997e-05, 'epoch': 0.37, 'step': 1500}
+INFO:root:{'loss': 2.4358, 'learning_rate': 1.6719967199671997e-05, 'epoch': 0.49, 'step': 2000}
+INFO:root:{'loss': 2.1717, 'learning_rate': 1.5899958999589997e-05, 'epoch': 0.62, 'step': 2500}
+INFO:root:{'loss': 2.1243, 'learning_rate': 1.5079950799507997e-05, 'epoch': 0.74, 'step': 3000}
+INFO:root:{'loss': 2.1496, 'learning_rate': 1.4259942599425996e-05, 'epoch': 0.86, 'step': 3500}
+INFO:root:{'loss': 2.0602, 'learning_rate': 1.3439934399343994e-05, 'epoch': 0.98, 'step': 4000}
+INFO:root:{'eval_loss': 2.0900566577911377, 'eval_F1': 0.8631165117941386, 'eval_precision': 0.9511618747538401, 'eval_recall': 0.7899901864573111, 'eval_accuracy': 0.7879584775086506, 'eval_runtime': 61.4313, 'eval_samples_per_second': 117.611, 'eval_steps_per_second': 7.358, 'epoch': 1.0, 'step': 4065}
+INFO:root:{'loss': 1.5863, 'learning_rate': 1.2619926199261994e-05, 'epoch': 1.11, 'step': 4500}
+INFO:root:{'loss': 1.6183, 'learning_rate': 1.1799917999179992e-05, 'epoch': 1.23, 'step': 5000}
+INFO:root:{'loss': 1.5407, 'learning_rate': 1.0979909799097992e-05, 'epoch': 1.35, 'step': 5500}
+INFO:root:{'loss': 1.5771, 'learning_rate': 1.0159901599015991e-05, 'epoch': 1.48, 'step': 6000}
+INFO:root:{'loss': 1.4716, 'learning_rate': 9.33989339893399e-06, 'epoch': 1.6, 'step': 6500}
+INFO:root:{'loss': 1.4637, 'learning_rate': 8.51988519885199e-06, 'epoch': 1.72, 'step': 7000}
+INFO:root:{'loss': 1.4055, 'learning_rate': 7.699876998769989e-06, 'epoch': 1.85, 'step': 7500}
+INFO:root:{'loss': 1.427, 'learning_rate': 6.879868798687988e-06, 'epoch': 1.97, 'step': 8000}
+INFO:root:{'eval_loss': 1.8037726879119873, 'eval_F1': 0.9143248800548319, 'eval_precision': 0.9600575746671465, 'eval_recall': 0.8727510631337912, 'eval_accuracy': 0.8615916955017301, 'eval_runtime': 60.7304, 'eval_samples_per_second': 118.969, 'eval_steps_per_second': 7.443, 'epoch': 2.0, 'step': 8130}
+INFO:root:{'loss': 1.1055, 'learning_rate': 6.059860598605987e-06, 'epoch': 2.09, 'step': 8500}
+INFO:root:{'loss': 0.9834, 'learning_rate': 5.2398523985239855e-06, 'epoch': 2.21, 'step': 9000}
+INFO:root:{'loss': 1.1114, 'learning_rate': 4.419844198441985e-06, 'epoch': 2.34, 'step': 9500}
+INFO:root:{'loss': 1.1162, 'learning_rate': 3.599835998359984e-06, 'epoch': 2.46, 'step': 10000}
+INFO:root:{'loss': 1.0832, 'learning_rate': 2.779827798277983e-06, 'epoch': 2.58, 'step': 10500}
+INFO:root:{'loss': 1.1449, 'learning_rate': 1.9598195981959823e-06, 'epoch': 2.71, 'step': 11000}
+INFO:root:{'loss': 1.0178, 'learning_rate': 1.1398113981139811e-06, 'epoch': 2.83, 'step': 11500}
+INFO:root:{'loss': 1.0616, 'learning_rate': 3.198031980319803e-07, 'epoch': 2.95, 'step': 12000}
+INFO:root:{'eval_loss': 3.1453473567962646, 'eval_F1': 0.9237683371491562, 'eval_precision': 0.9591477372776898, 'eval_recall': 0.890906117108276, 'eval_accuracy': 0.8755709342560554, 'eval_runtime': 60.7779, 'eval_samples_per_second': 118.875, 'eval_steps_per_second': 7.437, 'epoch': 3.0, 'step': 12195}
+INFO:root:{'train_runtime': 4605.298, 'train_samples_per_second': 42.363, 'train_steps_per_second': 2.648, 'total_flos': 0.0, 'train_loss': 1.6457103583792185, 'epoch': 3.0, 'step': 12195}
+INFO:root:Doing predictions on test set ...

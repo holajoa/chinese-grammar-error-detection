@@ -1,0 +1,16 @@
+python run-v2.py \
+    --model_name hfl/chinese-macbert-base \
+    --num_labels 2 \
+    --data_dir data/data-aug-trunc \
+    --maxlength 64 \
+    --pred_output_dir submissions-aug \
+    --output_model_dir finetuned_models/ner_run_aug_trial \
+    --epoch 3 \
+    --batch_size 64 \
+    --kfolds 10 \
+    --lr 3e-5 \
+    --alpha 1 \
+    --gamma 1 \
+    --perform_testing \
+    --single_layer_cls \
+    --easy_ensemble \

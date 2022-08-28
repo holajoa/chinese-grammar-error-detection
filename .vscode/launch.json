@@ -2,31 +2,34 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "main",
             "type": "python",
             "request": "launch",
+            "justMyCode": true,
             "program": "D:/Develop/chinese-grammar-error-detection/run-v2.py",
             "python": "D:/Apps/Anaconda3/envs/general-torch/python.exe", 
             "console": "integratedTerminal",
-            "justMyCode": true, 
             "args":[
                 "--model_name", "hfl/chinese-macbert-base", 
                 "--num_labels", "2",  
-                "--data_dir", "./data-aug-mini",  
+                "--data_dir", "./data-aug-large",  
                 "--maxlength", "128",   
                 "--pred_output_dir", "submissions-aug" , 
-                "--output_model_dir", "finetuned_models/ner_run_aug_mi", 
+                "--output_model_dir", "finetuned_models/ner_run_aug", 
                 "--epoch", "3",  
-                "--batch_size", "32",  
+                "--batch_size", "16",  
                 "--kfolds", "10",
                 "--perform_testing", 
-                "--lr", "3e-5", 
-                "--alpha", "1", 
+                "--lr", "1e-5", 
+                "--alpha", "0.5", 
                 "--gamma", "1", 
                 "--num_training_examples", "100", 
                 "--single_layer_cls", 
-                "--easy_ensemble", 
+                "--resume_fold_idx", "1", 
+                "--checkpoint", "finetuned_models/ner_run_aug_single/fold9/checkpoint-5014/pytorch_model.bin", 
+                "--from_another_run", 
+                "--add_crf_layer", 
             ]
-        }
+        }, 
     ]
 }

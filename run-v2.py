@@ -11,7 +11,7 @@ from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
-from models import AutoModelWithNER, BertWithClassificationHead
+from models import AutoModelWithNER, BertWithClassificationHead, BertWithCRFHead
 import random
 
 import argparse
@@ -29,6 +29,7 @@ parser.add_argument('--num_labels', type=int, default=2, help='Number of classes
 parser.add_argument('--ner_model_name', type=str, help='Finetuned model for named entities recognition boosting')
 parser.add_argument('--single_layer_cls_head', default=False, action='store_true')
 parser.add_argument('--add_up_hiddens', default=False, action='store_true')
+parser.add_argument('--add_crf_head', default=False, action='store_true')
 
 ## dataset parameters
 parser.add_argument('--data_dir', type=str, help='Path to directory storing train.csv and test.csv files.', required=True)
@@ -55,6 +56,7 @@ parser.add_argument('--easy_ensemble', default=False, action='store_true', help=
 parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
 parser.add_argument('--best_by_f1', default=False, action='store_true', help='Call back to best model by F1 score.')
 parser.add_argument('--calibration_temperature', type=float, default=1)
+parser.add_argument('--early_stopping_patience', type=int, default=4)
 
 parser.add_argument('--resume_fold_idx', type=int, help='On which fold to resume training.')
 parser.add_argument('--checkpoint', type=str, help='previous model checkpoint.')
@@ -71,13 +73,15 @@ def set_seed(args):
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
 
-data_files = [os.path.join(args.data_dir, 'train.csv')]
+data_files = [os.path.join(*(args.data_dir.split('/')), 'train.csv')]
+
 if args.perform_testing:
-    data_files.append(os.path.join(args.data_dir, 'test.csv'))
+    data_files.append(os.path.join(*(args.data_dir.split('/')), 'test.csv'))
     assert args.pred_output_dir, 'Must procvide an output path for predictions on the test set.'
 
 logging.info(f'Reading training data from {data_files[0]}...')
 train_df = pd.read_csv(data_files[0], sep=args.csv_sep)
+
 if args.num_training_examples == -1:
     logging.info('Using full training set.')
     train_df_use = train_df
@@ -87,6 +91,7 @@ else:
     train_df_use = train_df_use.reset_index().drop(columns=['index'])
 
 if args.perform_testing:
+    print(data_files[1])
     logging.info(f'Reading test data from {data_files[1]}...')
     test_df = pd.read_csv(data_files[1], sep=args.csv_sep)
 else: 
@@ -187,6 +192,13 @@ for i in irange:
             single_layer_cls=single_layer_cls, 
             concatenate=concat,
         )
+    elif args.add_crf_head:
+        model = BertWithCRFHead(
+            args.model_name, 
+            n_labels=args.num_labels, 
+            single_layer_cls=single_layer_cls, 
+            calibration_temperature=args.calibration_temperature, 
+        )
     else:
         model = BertWithClassificationHead(
             args.model_name, 
@@ -199,7 +211,7 @@ for i in irange:
         if not args.from_another_run:
             assert 'fold'+str(args.resume_fold_idx-1) in args.checkpoint
         state_dict = torch.load(args.checkpoint, map_location=device)
-        model.load_state_dict(state_dict) 
+        model.load_state_dict(state_dict, strict=False) 
     model.cuda()
 
 
@@ -239,7 +251,7 @@ for i in irange:
     )
 
     trainer.add_callback(EarlyStoppingCallback(
-        early_stopping_patience=4, 
+        early_stopping_patience=args.early_stopping_patience, 
         early_stopping_threshold=0.0, 
     ))  # apply early stopping - stop training immediately if the loss cease to decrease
     trainer.add_callback(TensorBoardCallback(tb_writer=tb_writer))
@@ -253,9 +265,10 @@ for i in irange:
     
     # Get pred accuracy on the dev set 
     val_pred_logits = trainer.predict(train.dataset['val']).predictions[0]
-    if val_pred_logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
-        val_pred_logits = postprocess_logits(val_pred_logits, train.dataset['val']['attention_mask'], args.calibration_tempreture)
-    val_pred = np.argmax(val_pred_logits, 1)
+    # if val_pred_logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
+    #     val_pred_logits = postprocess_logits(val_pred_logits, train.dataset['val']['attention_mask'], args.calibration_tempreture)
+    # val_pred = np.argmax(val_pred_logits, 1)
+    val_pred = extract_predictions(val_pred_logits)
     val_accuracy = (val_pred == train.dataset['val']['labels'].numpy()).mean()
     val_accuracies.append(val_accuracy)
 

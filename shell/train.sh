@@ -1,16 +1,16 @@
 python run-v2.py \
     --model_name hfl/chinese-macbert-base \
     --num_labels 2 \
-    --data_dir data-aug-large \
+    --data_dir data/data-aug-large \
     --maxlength 128 \
     --pred_output_dir submissions-aug \
-    --output_model_dir finetuned_models/ner_run_aug \
-    --epoch 3 \
+    --output_model_dir finetuned_models/ner_run_crf \
+    --epoch 2 \
     --batch_size 16 \
     --kfolds 10 \
-    --lr 2e-5 \
-    --alpha 0.5 \
-    --gamma 1 \
+    --lr 3e-6 \
+    --alpha 0.3 \
+    --gamma 2 \
     --perform_testing \
     --single_layer_cls_head \
     --resume_fold_idx 1 \

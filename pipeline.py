@@ -4,19 +4,28 @@ from typing import List, Union
 from utils import *
 from dataset import *
 from torch.utils.data import DataLoader
-from models import BertWithClassificationHead
+from models import BertWithCRFHead, BertWithClassificationHead
 
 
 class PipelineGED:
-    def __init__(self, model_name:str, data_configs=None, single_layer_cls=True):
+    def __init__(self, model_name:str, model_architecture:str='bert_with_clf_head', data_configs=None, single_layer_cls=True):
         # self.model = AutoModelForSequenceClassification.from_pretrained(
         #     model_name, num_labels=2, 
         # )
-        self.model = BertWithClassificationHead(
-            model_name, 
-            n_labels=2, 
-            single_layer_cls=single_layer_cls, 
-        )
+        if model_architecture == 'bert_with_clf_head':
+            self.model = BertWithClassificationHead(
+                model_name, 
+                n_labels=2, 
+                single_layer_cls=single_layer_cls, 
+            )
+        elif model_architecture == 'bert_with_crf_head':
+            self.model = BertWithCRFHead(
+                model_name, 
+                n_labels=2, 
+                single_layer_cls=single_layer_cls, 
+            )
+        else:
+            print(f'Model architecture {model_architecture} is not implemented.')
         if data_configs:
             self.data_configs = data_configs
         else:
@@ -62,29 +71,48 @@ class PipelineGED:
                         if k in ds.tokenizer.model_input_names or k == 'auxiliary_input_ids'}
                 with torch.no_grad():
                     output = self.model(**inputs)
-                logits.append(output['logits'])
-                sequence_logits.append(output['sequence_logits'])
+                try:
+                    logits.append(output['logits'])
+                    sequence_logits.append(output['sequence_logits'])
+                    pass_logits = True
+                except:
+                    logits.append(output['predictions'])
+                    pass_logits = False
             output_tensors.append(torch.concat(logits))
-            output_sequence_logits.append(torch.concat(sequence_logits, dim=0))
-
-        output_sequence_logits_agg = torch.stack(output_sequence_logits, dim=3)
-        if majority_vote:
-            return voting(torch.stack(output_tensors))
+            if pass_logits:
+                output_sequence_logits.append(torch.concat(sequence_logits, dim=0))
+        if pass_logits:
+            output_sequence_logits_agg = torch.stack(output_sequence_logits, dim=3)
+            if majority_vote:
+                return voting(torch.stack(output_tensors))
+            else:
+                if output_probabilities:
+                    from torch.nn import Softmax
+                    
+                    return (
+                        Softmax(dim=1)(torch.stack(output_tensors).mean(0)).cpu().numpy(), 
+                        Softmax(dim=2)(output_sequence_logits_agg.mean(-1)).cpu().numpy(), 
+                    )
+                    
+                if raw_outputs:
+                    return (
+                        torch.stack(output_tensors).mean(0).cpu().numpy(), 
+                        output_sequence_logits_agg.mean(-1).cpu().numpy()
+                    )
+                return (torch.stack(output_tensors).mean(0).argmax(1).cpu().numpy(), output_sequence_logits_agg.mean(-1).argmax(2).cpu().numpy())
         else:
-            if output_probabilities:
-                from torch.nn import Softmax
-                
-                return (
-                    Softmax(dim=1)(torch.stack(output_tensors).mean(0)).cpu().numpy(), 
-                    Softmax(dim=2)(output_sequence_logits_agg.mean(-1)).cpu().numpy(), 
-                )
-                
-            if raw_outputs:
-                return (
-                    torch.stack(output_tensors).mean(0).cpu().numpy(), 
-                    output_sequence_logits_agg.mean(-1).cpu().numpy()
-                )
-            return (torch.stack(output_tensors).mean(0).argmax(1).cpu().numpy(), output_sequence_logits_agg.mean(-1).argmax(2).cpu().numpy())
+            assert majority_vote, 'Must use majority voting if model outputs labels directly.'
+            pred_labels = torch.stack(output_tensors) # has shape (n_models, n_examples, seq_len). 
+            n_models, n_samples, seq_len = pred_labels.size()
+            pred_labels_flattened = pred_labels.view((n_models, n_samples*seq_len))
+            agg_labels = []
+            for single_examples_pred_labels in pred_labels_flattened.T:
+                labels, counts = torch.unique(single_examples_pred_labels, return_counts=True)
+                agg_labels.append(labels[torch.argmax(counts)])
+            seq_predictions = torch.tensor(agg_labels).view(n_samples, seq_len)
+            predictions = torch.any(seq_predictions, dim=1).int()
+            return predictions, seq_predictions
+
 
     @staticmethod
     def map_to_df(texts:str) -> pd.DataFrame:

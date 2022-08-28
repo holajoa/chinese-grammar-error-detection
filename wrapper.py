@@ -126,11 +126,13 @@ class ImbalancedTrainer(Trainer):
         true_labels = inputs['labels']
         if torch.is_tensor(outputs):
             logits = outputs
-        else:
+        elif 'logits' in outputs.keys():
             logits = outputs['logits']
+        else:
+            logits = outputs['predictions']
+        pass_pred_labels = 'predictions' in outputs.keys()
+        loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma, pass_pred_labels=pass_pred_labels)
     
-        loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma)
-
         ## Loggingcompute_loss
     
         # logging.info(f"True labels:      {inputs['labels'].cpu().numpy()}")
@@ -140,18 +142,31 @@ class ImbalancedTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
 
 
-def binary_focal_loss(logits, true_labels, alpha=1, gamma=0, sum=True):
+def binary_focal_loss(logits, true_labels, alpha=1, gamma=0, sum=True, pass_pred_labels=False):
+    def convert_labels_to_probs(pred_labels):
+        sizea, sizeb = pred_labels.size()
+        pred_probs = torch.zeros(size=(sizea, sizeb, 2), dtype=pred_labels.dtype)
+        a, b = torch.argwhere(pred_labels).T
+        pred_probs[a, b, 1] = 1
+        a, b = torch.argwhere(pred_labels == 0).T
+        pred_probs[a, b, 0] = 1
+        return pred_probs
+
     pos_idx = torch.Tensor(true_labels == 1).long()
     neg_idx = torch.Tensor(true_labels == 0).long()
-    # if logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than 0)
-    #     logits = postprocess_logits(logits)
-    pred_probs = torch.nn.Softmax(dim=1)(logits)[:, -1]
 
-    loss_pos = - alpha * ((1 - pred_probs)**gamma * torch.log(pred_probs)) * pos_idx
-    loss_neg = - (pred_probs**gamma * torch.log(1-pred_probs)) * neg_idx
+    if pass_pred_labels:
+        pred_probs = torch.any(logits, dim=1).float()
+        pred_probs.requires_grad = True
+    else:
+        pred_probs = torch.nn.Softmax(dim=1)(logits)[:, -1]
+
+    loss_pos = - alpha * ((1 - pred_probs)**gamma * torch.log(pred_probs+1e-7)) * pos_idx
+    loss_neg = - (pred_probs**gamma * torch.log(1-pred_probs+1e-7)) * neg_idx
 
     if sum:
         loss_pos = torch.sum(loss_pos)
         loss_neg = torch.sum(loss_neg)
     loss = loss_pos + loss_neg
     return loss
+
