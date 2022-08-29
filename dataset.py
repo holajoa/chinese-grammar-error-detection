@@ -6,7 +6,17 @@ from preprocess import *
 
 
 class SimpleDataset(torch.utils.data.Dataset):
-    def __init__(self, df, model_name, maxlength=128, train_val_split=-1, test=False, eda=True, device='cpu', **kwargs):
+    def __init__(
+        self, 
+        df, 
+        model_name, 
+        maxlength=128, 
+        train_val_split=-1, 
+        test=False, 
+        eda=True, 
+        device='cpu', 
+        **kwargs, 
+    ):
         self.model_name = model_name
         self.maxlength = maxlength
         self.test_stage = test
@@ -15,6 +25,11 @@ class SimpleDataset(torch.utils.data.Dataset):
         if not self.test_stage:
             self.labels = df.label
         self.device = device
+    
+    def prepare_dataset(self, val_idx=None):
+        self.val_idx = val_idx
+        self.tokenize()
+        self.construct_dataset(val_idx)
 
     def eda(self, df, **kwargs):
         cleaned = df.text.map(DataPreprocessor(**kwargs))

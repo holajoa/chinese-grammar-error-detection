@@ -101,7 +101,7 @@ def averaging(logits, val_accuracy, weighted=True):
     ensemble_logits = (np.array(logits) * np.expand_dims(weights, axis=(1, 2))).sum(0)
     return np.argmax(ensemble_logits, axis=1)
 
-def postprocess_logits(logits, attention_mask, calibration_temperature=1.):  # logits shape=(batch_size, 128, 2)
+def postprocess_logits(logits:torch.Tensor, attention_mask:torch.Tensor, calibration_temperature=1.) -> torch.Tensor:  # logits shape=(batch_size, 128, 2)
     x, y = torch.argwhere(attention_mask).T
     max_idx = torch.ones(logits.size(0), dtype=torch.int, device=attention_mask.device)
     for sample_idx in range(logits.size(0)):

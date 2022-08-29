@@ -1,10 +1,10 @@
 python run-v2.py \
-    --model_name hfl/chinese-macbert-base \
+    --model_name nghuyong/ernie-gram-zh \
     --num_labels 2 \
     --data_dir data/data-aug-trunc \
     --maxlength 64 \
     --pred_output_dir submissions-aug \
-    --output_model_dir finetuned_models/ner_run_aug_trial \
+    --output_model_dir finetuned_models/balanced_trial_ernie_gram \
     --epoch 3 \
     --batch_size 64 \
     --kfolds 10 \

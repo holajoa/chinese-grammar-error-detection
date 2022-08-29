@@ -96,10 +96,9 @@ python run.py \
     '雨珠砸在玻璃上，发出噼噼啪啪的声响。', 
     '雨珠砸在玻璃上，发出噼噼啪啪的声音。', 
     前者错误，后者正确
-2. Classification head改成CRF？
+2. Classification head改成CRF？NONONONO
 3. 缩句？POS困惑度 
    - https://huggingface.co/ckiplab/bert-base-chinese-pos
    - https://huggingface.co/KoichiYasuoka/chinese-bert-wwm-ext-upos
-
-### 模型问题
-1. 只要就类型搭配
+4. CLS与后面error_char一致的为简单样本，不一致的为困难样本，困难样本是否可以进行二次训练
+5. 用正确的句子训练pos tagger + clf，然后用clf层预测likelihood

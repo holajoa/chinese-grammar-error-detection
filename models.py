@@ -88,10 +88,10 @@ class AutoModelWithNER(nn.Module):
         output = self.classifier(concatenated_vectors)
         return {'logits':output}
 
-class BertWithClassificationHead(nn.Module):
+class AutoModelWithClassificationHead(nn.Module):
     def __init__(self, bert_model, n_labels=2, cls_hidden_size=768, single_layer_cls=False, calibration_temperature=1.):
-        super(BertWithClassificationHead, self).__init__()
-        self.base_model = AutoModelForMaskedLM.from_pretrained(bert_model) 
+        super(AutoModelWithClassificationHead, self).__init__()
+        self.base_model = AutoModel.from_pretrained(bert_model) 
         self.calibration_temperature = calibration_temperature
 
         if single_layer_cls:

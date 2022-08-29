@@ -4,8 +4,66 @@ from typing import List, Union
 from utils import *
 from dataset import *
 from torch.utils.data import DataLoader
-from models import BertWithCRFHead, BertWithClassificationHead
+from models import BertWithCRFHead, AutoModelWithClassificationHead
 
+
+
+class PersonalisedPipeline:
+    def __init__(self, model_name:str, data_configs=None, model_arch_configs=None):
+
+        self.model_arch_configs = model_arch_configs
+        self.data_configs = data_configs
+        self.model = self._init_model(model_name)
+
+    def _init_model(self, model_name):
+        raise NotImplementedError
+    
+    def _get_default_model_arch_configs(self, subclass):
+        mapping = {
+            'PipelineGED':{
+                'model_architecture':'bert_with_clf_head', 
+                'single_layer_cls':True, 
+            }, 
+        }
+        return mapping[subclass]
+
+    def _get_default_data_configs(self, subclass, model_name):
+        mapping = {
+            'PipelineGED':{
+                'model_name':model_name,
+                'maxlength':128,
+                'train_val_split':-1,
+                'test':True, 
+                'remove_username':False,
+                'remove_punctuation':False, 
+                'to_simplified':False, 
+                'emoji_to_text':False, 
+                'split_words':False, 
+                'cut_all':False, 
+            }, 
+        }
+        return mapping[subclass]
+
+    def feedforward(
+        self, 
+        ds:DatasetWithAuxiliaryEmbeddings, 
+        model_name:str, 
+        checkpoints:List[str], 
+        device:torch.device, 
+    ):
+        raise NotImplementedError
+
+    def __call__(
+        self, 
+        texts:Union[List[str], str], 
+        model_name:str, 
+        checkpoints:List[str], 
+        device:torch.device, 
+    ):
+        raise NotImplementedError
+
+    
+            
 
 class PipelineGED:
     def __init__(self, model_name:str, model_architecture:str='bert_with_clf_head', data_configs=None, single_layer_cls=True):
@@ -13,7 +71,7 @@ class PipelineGED:
         #     model_name, num_labels=2, 
         # )
         if model_architecture == 'bert_with_clf_head':
-            self.model = BertWithClassificationHead(
+            self.model = AutoModelWithClassificationHead(
                 model_name, 
                 n_labels=2, 
                 single_layer_cls=single_layer_cls, 
@@ -42,6 +100,12 @@ class PipelineGED:
                 'cut_all':False, 
         }
 
+    @staticmethod
+    def map_to_df(texts:str) -> pd.DataFrame:
+        if isinstance(texts, str):
+            texts = [texts]
+        return pd.DataFrame(data=texts, columns=['text'])
+    
     def feedforward(
         self, 
         ds:DatasetWithAuxiliaryEmbeddings, 
@@ -72,7 +136,7 @@ class PipelineGED:
                 with torch.no_grad():
                     output = self.model(**inputs)
                 try:
-                    logits.append(output['logits'])
+                    logits.append(output['logits'])    # not used
                     sequence_logits.append(output['sequence_logits'])
                     pass_logits = True
                 except:
@@ -82,7 +146,8 @@ class PipelineGED:
             if pass_logits:
                 output_sequence_logits.append(torch.concat(sequence_logits, dim=0))
         if pass_logits:
-            output_sequence_logits_agg = torch.stack(output_sequence_logits, dim=3)
+            output_sequence_logits_agg = torch.stack(output_sequence_logits, dim=3).mean(-1)
+            output_logits_agg = postprocess_logits(output_sequence_logits_agg, ds.dataset['train']['attention_mask'])
             if majority_vote:
                 return voting(torch.stack(output_tensors))
             else:
@@ -90,16 +155,16 @@ class PipelineGED:
                     from torch.nn import Softmax
                     
                     return (
-                        Softmax(dim=1)(torch.stack(output_tensors).mean(0)).cpu().numpy(), 
-                        Softmax(dim=2)(output_sequence_logits_agg.mean(-1)).cpu().numpy(), 
+                        Softmax(dim=1)(output_logits_agg).cpu().numpy(), 
+                        Softmax(dim=2)(output_sequence_logits_agg).cpu().numpy(), 
                     )
                     
                 if raw_outputs:
                     return (
-                        torch.stack(output_tensors).mean(0).cpu().numpy(), 
+                        output_logits_agg.cpu().numpy(), 
                         output_sequence_logits_agg.mean(-1).cpu().numpy()
                     )
-                return (torch.stack(output_tensors).mean(0).argmax(1).cpu().numpy(), output_sequence_logits_agg.mean(-1).argmax(2).cpu().numpy())
+                return (output_logits_agg.argmax(1).cpu().numpy(), output_sequence_logits_agg.mean(-1).argmax(2).cpu().numpy())
         else:
             assert majority_vote, 'Must use majority voting if model outputs labels directly.'
             pred_labels = torch.stack(output_tensors) # has shape (n_models, n_examples, seq_len). 
@@ -113,13 +178,6 @@ class PipelineGED:
             predictions = torch.any(seq_predictions, dim=1).int()
             return predictions, seq_predictions
 
-
-    @staticmethod
-    def map_to_df(texts:str) -> pd.DataFrame:
-        if isinstance(texts, str):
-            texts = [texts]
-        return pd.DataFrame(data=texts, columns=['text'])
-
     def __call__(
         self, 
         texts:Union[List[str], str], 
@@ -132,8 +190,6 @@ class PipelineGED:
     ) -> np.ndarray:
         test = DatasetWithAuxiliaryEmbeddings(df=self.map_to_df(texts), **self.data_configs)
         test.prepare_dataset()
-        # for txt in test.texts.values:
-        #     print(txt)
         if majority_vote:
             return self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities, majority_vote=True)
         probs, seq_probs = self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
@@ -151,5 +207,4 @@ class PipelineGED:
                 print(err_chars)
             err_char_lst.append(err_chars)
         return err_char_lst
-            
             

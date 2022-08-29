@@ -11,7 +11,7 @@ from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
-from models import AutoModelWithNER, BertWithClassificationHead, BertWithCRFHead
+from models import AutoModelWithNER, AutoModelWithClassificationHead, BertWithCRFHead
 import random
 
 import argparse
@@ -200,7 +200,7 @@ for i in irange:
             calibration_temperature=args.calibration_temperature, 
         )
     else:
-        model = BertWithClassificationHead(
+        model = AutoModelWithClassificationHead(
             args.model_name, 
             n_labels=args.num_labels, 
             single_layer_cls=single_layer_cls, 

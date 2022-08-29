@@ -1,0 +1,159 @@
+python run-v2.py \
+    --model_name hfl/chinese-macbert-base \
+    --num_labels 2 \
+    --data_dir data/data-aug-trunc \
+    --maxlength 64 \
+    --pred_output_dir submissions-aug \
+    --output_model_dir finetuned_models/ner_run_aug_trial \
+    --epoch 3 \
+    --batch_size 64 \
+    --kfolds 10 \
+    --lr 3e-5 \
+    --alpha 1 \
+    --gamma 1 \
+    --perform_testing \
+    --single_layer_cls \
+    --easy_ensemble \
+
+INFO:root:Reading training data from data\data-aug-trunc\train.csv...
+INFO:root:Using full training set.
+INFO:root:Reading test data from data\data-aug-trunc\test.csv...
+INFO:root:Constructing test dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': -1, 'test': True, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+DEBUG:jieba:Building prefix dict from the default dictionary ...
+DEBUG:jieba:Loading model from cache C:\Users\holaj\AppData\Local\Temp\jieba.cache
+DEBUG:jieba:Loading model cost 0.509 seconds.
+DEBUG:jieba:Prefix dict has been built successfully.
+INFO:root:Using easy ensemble - each fold has 3394 negatives in the training set, paired with 3394 positives
+INFO:root:Set up 10-fold CV.
+INFO:root:Training stage 1/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.3385, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 19.189151763916016, 'eval_F1': 0.7774634606317774, 'eval_precision': 0.6479371316306484, 'eval_recall': 0.971714790807307, 'eval_accuracy': 0.7218621096051856, 'eval_runtime': 29.8174, 'eval_samples_per_second': 227.652, 'eval_steps_per_second': 3.589, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.4368, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 4.942, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 13.415181159973145, 'eval_F1': 0.854793043009303, 'eval_precision': 0.7879691772309222, 'eval_recall': 0.934001178550383, 'eval_accuracy': 0.8413376546847378, 'eval_runtime': 30.2507, 'eval_samples_per_second': 224.392, 'eval_steps_per_second': 3.537, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.1726, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.2408, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 16.54856300354004, 'eval_F1': 0.8636301087106096, 'eval_precision': 0.8102246320681642, 'eval_recall': 0.924572775486152, 'eval_accuracy': 0.8540070713022981, 'eval_runtime': 30.3481, 'eval_samples_per_second': 223.671, 'eval_steps_per_second': 3.526, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2086.9241, 'train_samples_per_second': 87.825, 'train_steps_per_second': 1.373, 'total_flos': 0.0, 'train_loss': 5.191179642336115, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 2/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.5132, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 16.03579330444336, 'eval_F1': 0.7964934251721979, 'eval_precision': 0.692659551296014, 'eval_recall': 0.9369475545079552, 'eval_accuracy': 0.7606069534472599, 'eval_runtime': 30.3049, 'eval_samples_per_second': 223.99, 'eval_steps_per_second': 3.531, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.4382, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 4.8389, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 15.215356826782227, 'eval_F1': 0.8487584650112867, 'eval_precision': 0.7725404882765289, 'eval_recall': 0.9416617560400707, 'eval_accuracy': 0.832203889216264, 'eval_runtime': 29.7673, 'eval_samples_per_second': 228.035, 'eval_steps_per_second': 3.595, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.2068, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.185, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 17.1917781829834, 'eval_F1': 0.869170449855551, 'eval_precision': 0.8152258064516129, 'eval_recall': 0.9307601649970536, 'eval_accuracy': 0.8598998232174425, 'eval_runtime': 29.8023, 'eval_samples_per_second': 227.768, 'eval_steps_per_second': 3.59, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2104.0225, 'train_samples_per_second': 87.112, 'train_steps_per_second': 1.362, 'total_flos': 0.0, 'train_loss': 5.189566844254472, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 3/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.7036, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 16.28530502319336, 'eval_F1': 0.7860550458715595, 'eval_precision': 0.6720351390922401, 'eval_recall': 0.9466705951679434, 'eval_accuracy': 0.7423394225103123, 'eval_runtime': 29.777, 'eval_samples_per_second': 227.961, 'eval_steps_per_second': 3.593, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.6624, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 5.0852, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.378655433654785, 'eval_F1': 0.8636824569027959, 'eval_precision': 0.8495297805642633, 'eval_recall': 0.8783146729522687, 'eval_accuracy': 0.8613730111962287, 'eval_runtime': 29.7442, 'eval_samples_per_second': 228.212, 'eval_steps_per_second': 3.597, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.254, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.2168, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 16.78349494934082, 'eval_F1': 0.8662822624931358, 'eval_precision': 0.8110539845758354, 'eval_recall': 0.9295816146140248, 'eval_accuracy': 0.8565114908662346, 'eval_runtime': 29.7434, 'eval_samples_per_second': 228.219, 'eval_steps_per_second': 3.597, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2083.2071, 'train_samples_per_second': 87.982, 'train_steps_per_second': 1.375, 'total_flos': 0.0, 'train_loss': 5.313574261357439, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 4/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.6796, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 18.686132431030273, 'eval_F1': 0.7788621756724589, 'eval_precision': 0.6533546325878594, 'eval_recall': 0.9640542133176193, 'eval_accuracy': 0.7262816735415439, 'eval_runtime': 29.7533, 'eval_samples_per_second': 228.143, 'eval_steps_per_second': 3.596, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.647, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 5.3117, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 13.64299201965332, 'eval_F1': 0.8524456521739131, 'eval_precision': 0.7909732728189611, 'eval_recall': 0.9242781378903948, 'eval_accuracy': 0.8400117855038303, 'eval_runtime': 29.7449, 'eval_samples_per_second': 228.207, 'eval_steps_per_second': 3.597, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.5224, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.5431, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 16.547744750976562, 'eval_F1': 0.8597770744461264, 'eval_precision': 0.8066098631551769, 'eval_recall': 0.920447849145551, 'eval_accuracy': 0.8498821449616971, 'eval_runtime': 29.7357, 'eval_samples_per_second': 228.278, 'eval_steps_per_second': 3.598, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2057.6839, 'train_samples_per_second': 89.073, 'train_steps_per_second': 1.392, 'total_flos': 0.0, 'train_loss': 5.477131884509981, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 5/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.7268, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 17.207029342651367, 'eval_F1': 0.7927590511860175, 'eval_precision': 0.6878249566724437, 'eval_recall': 0.9354743665291692, 'eval_accuracy': 0.7554507955215085, 'eval_runtime': 29.7618, 'eval_samples_per_second': 228.077, 'eval_steps_per_second': 3.595, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.7915, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 5.4235, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 12.526019096374512, 'eval_F1': 0.8508333333333334, 'eval_precision': 0.8047819232790331, 'eval_recall': 0.9024749558043607, 'eval_accuracy': 0.8417796110783736, 'eval_runtime': 29.7441, 'eval_samples_per_second': 228.213, 'eval_steps_per_second': 3.597, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.5814, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.7046, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 15.51623249053955, 'eval_F1': 0.8629455650732247, 'eval_precision': 0.8124349635796045, 'eval_recall': 0.9201532115497938, 'eval_accuracy': 0.8538597525044196, 'eval_runtime': 29.7429, 'eval_samples_per_second': 228.223, 'eval_steps_per_second': 3.597, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2066.9769, 'train_samples_per_second': 88.673, 'train_steps_per_second': 1.386, 'total_flos': 0.0, 'train_loss': 5.5922557571171465, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 6/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.4337, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 19.146408081054688, 'eval_F1': 0.7725606150206978, 'eval_precision': 0.6453270104722387, 'eval_recall': 0.9622863877430761, 'eval_accuracy': 0.7167059516794343, 'eval_runtime': 29.7727, 'eval_samples_per_second': 227.994, 'eval_steps_per_second': 3.594, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.7377, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 5.2691, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 14.280706405639648, 'eval_F1': 0.8422336676606127, 'eval_precision': 0.7798694779116466, 'eval_recall': 0.9154390100176782, 'eval_accuracy': 0.8285209192692987, 'eval_runtime': 29.7474, 'eval_samples_per_second': 228.188, 'eval_steps_per_second': 3.597, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.4, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.4211, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 16.750179290771484, 'eval_F1': 0.8586401875603366, 'eval_precision': 0.8071039668135856, 'eval_recall': 0.9172068355922216, 'eval_accuracy': 0.8489982321744255, 'eval_runtime': 29.7855, 'eval_samples_per_second': 227.896, 'eval_steps_per_second': 3.592, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2073.3793, 'train_samples_per_second': 88.399, 'train_steps_per_second': 1.382, 'total_flos': 0.0, 'train_loss': 5.419495630181064, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 7/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.5914, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 15.07481575012207, 'eval_F1': 0.8186095138525876, 'eval_precision': 0.7355565993424142, 'eval_recall': 0.9228049499116088, 'eval_accuracy': 0.7955215085444903, 'eval_runtime': 29.765, 'eval_samples_per_second': 228.053, 'eval_steps_per_second': 3.595, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.2802, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 4.641, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 12.328028678894043, 'eval_F1': 0.8632406627351867, 'eval_precision': 0.8245708154506438, 'eval_recall': 0.90571596935769, 'eval_accuracy': 0.8565114908662346, 'eval_runtime': 29.771, 'eval_samples_per_second': 228.007, 'eval_steps_per_second': 3.594, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.0226, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.0735, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 18.293760299682617, 'eval_F1': 0.8635990139687757, 'eval_precision': 0.8068065506653019, 'eval_recall': 0.9289923394225104, 'eval_accuracy': 0.8532704773129052, 'eval_runtime': 29.7542, 'eval_samples_per_second': 228.136, 'eval_steps_per_second': 3.596, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2066.478, 'train_samples_per_second': 88.694, 'train_steps_per_second': 1.386, 'total_flos': 0.0, 'train_loss': 5.063341795170702, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 8/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.5502, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 16.982603073120117, 'eval_F1': 0.7963488343406934, 'eval_precision': 0.6849140674729471, 'eval_recall': 0.9510901591043017, 'eval_accuracy': 0.756776664702416, 'eval_runtime': 29.7505, 'eval_samples_per_second': 228.164, 'eval_steps_per_second': 3.597, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.5114, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 4.8004, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 17.500694274902344, 'eval_F1': 0.831680618158403, 'eval_precision': 0.7387325554792954, 'eval_recall': 0.9513847967000589, 'eval_accuracy': 0.8074543311726576, 'eval_runtime': 29.7711, 'eval_samples_per_second': 228.006, 'eval_steps_per_second': 3.594, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.282, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.2165, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 18.731990814208984, 'eval_F1': 0.8632619439868205, 'eval_precision': 0.8082262210796916, 'eval_recall': 0.9263406010606954, 'eval_accuracy': 0.8532704773129052, 'eval_runtime': 29.7683, 'eval_samples_per_second': 228.027, 'eval_steps_per_second': 3.594, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2067.3137, 'train_samples_per_second': 88.659, 'train_steps_per_second': 1.386, 'total_flos': 0.0, 'train_loss': 5.213169128524488, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 9/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.6141, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 18.05584144592285, 'eval_F1': 0.7747747747747747, 'eval_precision': 0.6540255526262422, 'eval_recall': 0.9502062463170301, 'eval_accuracy': 0.7237772539776075, 'eval_runtime': 29.782, 'eval_samples_per_second': 227.923, 'eval_steps_per_second': 3.593, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.723, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 5.329, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 12.452320098876953, 'eval_F1': 0.850062647918697, 'eval_precision': 0.8057534969648984, 'eval_recall': 0.8995285798467885, 'eval_accuracy': 0.8413376546847378, 'eval_runtime': 29.7721, 'eval_samples_per_second': 227.998, 'eval_steps_per_second': 3.594, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.3928, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.5166, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 16.850475311279297, 'eval_F1': 0.8570249071143524, 'eval_precision': 0.8040278853601859, 'eval_recall': 0.9175014731879788, 'eval_accuracy': 0.8469357690041249, 'eval_runtime': 29.9063, 'eval_samples_per_second': 226.976, 'eval_steps_per_second': 3.578, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2070.3282, 'train_samples_per_second': 88.529, 'train_steps_per_second': 1.384, 'total_flos': 0.0, 'train_loss': 5.4569900912140055, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 10/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'hfl/chinese-macbert-base', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.5628, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 17.317766189575195, 'eval_F1': 0.7812197483059052, 'eval_precision': 0.6628336755646818, 'eval_recall': 0.9510901591043017, 'eval_accuracy': 0.7336476134354744, 'eval_runtime': 29.8741, 'eval_samples_per_second': 227.221, 'eval_steps_per_second': 3.582, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 7.6296, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 5.2987, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 13.111541748046875, 'eval_F1': 0.8527973927213471, 'eval_precision': 0.7909319899244333, 'eval_recall': 0.9251620506776664, 'eval_accuracy': 0.8403064230995875, 'eval_runtime': 29.7818, 'eval_samples_per_second': 227.924, 'eval_steps_per_second': 3.593, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 4.4342, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 2.4252, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 16.498559951782227, 'eval_F1': 0.8637362637362637, 'eval_precision': 0.8090581574884199, 'eval_recall': 0.9263406010606954, 'eval_accuracy': 0.8538597525044196, 'eval_runtime': 29.756, 'eval_samples_per_second': 228.122, 'eval_steps_per_second': 3.596, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2071.124, 'train_samples_per_second': 88.495, 'train_steps_per_second': 1.383, 'total_flos': 0.0, 'train_loss': 5.41876614821935, 'epoch': 3.0, 'step': 2865}
+INFO:root:Doing predictions on test set ...
