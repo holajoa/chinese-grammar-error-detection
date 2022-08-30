@@ -5,7 +5,7 @@
             "name": "main",
             "type": "python",
             "request": "launch",
-            "justMyCode": true,
+            "justMyCode": false,
             "program": "D:/Develop/chinese-grammar-error-detection/run-v2.py",
             "python": "D:/Apps/Anaconda3/envs/general-torch/python.exe", 
             "console": "integratedTerminal",

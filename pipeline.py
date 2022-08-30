@@ -1,4 +1,4 @@
-from transformers import AutoModelForSequenceClassification
+from transformers import AutoModelForTokenClassification
 from typing import List, Union
 
 from utils import *
@@ -7,62 +7,76 @@ from torch.utils.data import DataLoader
 from models import BertWithCRFHead, AutoModelWithClassificationHead
 
 
+def map_to_df(texts:str) -> pd.DataFrame:
+    if isinstance(texts, str):
+        texts = [texts]
+    return pd.DataFrame(data=texts, columns=['text'])
 
-class PersonalisedPipeline:
-    def __init__(self, model_name:str, data_configs=None, model_arch_configs=None):
 
-        self.model_arch_configs = model_arch_configs
-        self.data_configs = data_configs
+class POSTaggingPipeline:
+    def __init__(self, model_name:str, data_configs=None):
         self.model = self._init_model(model_name)
-
+        self.data_configs = data_configs if data_configs else self._get_default_data_configs(model_name)
+        
     def _init_model(self, model_name):
-        raise NotImplementedError
-    
-    def _get_default_model_arch_configs(self, subclass):
-        mapping = {
-            'PipelineGED':{
-                'model_architecture':'bert_with_clf_head', 
-                'single_layer_cls':True, 
-            }, 
-        }
-        return mapping[subclass]
+        return AutoModelForTokenClassification.from_pretrained(model_name)
 
-    def _get_default_data_configs(self, subclass, model_name):
-        mapping = {
-            'PipelineGED':{
-                'model_name':model_name,
-                'maxlength':128,
-                'train_val_split':-1,
-                'test':True, 
-                'remove_username':False,
-                'remove_punctuation':False, 
-                'to_simplified':False, 
-                'emoji_to_text':False, 
-                'split_words':False, 
-                'cut_all':False, 
-            }, 
+    def _get_default_data_configs(self, model_name):
+        return {
+            'model_name':model_name,
+            'maxlength':128,
+            'train_val_split':-1,
+            'test':True, 
+            'remove_username':False,
+            'remove_punctuation':False, 
+            'to_simplified':False, 
+            'emoji_to_text':False, 
+            'split_words':False, 
+            'cut_all':False, 
         }
-        return mapping[subclass]
 
     def feedforward(
         self, 
         ds:DatasetWithAuxiliaryEmbeddings, 
-        model_name:str, 
-        checkpoints:List[str], 
         device:torch.device, 
-    ):
-        raise NotImplementedError
+    ):  
+        from tqdm import tqdm
+
+        if 'cuda' in device.type:
+            self.model.cuda()
+
+        logits = []
+        dataloader = DataLoader(ds.dataset['train'].with_format('torch'), batch_size=16)
+
+        for batch in tqdm(dataloader):
+            inputs = {k:v.to(device) for k,v in batch.items()
+                    if k in ds.tokenizer.model_input_names or k == 'auxiliary_input_ids'}
+            with torch.no_grad():
+                output = self.model(**inputs)
+
+            logits.append(output['logits'])
+        return torch.concat(logits)
 
     def __call__(
         self, 
-        texts:Union[List[str], str], 
-        model_name:str, 
-        checkpoints:List[str], 
-        device:torch.device, 
-    ):
-        raise NotImplementedError
-
-    
+        ds:DatasetWithAuxiliaryEmbeddings=None, 
+        texts:Union[List[str], str]=None, 
+        device:torch.device=torch.device('cpu'), 
+        return_tags=True, 
+    ):  
+        if ds is not None:
+            if not isinstance(ds, DatasetWithAuxiliaryEmbeddings):
+                raise TypeError('Passed data object is not a Dataset. Pass it as argument `texts` instead.')
+        else:
+            ds = DatasetWithAuxiliaryEmbeddings(df=map_to_df(texts), **self.data_configs)
+            ds.prepare_dataset()
+        logits = self.feedforward(ds, device)
+        tag_ids = torch.argmax(logits, dim=2)
+        if return_tags:
+            return tag_ids
+        ds.dataset['train'] = ds.dataset['train'].add_column(name='tag_ids', column=[id for id in tag_ids.cpu().numpy()])
+        ds.dataset['train'] = ds.dataset['train'].add_column(name='emissions', column=logits.cpu().numpy().tolist())
+        return ds
             
 
 class PipelineGED:
@@ -100,11 +114,6 @@ class PipelineGED:
                 'cut_all':False, 
         }
 
-    @staticmethod
-    def map_to_df(texts:str) -> pd.DataFrame:
-        if isinstance(texts, str):
-            texts = [texts]
-        return pd.DataFrame(data=texts, columns=['text'])
     
     def feedforward(
         self, 
@@ -117,6 +126,7 @@ class PipelineGED:
     ) -> np.ndarray:
         output_tensors = []
         output_sequence_logits = []
+        from tqdm import tqdm
 
         for cp in checkpoints:
             state_dict = torch.load(cp, map_location=device)
@@ -130,7 +140,7 @@ class PipelineGED:
             sequence_logits = []
             dataloader = DataLoader(ds.dataset['train'].with_format('torch'), batch_size=16)
 
-            for batch in dataloader:
+            for batch in tqdm(dataloader):
                 inputs = {k:v.to(device) for k,v in batch.items()
                         if k in ds.tokenizer.model_input_names or k == 'auxiliary_input_ids'}
                 with torch.no_grad():
@@ -188,7 +198,7 @@ class PipelineGED:
         display=True, 
         majority_vote=False, 
     ) -> np.ndarray:
-        test = DatasetWithAuxiliaryEmbeddings(df=self.map_to_df(texts), **self.data_configs)
+        test = DatasetWithAuxiliaryEmbeddings(df=map_to_df(texts), **self.data_configs)
         test.prepare_dataset()
         if majority_vote:
             return self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities, majority_vote=True)

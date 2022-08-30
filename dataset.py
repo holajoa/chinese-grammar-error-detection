@@ -115,7 +115,10 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         data_dict = {}
-        for key, value in self.inputs.items():
+        items_iterator = self.inputs.items() if self.dataset is None else self.dataset['train'].to_dict().items()
+        for key, value in items_iterator:
+            if isinstance(value, list):
+                value = torch.Tensor(value).to(device=self.device)
             indexed_value = torch.tensor(value[index]).squeeze()
             data_dict[key] = indexed_value
         if not self.test_stage:
@@ -128,16 +131,16 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
             if val_idx is None: 
                val_idx = np.random.randint(0, self.__len__(), size=int(self.__len__() * (1-self.train_val_split)))
             self.val_idx = val_idx
+            self.train_val_split = len(self.val_idx) / self.__len__()
             train_idx = np.array(list(set(np.arange(self.__len__())) - set(val_idx)))
     
             self.dataset = DatasetDict(
                 train=self.__getitem__(train_idx), 
                 val=self.__getitem__(val_idx), 
             )
-            self.dataset.set_format("torch")
         else:
             self.dataset = DatasetDict(train=self.__getitem__(np.arange(self.__len__())))
-        self.dataset.set_format(type="pytorch")
+        self.dataset.set_format('torch')
 
     @classmethod
     def classes(self):
