@@ -132,7 +132,9 @@ class PipelineGED:
             state_dict = torch.load(cp, map_location=device)
             # for key in list(state_dict.keys()):
             #     state_dict[key.replace('bert', 'base_model')] = state_dict.pop(key)
-            self.model.load_state_dict(state_dict)
+            missing_keys, unexpected_keys = self.model.load_state_dict(state_dict, strict=False)
+            if (missing_keys is not None) | (unexpected_keys is not None):
+                print(f'Warning: state_dict does not match perfectly. \nMissing keys: {missing_keys}\nUnexpected keys: {unexpected_keys}')
             if 'cuda' in device.type:
                 self.model.cuda()
 

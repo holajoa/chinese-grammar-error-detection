@@ -30,6 +30,7 @@ parser.add_argument('--ner_model_name', type=str, help='Finetuned model for name
 parser.add_argument('--single_layer_cls_head', default=False, action='store_true')
 parser.add_argument('--add_up_hiddens', default=False, action='store_true')
 parser.add_argument('--add_crf_head', default=False, action='store_true')
+parser.add_argument('--token_level_model', default=False, action='store_true')
 
 ## dataset parameters
 parser.add_argument('--data_dir', type=str, help='Path to directory storing train.csv and test.csv files.', required=True)
@@ -204,6 +205,7 @@ for i in irange:
             args.model_name, 
             n_labels=args.num_labels, 
             single_layer_cls=single_layer_cls, 
+            token_level=args.token_level_model, 
             calibration_temperature=args.calibration_temperature, 
         )
         # model = AutoModelForSequenceClassification(args.model_name, num_labels=args.num_labels)

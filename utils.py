@@ -11,6 +11,12 @@ def ntf(file="https://notificationsounds.com/storage/sounds/file-sounds-1228-so-
     from playsound import playsound
     playsound(file)
 
+def full_display(df):
+    import pandas as pd
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None, ):
+        pd.options.display.max_colwidth = 100
+        display(df)
+
 def generate_folds(L, k=5):
     permuted = np.random.permutation(np.arange(L))
     return np.array_split(permuted, k)

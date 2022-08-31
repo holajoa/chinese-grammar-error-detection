@@ -1,0 +1,159 @@
+python run-v2.py \
+    --model_name nghuyong/ernie-gram-zh \
+    --num_labels 2 \
+    --data_dir data/data-aug-trunc \
+    --maxlength 64 \
+    --pred_output_dir submissions-aug \
+    --output_model_dir finetuned_models/balanced_trial_ernie_gram \
+    --epoch 3 \
+    --batch_size 64 \
+    --kfolds 10 \
+    --lr 3e-5 \
+    --alpha 1 \
+    --gamma 1 \
+    --perform_testing \
+    --single_layer_cls \
+    --easy_ensemble \
+
+INFO:root:Reading training data from data\data-aug-trunc\train.csv...
+INFO:root:Using full training set.
+INFO:root:Reading test data from data\data-aug-trunc\test.csv...
+INFO:root:Constructing test dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': -1, 'test': True, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+DEBUG:jieba:Building prefix dict from the default dictionary ...
+DEBUG:jieba:Loading model from cache C:\Users\holaj\AppData\Local\Temp\jieba.cache
+DEBUG:jieba:Loading model cost 0.480 seconds.
+DEBUG:jieba:Prefix dict has been built successfully.
+INFO:root:Using easy ensemble - each fold has 3394 negatives in the training set, paired with 3394 positives
+INFO:root:Set up 10-fold CV.
+INFO:root:Training stage 1/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.8281, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 13.651902198791504, 'eval_F1': 0.7947540983606558, 'eval_precision': 0.8957871396895787, 'eval_recall': 0.714201532115498, 'eval_accuracy': 0.8155568650559811, 'eval_runtime': 26.2078, 'eval_samples_per_second': 259.007, 'eval_steps_per_second': 4.083, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.4559, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.6719, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.353099822998047, 'eval_F1': 0.8464194565380574, 'eval_precision': 0.8628711355984083, 'eval_recall': 0.8305833824395993, 'eval_accuracy': 0.8492928697701827, 'eval_runtime': 26.1469, 'eval_samples_per_second': 259.611, 'eval_steps_per_second': 4.092, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 5.9482, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.4114, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 12.623693466186523, 'eval_F1': 0.8535476046088539, 'eval_precision': 0.8791380387257963, 'eval_recall': 0.8294048320565705, 'eval_accuracy': 0.8576900412492634, 'eval_runtime': 26.1801, 'eval_samples_per_second': 259.281, 'eval_steps_per_second': 4.087, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 1980.9237, 'train_samples_per_second': 92.525, 'train_steps_per_second': 1.446, 'total_flos': 0.0, 'train_loss': 6.708793365851331, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 2/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.7617, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 13.465509414672852, 'eval_F1': 0.820183235334336, 'eval_precision': 0.7652462362847665, 'eval_recall': 0.8836181496758987, 'eval_accuracy': 0.8062757807896288, 'eval_runtime': 28.3211, 'eval_samples_per_second': 239.68, 'eval_steps_per_second': 3.778, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.2076, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.529, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.326790809631348, 'eval_F1': 0.853935992719551, 'eval_precision': 0.8799624882775867, 'eval_recall': 0.8294048320565705, 'eval_accuracy': 0.8581319976428993, 'eval_runtime': 27.1946, 'eval_samples_per_second': 249.608, 'eval_steps_per_second': 3.935, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 5.5853, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.2783, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 12.437555313110352, 'eval_F1': 0.8644400785854617, 'eval_precision': 0.8873720136518771, 'eval_recall': 0.8426635238656452, 'eval_accuracy': 0.8678550383028875, 'eval_runtime': 26.3222, 'eval_samples_per_second': 257.881, 'eval_steps_per_second': 4.065, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 2025.518, 'train_samples_per_second': 90.488, 'train_steps_per_second': 1.414, 'total_flos': 0.0, 'train_loss': 6.504300752276942, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 3/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.8598, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 14.698373794555664, 'eval_F1': 0.8029530201342282, 'eval_precision': 0.7374260355029586, 'eval_recall': 0.8812610489098409, 'eval_accuracy': 0.7837360047142016, 'eval_runtime': 25.9053, 'eval_samples_per_second': 262.031, 'eval_steps_per_second': 4.13, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.5026, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.6513, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 12.262748718261719, 'eval_F1': 0.8418095801301004, 'eval_precision': 0.8448071216617211, 'eval_recall': 0.8388332351208014, 'eval_accuracy': 0.842368886269888, 'eval_runtime': 26.5695, 'eval_samples_per_second': 255.481, 'eval_steps_per_second': 4.027, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 5.9329, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.5834, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 13.066901206970215, 'eval_F1': 0.8501362397820165, 'eval_precision': 0.8742216687422167, 'eval_recall': 0.8273423688862699, 'eval_accuracy': 0.8541543901001768, 'eval_runtime': 26.693, 'eval_samples_per_second': 254.299, 'eval_steps_per_second': 4.009, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 1966.6361, 'train_samples_per_second': 93.197, 'train_steps_per_second': 1.457, 'total_flos': 0.0, 'train_loss': 6.737458457747055, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 4/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.8186, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 13.881694793701172, 'eval_F1': 0.8088789613290521, 'eval_precision': 0.7686388962589547, 'eval_recall': 0.8535651149086624, 'eval_accuracy': 0.7983205657041839, 'eval_runtime': 26.9148, 'eval_samples_per_second': 252.203, 'eval_steps_per_second': 3.976, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.1575, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.3584, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.701578140258789, 'eval_F1': 0.8483625640229706, 'eval_precision': 0.8963594621187274, 'eval_recall': 0.8052445492044785, 'eval_accuracy': 0.8560695344725987, 'eval_runtime': 27.018, 'eval_samples_per_second': 251.24, 'eval_steps_per_second': 3.96, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 5.6459, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.2648, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 12.824398040771484, 'eval_F1': 0.8640192539109506, 'eval_precision': 0.8826060233558697, 'eval_recall': 0.8461991750147319, 'eval_accuracy': 0.8668238067177372, 'eval_runtime': 26.6057, 'eval_samples_per_second': 255.133, 'eval_steps_per_second': 4.022, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 1982.9931, 'train_samples_per_second': 92.428, 'train_steps_per_second': 1.445, 'total_flos': 0.0, 'train_loss': 6.4880723457269855, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 5/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.7725, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 12.903117179870605, 'eval_F1': 0.799421872490766, 'eval_precision': 0.8785739498764561, 'eval_recall': 0.7333529758397171, 'eval_accuracy': 0.815998821449617, 'eval_runtime': 26.9426, 'eval_samples_per_second': 251.943, 'eval_steps_per_second': 3.971, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.4144, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.4775, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.507107734680176, 'eval_F1': 0.8544434602893415, 'eval_precision': 0.8562130177514793, 'eval_recall': 0.8526812021213906, 'eval_accuracy': 0.8547436652916912, 'eval_runtime': 26.5987, 'eval_samples_per_second': 255.2, 'eval_steps_per_second': 4.023, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 5.7088, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.1118, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 12.240741729736328, 'eval_F1': 0.8655628133070028, 'eval_precision': 0.8933835058011916, 'eval_recall': 0.8394225103123159, 'eval_accuracy': 0.8696228638774307, 'eval_runtime': 25.6258, 'eval_samples_per_second': 264.89, 'eval_steps_per_second': 4.175, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 1990.6247, 'train_samples_per_second': 92.074, 'train_steps_per_second': 1.439, 'total_flos': 0.0, 'train_loss': 6.533351441494873, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 6/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.5659, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 15.137314796447754, 'eval_F1': 0.808433107756377, 'eval_precision': 0.724009324009324, 'eval_recall': 0.915144372421921, 'eval_accuracy': 0.783146729522687, 'eval_runtime': 25.552, 'eval_samples_per_second': 265.655, 'eval_steps_per_second': 4.188, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.4161, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.5067, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.977080345153809, 'eval_F1': 0.8493443122903325, 'eval_precision': 0.8802149178255373, 'eval_recall': 0.8205657041838539, 'eval_accuracy': 0.854449027695934, 'eval_runtime': 25.5242, 'eval_samples_per_second': 265.944, 'eval_steps_per_second': 4.192, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 5.8064, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.372, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 12.859195709228516, 'eval_F1': 0.858361254949741, 'eval_precision': 0.8883984867591425, 'eval_recall': 0.8302887448438421, 'eval_accuracy': 0.8629935179728934, 'eval_runtime': 25.5674, 'eval_samples_per_second': 265.494, 'eval_steps_per_second': 4.185, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 1916.3922, 'train_samples_per_second': 95.641, 'train_steps_per_second': 1.495, 'total_flos': 0.0, 'train_loss': 6.583144624986366, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 7/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.9073, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 15.253955841064453, 'eval_F1': 0.7996318695766501, 'eval_precision': 0.7219848053181387, 'eval_recall': 0.8959929286977019, 'eval_accuracy': 0.7754861520329994, 'eval_runtime': 25.5669, 'eval_samples_per_second': 265.499, 'eval_steps_per_second': 4.185, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.5138, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.6439, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.433183670043945, 'eval_F1': 0.8472034787824262, 'eval_precision': 0.8625954198473282, 'eval_recall': 0.8323512080141426, 'eval_accuracy': 0.8498821449616971, 'eval_runtime': 25.531, 'eval_samples_per_second': 265.873, 'eval_steps_per_second': 4.191, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 6.0884, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.5918, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 12.337929725646973, 'eval_F1': 0.8521394853053145, 'eval_precision': 0.8818153167349512, 'eval_recall': 0.8243959929286977, 'eval_accuracy': 0.8569534472598703, 'eval_runtime': 25.6823, 'eval_samples_per_second': 264.306, 'eval_steps_per_second': 4.166, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 1918.1816, 'train_samples_per_second': 95.551, 'train_steps_per_second': 1.494, 'total_flos': 0.0, 'train_loss': 6.785426722022251, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 8/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.8071, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 13.82725715637207, 'eval_F1': 0.8084857351865399, 'eval_precision': 0.8029642545771578, 'eval_recall': 0.8140836770771951, 'eval_accuracy': 0.8071596935769004, 'eval_runtime': 25.5877, 'eval_samples_per_second': 265.284, 'eval_steps_per_second': 4.182, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.2234, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.4155, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.636598587036133, 'eval_F1': 0.8518298125557869, 'eval_precision': 0.8602764423076923, 'eval_recall': 0.8435474366529169, 'eval_accuracy': 0.8532704773129052, 'eval_runtime': 25.5024, 'eval_samples_per_second': 266.171, 'eval_steps_per_second': 4.196, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 5.6481, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.1162, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 12.871798515319824, 'eval_F1': 0.8543157253767697, 'eval_precision': 0.8837795275590551, 'eval_recall': 0.8267530936947555, 'eval_accuracy': 0.8590159104301709, 'eval_runtime': 25.5384, 'eval_samples_per_second': 265.795, 'eval_steps_per_second': 4.19, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 1923.7241, 'train_samples_per_second': 95.276, 'train_steps_per_second': 1.489, 'total_flos': 0.0, 'train_loss': 6.475660841377618, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 9/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.8088, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 13.568931579589844, 'eval_F1': 0.8201754385964912, 'eval_precision': 0.7667862634546386, 'eval_recall': 0.8815556865055981, 'eval_accuracy': 0.8067177371832646, 'eval_runtime': 25.5035, 'eval_samples_per_second': 266.16, 'eval_steps_per_second': 4.196, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.3958, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.4571, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.621092796325684, 'eval_F1': 0.8573522943849875, 'eval_precision': 0.8532243945141523, 'eval_recall': 0.8615203299941072, 'eval_accuracy': 0.8566588096641131, 'eval_runtime': 25.5264, 'eval_samples_per_second': 265.92, 'eval_steps_per_second': 4.192, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 5.8244, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.2816, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 12.333418846130371, 'eval_F1': 0.8659606656580938, 'eval_precision': 0.8899253731343284, 'eval_recall': 0.8432527990571597, 'eval_accuracy': 0.8694755450795522, 'eval_runtime': 25.4957, 'eval_samples_per_second': 266.241, 'eval_steps_per_second': 4.197, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 1910.5515, 'train_samples_per_second': 95.933, 'train_steps_per_second': 1.5, 'total_flos': 0.0, 'train_loss': 6.597542743782722, 'epoch': 3.0, 'step': 2865}
+INFO:root:Training stage 10/10 ...
+INFO:root:Constructing 10-fold training dataset object, with the following config:
+INFO:root:{'model_name': 'nghuyong/ernie-gram-zh', 'aux_model_name': None, 'maxlength': 64, 'train_val_split': 0.9, 'test': False, 'split_words': True, 'remove_username': False, 'remove_punctuation': False, 'to_simplified': False, 'emoji_to_text': False, 'device': device(type='cuda'), 'cut_all': False}
+INFO:root:Defining TrainingArguments.
+INFO:root:{'loss': 9.5891, 'learning_rate': 2.4764397905759163e-05, 'epoch': 0.52, 'step': 500}
+INFO:root:{'eval_loss': 12.526629447937012, 'eval_F1': 0.8104066053902477, 'eval_precision': 0.8598347107438017, 'eval_recall': 0.7663523865645256, 'eval_accuracy': 0.8207130229817324, 'eval_runtime': 25.5432, 'eval_samples_per_second': 265.746, 'eval_steps_per_second': 4.189, 'epoch': 1.0, 'step': 955}
+INFO:root:{'loss': 8.5525, 'learning_rate': 1.9528795811518324e-05, 'epoch': 1.05, 'step': 1000}
+INFO:root:{'loss': 6.6271, 'learning_rate': 1.4293193717277488e-05, 'epoch': 1.57, 'step': 1500}
+INFO:root:{'eval_loss': 11.652371406555176, 'eval_F1': 0.8501064153238067, 'eval_precision': 0.878140703517588, 'eval_recall': 0.8238067177371833, 'eval_accuracy': 0.8547436652916912, 'eval_runtime': 25.5695, 'eval_samples_per_second': 265.472, 'eval_steps_per_second': 4.185, 'epoch': 2.0, 'step': 1910}
+INFO:root:{'loss': 5.804, 'learning_rate': 9.05759162303665e-06, 'epoch': 2.09, 'step': 2000}
+INFO:root:{'loss': 4.4522, 'learning_rate': 3.821989528795812e-06, 'epoch': 2.62, 'step': 2500}
+INFO:root:{'eval_loss': 12.162102699279785, 'eval_F1': 0.863780359028511, 'eval_precision': 0.8850077279752705, 'eval_recall': 0.8435474366529169, 'eval_accuracy': 0.8669711255156158, 'eval_runtime': 26.4926, 'eval_samples_per_second': 256.222, 'eval_steps_per_second': 4.039, 'epoch': 3.0, 'step': 2865}
+INFO:root:{'train_runtime': 1940.9721, 'train_samples_per_second': 94.429, 'train_steps_per_second': 1.476, 'total_flos': 0.0, 'train_loss': 6.645750632294393, 'epoch': 3.0, 'step': 2865}
+INFO:root:Doing predictions on test set ...

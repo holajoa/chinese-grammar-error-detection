@@ -1,0 +1,20 @@
+python run-v2.py \
+    --model_name nghuyong/ernie-gram-zh \
+    --num_labels 2 \
+    --data_dir data/data-aug-trunc \
+    --maxlength 64 \
+    --pred_output_dir submissions-ernie-ft \
+    --output_model_dir finetuned_models/ernie_finetune \
+    --epoch 3 \
+    --batch_size 64 \
+    --kfolds 10 \
+    --lr 3e-5 \
+    --alpha 1 \
+    --gamma 1 \
+    --perform_testing \
+    --single_layer_cls \
+    --token_level_model \
+    --easy_ensemble \
+    --resume_fold_idx 1 \
+    --checkpoint finetuned_models/balanced_trial_ernie_gram/fold1/checkpoint-1910/pytorch_model.bin \
+    --from_another_run 

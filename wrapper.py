@@ -124,22 +124,44 @@ class ImbalancedTrainer(Trainer):
         outputs = model(**inputs)
 
         true_labels = inputs['labels']
-        if torch.is_tensor(outputs):
-            logits = outputs
+        if self.model.token_level:
+            logits = outputs['sequence_logits']
         elif 'logits' in outputs.keys():
             logits = outputs['logits']
         else:
             logits = outputs['predictions']
         pass_pred_labels = 'predictions' in outputs.keys()
-        loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma, pass_pred_labels=pass_pred_labels)
-    
-        ## Loggingcompute_loss
-    
-        # logging.info(f"True labels:      {inputs['labels'].cpu().numpy()}")
-        # logging.info(f'Predicted labels: {np.argmax(outputs.logits.cpu().detach().numpy(), axis=1)}')
-        # logging.info(f'loss = {loss}\n')
+
+        focal_loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma, pass_pred_labels=pass_pred_labels)
+        if 'sequence_logits' in outputs.keys():
+            sequence_logits = outputs['sequence_logits']
+            local_loss = token_label_loss(sequence_logits, true_labels)
+        else: 
+            local_loss = 0
+        loss = focal_loss + local_loss
 
         return (loss, outputs) if return_outputs else loss
+
+
+def token_label_loss(sequence_logits, true_labels, sum=True):
+    pos_idx = torch.Tensor(true_labels == 1).long()
+    neg_idx = torch.Tensor(true_labels == 0).long()
+
+    logits_difference = sequence_logits[..., 1] - sequence_logits[..., 0]
+
+    # For positive examples, maximise difference between max logit difference and min logit difference
+    loss_pos = (logits_difference.min(-1).values - logits_difference.max(-1).values) / 2 * pos_idx   
+
+    # For negative examples, minimise logit differences
+    loss_neg = logits_difference.mean(-1) * neg_idx
+
+    if sum:
+        loss_pos = torch.sum(loss_pos)
+        loss_neg = torch.sum(loss_neg)
+
+    loss = loss_pos + loss_neg
+    
+    return loss
 
 
 def binary_focal_loss(logits, true_labels, alpha=1, gamma=0, sum=True, pass_pred_labels=False):
@@ -159,14 +181,19 @@ def binary_focal_loss(logits, true_labels, alpha=1, gamma=0, sum=True, pass_pred
         pred_probs = torch.any(logits, dim=1).float()
         pred_probs.requires_grad = True
     else:
-        pred_probs = torch.nn.Softmax(dim=1)(logits)[:, -1]
+        pred_probs = torch.nn.Softmax(dim=-1)(logits)[..., -1]
 
+    if pred_probs.ndim > 1:
+        pos_idx = pos_idx.view(-1, 1)
+        neg_idx = neg_idx.view(-1, 1)
     loss_pos = - alpha * ((1 - pred_probs)**gamma * torch.log(pred_probs+1e-7)) * pos_idx
     loss_neg = - (pred_probs**gamma * torch.log(1-pred_probs+1e-7)) * neg_idx
 
     if sum:
         loss_pos = torch.sum(loss_pos)
         loss_neg = torch.sum(loss_neg)
+
     loss = loss_pos + loss_neg
+    
     return loss
 
