@@ -51,7 +51,7 @@
 				"console": "integratedTerminal",
 				"justMyCode": true, 
 				"args":[
-					"--model_name", "nghuyong/ernie-gram-zh", 
+					"--model_name", "hfl/chinese-macbert-base", 
 					"--num_labels", "2",  
 					"--data_dir", "data/data-aug-trunc",  
 					"--maxlength", "64",  
@@ -71,6 +71,34 @@
 					"--resume_fold_idx",  "1",  
 					"--checkpoint",  "finetuned_models/balanced_trial_ernie_gram/fold1/checkpoint-1910/pytorch_model.bin", 
 					"--from_another_run", 
+				]
+			}, 
+			{
+				"name": "Cleaned up main.py",
+				"type": "python",
+				"request": "launch",
+				"program": "D:/Develop/chinese-grammar-error-detection/run-cleaned.py",
+				"python": "D:/Apps/Anaconda3/envs/general-torch/python.exe", 
+				"console": "integratedTerminal",
+				"justMyCode": true, 
+				"args":[
+					"--model_name", "nghuyong/ernie-gram-zh", 
+					"--num_labels", "2",  
+					"--single_layer_cls",
+					"--data_dir", "data/data-org",  
+					"--maxlength", "64",  
+					"--kfolds", "10",
+					"--pred_output_dir", "submissions" , 
+					"--output_model_dir", "finetuned_models/cleaned", 
+					"--n_fold_used", "5", 
+					"--num_ensemble_models", "5", 
+					"--epoch", "2",  
+					"--batch_size", "64",  
+					"--perform_testing", 
+					"--lr", "2e-5", 
+					"--alpha", "1", 
+					"--gamma", "1", 
+					"--perform_testing",
 				]
 			}
 		]

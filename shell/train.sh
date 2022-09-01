@@ -1,18 +1,16 @@
 python run-v2.py \
     --model_name hfl/chinese-macbert-base \
     --num_labels 2 \
-    --data_dir data/data-aug-large \
-    --maxlength 128 \
+    --data_dir data/data-aug-trunc \
+    --maxlength 64 \
     --pred_output_dir submissions-aug \
-    --output_model_dir finetuned_models/ner_run_crf \
-    --epoch 2 \
-    --batch_size 16 \
+    --output_model_dir finetuned_models/local_loss_unbalanced \
+    --epoch 4 \
+    --batch_size 64 \
     --kfolds 10 \
-    --lr 3e-6 \
-    --alpha 0.3 \
-    --gamma 2 \
+    --lr 1e-5 \
+    --alpha 0.5 \
+    --gamma 0.5 \
+    --local_loss_param 1e-3 \
     --perform_testing \
-    --single_layer_cls_head \
-    --resume_fold_idx 1 \
-    --checkpoint finetuned_models/ner_run_aug_single/fold9/checkpoint-5014/pytorch_model.bin \
-    --from_another_run
+    --single_layer_cls \

@@ -14,25 +14,36 @@ def ntf(file="https://notificationsounds.com/storage/sounds/file-sounds-1228-so-
 def full_display(df):
     import pandas as pd
     with pd.option_context('display.max_rows', None, 'display.max_columns', None, ):
-        pd.options.display.max_colwidth = 100
+        pd.options.display.max_colwidth = 200
         display(df)
 
 def generate_folds(L, k=5):
     permuted = np.random.permutation(np.arange(L))
     return np.array_split(permuted, k)
 
-def easy_ensenble_generate_kfolds(L, k, minority_idx):
-    s_fold = L // k
-    majority_idx = np.array(list(set(range(L)) - set(minority_idx)))
-    folds = []
-    for _ in range(k):
-        minor_sample = np.random.choice(minority_idx, size=s_fold//2, replace=False)
-        major_sample = np.random.choice(majority_idx, size=s_fold//2, replace=False)
-        fold = np.concatenate((minor_sample, major_sample))
-        fold = np.random.permutation(fold)
-        folds.append(fold)
-    logging.info(f'Using easy ensemble - each fold has {len(minor_sample)} negatives in the training set, paired with {len(major_sample)} positives')
-    return np.array(folds)
+def easy_ensenble_generate_kfolds(indices, k, minority_idx, fold_size=None):
+    s_fold = fold_size if fold_size else len(indices) // k 
+    majority_idx = np.array(list(set(indices) - set(minority_idx)))
+    minor_samples = np.random.choice(minority_idx, size=(k, s_fold//2), replace=True)
+    major_samples = np.random.choice(majority_idx, size=(k, s_fold//2), replace=False)
+    folds = np.concatenate((minor_samples, major_samples), axis=1)
+    folds = folds[:, np.random.permutation(range(s_fold))]
+    print(f'Using easy ensemble - each fold has {minor_samples.shape[1]} negatives in the training set, paired with {major_samples.shape[1]} positives')
+    return folds
+
+# def easy_ensenble_generate_kfolds(L, k, minority_idx, fold_size=None):
+#     """Wrong implementation - minority class examples are not all used in each fold."""
+#     s_fold = len(minority_idx) * 2
+#     majority_idx = np.array(list(set(range(L)) - set(minority_idx)))
+#     folds = []
+#     for _ in range(k):
+#         minor_sample = np.random.choice(minority_idx, size=s_fold//2, replace=False)
+#         major_sample = np.random.choice(majority_idx, size=s_fold//2, replace=False)
+#         fold = np.concatenate((minor_sample, major_sample))
+#         fold = np.random.permutation(fold)
+#         folds.append(fold)
+#     logging.info(f'Using easy ensemble - each fold has {len(minor_sample)} negatives in the training set, paired with {len(major_sample)} positives')
+#     return np.array(folds)
 
 
 def extract_predictions(logits):

@@ -54,10 +54,13 @@ parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate ', req
 parser.add_argument('--kfolds', type=int, default=5, help='k-fold k', required=False)
 parser.add_argument('--folds', type=str, help='Directory to txt file storing the fold indices used for training.')
 parser.add_argument('--easy_ensemble', default=False, action='store_true', help='Whether to use easy ensemble to balance data labels.')
+parser.add_argument('--fold_size', type=int, help='Number of examples in a fold', required=False)
 parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
 parser.add_argument('--best_by_f1', default=False, action='store_true', help='Call back to best model by F1 score.')
 parser.add_argument('--calibration_temperature', type=float, default=1)
+parser.add_argument('--local_loss_param', type=float, default=1e-2, help='Hyperparameter for token-level local loss.')
 parser.add_argument('--early_stopping_patience', type=int, default=4)
+
 
 parser.add_argument('--resume_fold_idx', type=int, help='On which fold to resume training.')
 parser.add_argument('--checkpoint', type=str, help='previous model checkpoint.')
@@ -156,7 +159,10 @@ if args.folds:
 else:
     if args.easy_ensemble:
         minority_idx = np.array(train_df_use.index[train_df_use.label == 0].tolist())
-        folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx)
+        if args.fold_size:
+            folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx, fold_size=args.fold_size)
+        else:
+            folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx)
     else:
         folds = generate_folds(L, k)
 
@@ -238,6 +244,7 @@ for i in irange:
         epsilon=args.adversarial_training_param, 
         alpha=args.alpha, 
         gamma=args.gamma, 
+        local_loss_param=args.local_loss_param, 
         seed=seed,
         report_to='tensorboard',
         push_to_hub=False, 
@@ -267,17 +274,9 @@ for i in irange:
     
     # Get pred accuracy on the dev set 
     val_pred_logits = trainer.predict(train.dataset['val']).predictions[0]
-    # if val_pred_logits.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
-    #     val_pred_logits = postprocess_logits(val_pred_logits, train.dataset['val']['attention_mask'], args.calibration_tempreture)
-    # val_pred = np.argmax(val_pred_logits, 1)
     val_pred = extract_predictions(val_pred_logits)
     val_accuracy = (val_pred == train.dataset['val']['labels'].numpy()).mean()
     val_accuracies.append(val_accuracy)
-
-    # Print the predictions
-    # logging.info("Full model trained...")
-    # logging.info(f"True labels:      {train.dataset['val']['input_ids']}")
-    # logging.info(f'Predicted labels: {val_pred}')
 
     if args.perform_testing:
         # Get logits on the test set

@@ -7,7 +7,7 @@ from utils import postprocess_logits
 
 
 class MyTrainingArguments(TrainingArguments):
-    def __init__(self, epsilon, alpha=0.5, gamma=0, *args, **kwargs):
+    def __init__(self, epsilon, alpha=0.5, gamma=0, local_loss_param=1e-2, *args, **kwargs):
         super(MyTrainingArguments, self).__init__(*args, **kwargs)
         self.epsilon = epsilon    # add a perturbation parameter
 
@@ -16,6 +16,7 @@ class MyTrainingArguments(TrainingArguments):
         # focal loss = -(1-alpha)*pred^{gamma} * log(1-pred) if ture_label=0
         self.alpha = alpha
         self.gamma = gamma
+        self.local_loss_param = local_loss_param
 
 
 class AdversarialTrainer(Trainer):
@@ -135,7 +136,7 @@ class ImbalancedTrainer(Trainer):
         focal_loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma, pass_pred_labels=pass_pred_labels)
         if 'sequence_logits' in outputs.keys():
             sequence_logits = outputs['sequence_logits']
-            local_loss = token_label_loss(sequence_logits, true_labels)
+            local_loss = token_label_loss(sequence_logits, true_labels, hyperparam=self.args.local_loss_param)
         else: 
             local_loss = 0
         loss = focal_loss + local_loss
@@ -143,7 +144,7 @@ class ImbalancedTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
 
 
-def token_label_loss(sequence_logits, true_labels, sum=True):
+def token_label_loss(sequence_logits, true_labels, sum=True, hyperparam=2e-3):
     pos_idx = torch.Tensor(true_labels == 1).long()
     neg_idx = torch.Tensor(true_labels == 0).long()
 
@@ -161,7 +162,7 @@ def token_label_loss(sequence_logits, true_labels, sum=True):
 
     loss = loss_pos + loss_neg
     
-    return loss
+    return loss * hyperparam
 
 
 def binary_focal_loss(logits, true_labels, alpha=1, gamma=0, sum=True, pass_pred_labels=False):

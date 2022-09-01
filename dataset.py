@@ -3,6 +3,7 @@ from transformers import AutoTokenizer
 from datasets import DatasetDict, Dataset
 import numpy as np
 from preprocess import *
+from typing import Dict, List, Union
 
 
 class SimpleDataset(torch.utils.data.Dataset):
@@ -75,13 +76,27 @@ class SimpleDataset(torch.utils.data.Dataset):
     
 
 class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
-    def __init__(self, df, model_name, aux_model_name=None, maxlength=128, train_val_split=-1, test=False, eda=True, device='cpu', **kwargs):
+    def __init__(
+        self, 
+        df:pd.DataFrame, 
+        model_name:str, 
+        aux_model_name:str=None, 
+        maxlength:int=128, 
+        train_val_split:Union[float, int]=-1, 
+        test:bool=False, 
+        eda:bool=True, 
+        device:str='cpu',
+        da_configs:Dict[str, dict]=None, 
+        **kwargs
+    ):
         self.model_name = model_name
         self.aux_model_name = aux_model_name
         self.maxlength = maxlength
         self.test_stage = test
         self.train_val_split = train_val_split
-        self.texts = self.eda(df, **kwargs) if eda else df.text
+
+        df_aug = DataAugmentation(da_configs).aug(df) if da_configs else df
+        self.texts = self.eda(df_aug, **kwargs) if eda else df_aug.text
         self.device = device
         if not self.test_stage:
             self.labels = df.label
@@ -118,11 +133,11 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
         items_iterator = self.inputs.items() if self.dataset is None else self.dataset['train'].to_dict().items()
         for key, value in items_iterator:
             if isinstance(value, list):
-                value = torch.Tensor(value).to(device=self.device)
-            indexed_value = torch.tensor(value[index]).squeeze()
+                value = torch.from_numpy(np.array(value))
+            indexed_value = value[index].to(device=self.device)
             data_dict[key] = indexed_value
         if not self.test_stage:
-            data_dict['labels'] = torch.tensor(self.labels[index].values).squeeze()
+            data_dict['labels'] = torch.from_numpy(self.labels.iloc[index].values).to(device=self.device)
         dataset_obj = Dataset.from_dict(data_dict)
         return dataset_obj
 

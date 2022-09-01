@@ -111,7 +111,7 @@ class AutoModelWithClassificationHead(nn.Module):
         MLM_logits = self.base_model(input_ids, attention_mask=attention_mask, output_hidden_states=True).hidden_states[-1]
         sequence_logits = self.classifier(MLM_logits)
         if self.token_level:
-            return {'sequence_logits':sequence_logits / self.calibration_temperature}
+            return {'sequence_logits':sequence_logits / self.calibration}
         output = postprocess_logits(sequence_logits, attention_mask, self.calibration_temperature)
         return {'logits':output, 'sequence_logits':sequence_logits}
 

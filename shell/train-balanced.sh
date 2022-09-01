@@ -5,12 +5,13 @@ python run-v2.py \
     --maxlength 64 \
     --pred_output_dir submissions-aug \
     --output_model_dir finetuned_models/balanced_trial_local_loss \
-    --epoch 3 \
+    --epoch 4 \
     --batch_size 64 \
     --kfolds 10 \
-    --lr 3e-5 \
+    --lr 1e-5 \
     --alpha 1 \
-    --gamma 1 \
+    --gamma 2 \
+    --local_loss_param 1e-3 \
     --perform_testing \
     --single_layer_cls \
     --easy_ensemble \

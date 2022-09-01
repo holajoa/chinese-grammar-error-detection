@@ -1,15 +1,18 @@
 from urllib.parse import DefragResult
 import torch
 import pandas as pd
-import re
 import numpy as np
+from torch.utils.tensorboard import SummaryWriter
 from transformers import AutoModelForSequenceClassification
-from transformers import EarlyStoppingCallback, TrainerCallback
+from transformers import EarlyStoppingCallback
+from transformers.integrations import TensorBoardCallback
 
 from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
+from models import AutoModelWithNER, AutoModelWithClassificationHead, BertWithCRFHead
+import random
 
 import argparse
 import os
@@ -21,8 +24,13 @@ logging.basicConfig(filename=os.path.join('logs', str(time()).split('.')[1]+'.lo
 parser = argparse.ArgumentParser(description='Model and Training Config')
 
 ## model parameters
-parser.add_argument('--model_name', type=str, help='Huggingface model code', required=True)
+parser.add_argument('--model_name', type=str, help='Huggingface model code for the Bert model', required=True)
 parser.add_argument('--num_labels', type=int, default=2, help='Number of classes in the dataset', required=True)
+parser.add_argument('--ner_model_name', type=str, help='Finetuned model for named entities recognition boosting')
+parser.add_argument('--single_layer_cls_head', default=False, action='store_true')
+parser.add_argument('--add_up_hiddens', default=False, action='store_true')
+parser.add_argument('--add_crf_head', default=False, action='store_true')
+parser.add_argument('--token_level_model', default=False, action='store_true')
 
 ## dataset parameters
 parser.add_argument('--data_dir', type=str, help='Path to directory storing train.csv and test.csv files.', required=True)
@@ -36,14 +44,27 @@ parser.add_argument('--to_simplified', default=False, action='store_true', help=
 parser.add_argument('--emoji_to_text', default=False, action='store_true', help='Whether to translate emojis to texts. Default to True.')
 
 ## training parameters
+parser.add_argument('--seed', type=int)
 parser.add_argument('--adversarial_training_param', type=int, default=0, help='Adversarial training parameter. If passed 0 then switched off adversarial traiing.')
-parser.add_argument('--alpha', type=float, default=0.5, help='alpha parameter for focal loss. Change the weights of positive examples.')
-parser.add_argument('--gamma', type=float, default=0, help='gamma parameter for focal loss. Change how strict the labelling is.')
+parser.add_argument('--alpha', type=float, default=1, help='alpha parameter for focal loss. Change the weights of positive examples.')
+parser.add_argument('--gamma', type=float, default=0, help='gamma parameter for focal loss. Change how strict the positive labelling is.')
 parser.add_argument('--batch_size', type=int, default=8, help='batch size', required=False)
 parser.add_argument('--epoch', type=int, default=10, help='epoch', required=False)
 parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate ', required=False)
 parser.add_argument('--kfolds', type=int, default=5, help='k-fold k', required=False)
+parser.add_argument('--folds', type=str, help='Directory to txt file storing the fold indices used for training.')
+parser.add_argument('--easy_ensemble', default=False, action='store_true', help='Whether to use easy ensemble to balance data labels.')
+parser.add_argument('--fold_size', type=int, help='Number of examples in a fold', required=False)
 parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
+parser.add_argument('--best_by_f1', default=False, action='store_true', help='Call back to best model by F1 score.')
+parser.add_argument('--calibration_temperature', type=float, default=1)
+parser.add_argument('--local_loss_param', type=float, default=1e-2, help='Hyperparameter for token-level local loss.')
+parser.add_argument('--early_stopping_patience', type=int, default=4)
+
+
+parser.add_argument('--resume_fold_idx', type=int, help='On which fold to resume training.')
+parser.add_argument('--checkpoint', type=str, help='previous model checkpoint.')
+parser.add_argument('--from_another_run', default=False, action='store_true')
 
 ## output parameters
 parser.add_argument('--perform_testing', help='Whether to use the trained model on a test set', default=False, action='store_true')
@@ -51,15 +72,20 @@ parser.add_argument('--pred_output_dir', type=str, help='Directory to store fina
 # parser.add_argument('--weighted_averaging', default=True, help='Whether to weight the logits of the model based on their dev set accuracy when creating ensemble.')
 args = parser.parse_args()
 
+def set_seed(args):
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
 
+data_files = [os.path.join(*(args.data_dir.split('/')), 'train.csv')]
 
-data_files = [os.path.join(args.data_dir, 'train.csv')]
 if args.perform_testing:
-    data_files.append(os.path.join(args.data_dir, 'test.csv'))
+    data_files.append(os.path.join(*(args.data_dir.split('/')), 'test.csv'))
     assert args.pred_output_dir, 'Must procvide an output path for predictions on the test set.'
 
 logging.info(f'Reading training data from {data_files[0]}...')
 train_df = pd.read_csv(data_files[0], sep=args.csv_sep)
+
 if args.num_training_examples == -1:
     logging.info('Using full training set.')
     train_df_use = train_df
@@ -69,6 +95,7 @@ else:
     train_df_use = train_df_use.reset_index().drop(columns=['index'])
 
 if args.perform_testing:
+    print(data_files[1])
     logging.info(f'Reading test data from {data_files[1]}...')
     test_df = pd.read_csv(data_files[1], sep=args.csv_sep)
 else: 
@@ -77,8 +104,11 @@ else:
 k = args.kfolds
 train_val_split = 1 - 1/k
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 train_dataset_config = {
     'model_name':args.model_name,
+    'aux_model_name':args.ner_model_name, 
     'maxlength':args.maxlength,
     'train_val_split':train_val_split,
     'test':False, 
@@ -87,11 +117,15 @@ train_dataset_config = {
     'remove_punctuation':args.remove_punctuation, 
     'to_simplified':args.to_simplified, 
     'emoji_to_text':args.emoji_to_text,
+    'device':device, 
+    'split_words':True, 
+    'cut_all':False, 
 }
 
 if args.perform_testing:
     test_dataset_config = {
         'model_name':args.model_name,
+        'aux_model_name':args.ner_model_name, 
         'maxlength':args.maxlength,
         'train_val_split':-1,
         'test':True, 
@@ -100,43 +134,104 @@ if args.perform_testing:
         'remove_punctuation':args.remove_punctuation, 
         'to_simplified':args.to_simplified, 
         'emoji_to_text':args.emoji_to_text,
+        'device':device, 
+        'split_words':True, 
+        'cut_all':False, 
     }
 
     logging.info(f'Constructing test dataset object, with the following config:')
     logging.info(test_dataset_config)
-    test = SimpleDataset(df=test_df, **test_dataset_config)
+    test = DatasetWithAuxiliaryEmbeddings(df=test_df, **test_dataset_config)
     test.tokenize()
     test.construct_dataset()
 
 
-logging.info(f'Setting up {k}-fold CV.')
 L = len(train_df_use)
-folds = generate_folds(L, k)
+if args.folds:
+    with open(args.folds, 'r') as f:
+        lines = f.readlines()
+        folds = [np.array(list(map(int, line.rstrip().split(' ')))) for line in lines]
+    assert sum(map(len, folds)) == L, 'Provided folds does not match with number of training examples'
+    k = len(folds)
+    if args.kfolds and args.kfolds != k:
+        logging.warning('Provided folds does not match with provided k.')
+    logging.info(f'Loaded folds indices from {args.folds}.')
+else:
+    if args.easy_ensemble:
+        minority_idx = np.array(train_df_use.index[train_df_use.label == 0].tolist())
+        if args.fold_size:
+            folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx, fold_size=args.fold_size)
+        else:
+            folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx)
+    else:
+        folds = generate_folds(L, k)
+
+    if not os.path.exists(args.output_model_dir):
+        os.makedirs(args.output_model_dir)
+    with open(os.path.join(args.output_model_dir, 'folds.txt'), 'w+') as fp:
+        for item in folds:
+            fp.write(' '.join(list(map(str, item))) + '\n')
+
+logging.info(f'Set up {k}-fold CV.')
+
 val_accuracies = []
 if args.perform_testing:
     logits = []
 
+irange = range(k) if not args.resume_fold_idx else range(args.resume_fold_idx-1, k)
 
-for i in range(k):
+for i in irange:
     val_idx = folds[i]
     logging.info(f'Training stage {i+1}/{k} ...')
     logging.info(f'Constructing {k}-fold training dataset object, with the following config:')
     logging.info(train_dataset_config)
-    train = SimpleDataset(df=train_df_use, **train_dataset_config)
+    train = DatasetWithAuxiliaryEmbeddings(df=train_df_use, **train_dataset_config)
     train.tokenize()
     train.construct_dataset(val_idx=val_idx)
+    single_layer_cls = True if args.single_layer_cls_head else False
+    concat = False if args.add_up_hiddens else True
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = AutoModelForSequenceClassification.from_pretrained(
-        args.model_name, num_labels=args.num_labels,
-    )   
-
+    if args.ner_model_name:
+        model = AutoModelWithNER(
+            model=args.model_name, 
+            ner_model=args.ner_model_name, 
+            n_labels=2, 
+            single_layer_cls=single_layer_cls, 
+            concatenate=concat,
+        )
+    elif args.add_crf_head:
+        model = BertWithCRFHead(
+            args.model_name, 
+            n_labels=args.num_labels, 
+            single_layer_cls=single_layer_cls, 
+            calibration_temperature=args.calibration_temperature, 
+        )
+    else:
+        model = AutoModelWithClassificationHead(
+            args.model_name, 
+            n_labels=args.num_labels, 
+            single_layer_cls=single_layer_cls, 
+            token_level=args.token_level_model, 
+            calibration_temperature=args.calibration_temperature, 
+        )
+        # model = AutoModelForSequenceClassification(args.model_name, num_labels=args.num_labels)
+    if args.checkpoint is not None and i == args.resume_fold_idx - 1:
+        if not args.from_another_run:
+            assert 'fold'+str(args.resume_fold_idx-1) in args.checkpoint
+        state_dict = torch.load(args.checkpoint, map_location=device)
+        model.load_state_dict(state_dict, strict=False) 
     model.cuda()
+
 
     logging.info('Defining TrainingArguments.')
     # Define training arguments
-    arguments = AdversarialTrainingArguments(
-        output_dir=os.path.join(args.output_model_dir, 'fold'+str(i)),  # output directory
+    output_dir = os.path.join(args.output_model_dir, 'fold'+str(i))
+    # Initialise tensorboard
+    tb_writer = SummaryWriter(os.path.join(output_dir, 'runs'))
+    seed = args.seed if args.seed else 42
+    metric_for_best_model = 'F1' if args.best_by_f1 else 'loss'
+    arguments = MyTrainingArguments(
+        output_dir=output_dir,  # output directory
         per_device_train_batch_size=args.batch_size, 
         per_device_eval_batch_size=args.batch_size, 
         num_train_epochs=args.epoch,
@@ -144,13 +239,18 @@ for i in range(k):
         save_strategy="epoch",  # save checkpoint at each epoch
         learning_rate=args.lr, 
         load_best_model_at_end=True,
-        # report_to="tensorboard", # for submissions
+        metric_for_best_model=metric_for_best_model, 
+        label_names=['labels'],   # need to specify this to pass the labels to the trainer
         epsilon=args.adversarial_training_param, 
         alpha=args.alpha, 
         gamma=args.gamma, 
+        local_loss_param=args.local_loss_param, 
+        seed=seed,
+        report_to='tensorboard',
+        push_to_hub=False, 
     )
 
-    trainer = AdversarialTrainer(
+    trainer = ImbalancedTrainer(
         model=model, 
         args=arguments, 
         train_dataset=train.dataset['train'], 
@@ -160,9 +260,10 @@ for i in range(k):
     )
 
     trainer.add_callback(EarlyStoppingCallback(
-        early_stopping_patience=4, 
+        early_stopping_patience=args.early_stopping_patience, 
         early_stopping_threshold=0.0, 
     ))  # apply early stopping - stop training immediately if the loss cease to decrease
+    trainer.add_callback(TensorBoardCallback(tb_writer=tb_writer))
 
     # Train the model
     trainer.train()
@@ -172,18 +273,16 @@ for i in range(k):
     # soft_labels.append(dev_labels)
     
     # Get pred accuracy on the dev set 
-    val_pred = np.argmax(trainer.predict(train.dataset['val']).predictions, 1)
+    val_pred_logits = trainer.predict(train.dataset['val']).predictions[0]
+    val_pred = extract_predictions(val_pred_logits)
     val_accuracy = (val_pred == train.dataset['val']['labels'].numpy()).mean()
     val_accuracies.append(val_accuracy)
 
-    # Print the predictions
-    # logging.info("Full model trained...")
-    # logging.info(f"True labels:      {train.dataset['val']['input_ids']}")
-    # logging.info(f'Predicted labels: {val_pred}')
-
     if args.perform_testing:
         # Get logits on the test set
-        hiddens = trainer.predict(test.dataset['train']).predictions
+        hiddens = trainer.predict(test.dataset['train']).predictions[0]
+        if hiddens.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
+            hiddens = postprocess_logits(hiddens, test.dataset['train']['attention_mask'], args.calibration_tempreture)
         logits.append(hiddens)
 
     del model
@@ -201,5 +300,5 @@ if args.perform_testing:
     # Write results
     out_path = os.path.join(args.pred_output_dir, 'submission.csv')
 
-    with open(out_path, 'a+') as f:
+    with open(out_path, 'a') as f:
         result.to_csv(out_path, index=False)
