@@ -84,7 +84,7 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
         maxlength:int=128, 
         train_val_split:Union[float, int]=-1, 
         test:bool=False, 
-        eda:bool=True, 
+        eda:bool=False, 
         device:str='cpu',
         da_configs:Dict[str, dict]=None, 
         **kwargs
@@ -99,7 +99,7 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
         self.texts = self.eda(df_aug, **kwargs) if eda else df_aug.text
         self.device = device
         if not self.test_stage:
-            self.labels = df.label
+            self.labels = df_aug.label
         self.dataset = None
 
     def prepare_dataset(self, val_idx=None):

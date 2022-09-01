@@ -12,7 +12,6 @@ from dataset import *
 from preprocess import *
 from wrapper import *
 from models import AutoModelWithNER, AutoModelWithClassificationHead, BertWithCRFHead
-import random
 
 import argparse
 import os
@@ -29,7 +28,6 @@ parser.add_argument('--num_labels', type=int, default=2, help='Number of classes
 parser.add_argument('--ner_model_name', type=str, help='Finetuned model for named entities recognition boosting')
 parser.add_argument('--single_layer_cls_head', default=False, action='store_true')
 parser.add_argument('--add_up_hiddens', default=False, action='store_true')
-parser.add_argument('--add_crf_head', default=False, action='store_true')
 parser.add_argument('--token_level_model', default=False, action='store_true')
 
 ## dataset parameters
@@ -42,26 +40,25 @@ parser.add_argument('--remove_username', default=False, action='store_true', hel
 parser.add_argument('--remove_punctuation', default=False, action='store_true', help='Whether remove punctuations in texts. Default to True.')
 parser.add_argument('--to_simplified', default=False, action='store_true', help='Whether to convert all texts to simplified Chinese. Default to True.')
 parser.add_argument('--emoji_to_text', default=False, action='store_true', help='Whether to translate emojis to texts. Default to True.')
+parser.add_argument('--kfolds', type=int, default=5, help='k-fold k', required=False)
+parser.add_argument('--folds', type=str, help='Directory to txt file storing the fold indices used for training.')
+parser.add_argument('--fold_size', type=int, help='Number of examples in a fold', required=False)
 
 ## training parameters
+parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
 parser.add_argument('--seed', type=int)
+parser.add_argument('--n_fold_used', type=int, help='Number of folds of data used for training each model.')
+parser.add_argument('--num_ensemble_models', type=int, help='Number of trained models.')
+parser.add_argument('--num_epochs', type=int, default=10, help='epoch', required=False)
+parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate ', required=False)
+parser.add_argument('--batch_size', type=int, default=8, help='batch size', required=False)
+parser.add_argument('--best_by_f1', default=False, action='store_true', help='Call back to best model by F1 score.')
 parser.add_argument('--adversarial_training_param', type=int, default=0, help='Adversarial training parameter. If passed 0 then switched off adversarial traiing.')
 parser.add_argument('--alpha', type=float, default=1, help='alpha parameter for focal loss. Change the weights of positive examples.')
 parser.add_argument('--gamma', type=float, default=0, help='gamma parameter for focal loss. Change how strict the positive labelling is.')
-parser.add_argument('--batch_size', type=int, default=8, help='batch size', required=False)
-parser.add_argument('--epoch', type=int, default=10, help='epoch', required=False)
-parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate ', required=False)
-parser.add_argument('--kfolds', type=int, default=5, help='k-fold k', required=False)
-parser.add_argument('--folds', type=str, help='Directory to txt file storing the fold indices used for training.')
-parser.add_argument('--easy_ensemble', default=False, action='store_true', help='Whether to use easy ensemble to balance data labels.')
-parser.add_argument('--fold_size', type=int, help='Number of examples in a fold', required=False)
-parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
-parser.add_argument('--best_by_f1', default=False, action='store_true', help='Call back to best model by F1 score.')
 parser.add_argument('--calibration_temperature', type=float, default=1)
-parser.add_argument('--local_loss_param', type=float, default=1e-2, help='Hyperparameter for token-level local loss.')
-parser.add_argument('--early_stopping_patience', type=int, default=4)
-
-
+parser.add_argument('--local_loss_param', type=float, default=1e-3, help='Hyperparameter for token-level local loss.')
+parser.add_argument('--early_stopping_patience', type=int, default=5)
 parser.add_argument('--resume_fold_idx', type=int, help='On which fold to resume training.')
 parser.add_argument('--checkpoint', type=str, help='previous model checkpoint.')
 parser.add_argument('--from_another_run', default=False, action='store_true')
@@ -72,11 +69,9 @@ parser.add_argument('--pred_output_dir', type=str, help='Directory to store fina
 # parser.add_argument('--weighted_averaging', default=True, help='Whether to weight the logits of the model based on their dev set accuracy when creating ensemble.')
 args = parser.parse_args()
 
-def set_seed(args):
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
 
+
+# Loading full datasets
 data_files = [os.path.join(*(args.data_dir.split('/')), 'train.csv')]
 
 if args.perform_testing:
@@ -84,7 +79,7 @@ if args.perform_testing:
     assert args.pred_output_dir, 'Must procvide an output path for predictions on the test set.'
 
 logging.info(f'Reading training data from {data_files[0]}...')
-train_df = pd.read_csv(data_files[0], sep=args.csv_sep)
+train_df = pd.read_csv(data_files[0], sep=args.csv_sep).set_index('id')
 
 if args.num_training_examples == -1:
     logging.info('Using full training set.')
@@ -92,154 +87,209 @@ if args.num_training_examples == -1:
 else:
     logging.info(f'Using randomly selected {args.num_training_examples} training examples.')
     train_df_use = train_df.iloc[np.random.choice(np.arange(len(train_df)), size=args.num_training_examples, replace=False)]
-    train_df_use = train_df_use.reset_index().drop(columns=['index'])
 
 if args.perform_testing:
     print(data_files[1])
     logging.info(f'Reading test data from {data_files[1]}...')
-    test_df = pd.read_csv(data_files[1], sep=args.csv_sep)
+    test_df = pd.read_csv(data_files[1], sep=args.csv_sep).set_index('id')
 else: 
     logging.info('No testing stage.')
 
-k = args.kfolds
-train_val_split = 1 - 1/k
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-train_dataset_config = {
+entities_file = os.path.join(
+    "D:\Apps\Anaconda3\envs\general-torch\Lib\site-packages", 
+    "nlpcda\data\entities.txt", 
+)
+
+DATA_AUG_CONFIGS = {
+    'random_entity':{
+        'base_file':entities_file, 
+        'create_num':2, 
+        'change_rate':0.5, 
+        'seed':1024, 
+        'prop':0.2,  
+    }, 
+    'random_delete_char':{
+        'create_num':2, 
+        'change_rate':0.05, 
+        'seed':1024, 
+        'prop':0.1, 
+    }, 
+    'random_swap':{
+        'create_num':2, 
+        'change_rate':0.2, 
+        'seed':1024, 
+        'prop':0.2, 
+    }, 
+    'random_swap_order':{
+        'create_num':2,
+        'char_gram':5,  
+        'change_rate':0.05, 
+        'seed':1024, 
+        'prop':0.5, 
+    }
+}
+
+TRAIN_DATASET_CONFIGS = {
     'model_name':args.model_name,
     'aux_model_name':args.ner_model_name, 
     'maxlength':args.maxlength,
-    'train_val_split':train_val_split,
+    'train_val_split':-1,
     'test':False, 
     'split_words':args.split_words,
     'remove_username':args.remove_username,
     'remove_punctuation':args.remove_punctuation, 
     'to_simplified':args.to_simplified, 
     'emoji_to_text':args.emoji_to_text,
-    'device':device, 
+    'device':DEVICE, 
+    'split_words':True, 
+    'cut_all':False, 
+    'da_configs':DATA_AUG_CONFIGS, 
+}
+
+DEV_DATASET_CONFIGS = {
+    'model_name':args.model_name,
+    'aux_model_name':args.ner_model_name, 
+    'maxlength':args.maxlength,
+    'train_val_split':-1,
+    'test':False, 
+    'split_words':args.split_words,
+    'remove_username':args.remove_username,
+    'remove_punctuation':args.remove_punctuation, 
+    'to_simplified':args.to_simplified, 
+    'emoji_to_text':args.emoji_to_text,
+    'device':DEVICE, 
     'split_words':True, 
     'cut_all':False, 
 }
 
-if args.perform_testing:
-    test_dataset_config = {
-        'model_name':args.model_name,
-        'aux_model_name':args.ner_model_name, 
-        'maxlength':args.maxlength,
-        'train_val_split':-1,
-        'test':True, 
-        'split_words':args.split_words,
-        'remove_username':args.remove_username,
-        'remove_punctuation':args.remove_punctuation, 
-        'to_simplified':args.to_simplified, 
-        'emoji_to_text':args.emoji_to_text,
-        'device':device, 
-        'split_words':True, 
-        'cut_all':False, 
-    }
-
-    logging.info(f'Constructing test dataset object, with the following config:')
-    logging.info(test_dataset_config)
-    test = DatasetWithAuxiliaryEmbeddings(df=test_df, **test_dataset_config)
-    test.tokenize()
-    test.construct_dataset()
+TEST_DATASET_CONFIGS = {
+    'model_name':args.model_name,
+    'aux_model_name':args.ner_model_name, 
+    'maxlength':args.maxlength,
+    'train_val_split':-1,
+    'test':True, 
+    'split_words':args.split_words,
+    'remove_username':args.remove_username,
+    'remove_punctuation':args.remove_punctuation, 
+    'to_simplified':args.to_simplified, 
+    'emoji_to_text':args.emoji_to_text,
+    'device':DEVICE, 
+    'split_words':True, 
+    'cut_all':False, 
+}
 
 
-L = len(train_df_use)
+### ----------------------------- PREPARE DATASETS -----------------------------
+save_generated_datasets_dir = os.path.join(args.output_model_dir, 'data')
+
+# If provided, load dev set and training fold indices from file
 if args.folds:
+    logging.info(f'Loading dev set indices from file {args.folds}.')
     with open(args.folds, 'r') as f:
         lines = f.readlines()
         folds = [np.array(list(map(int, line.rstrip().split(' ')))) for line in lines]
-    assert sum(map(len, folds)) == L, 'Provided folds does not match with number of training examples'
+        dev_set_idx, folds = folds[0], folds[1:]
+    assert sum(map(len, folds)) == len(train_df_use), \
+        'Provided dev set and training fold indices does not match with number of training examples.'
+
+# Otherwise, randomly cast aside 1/10 of the original training data as dev set
+dev_set_idx = np.random.choice(np.arange(len(train_df_use)), size=len(train_df_use)//10, replace=False)
+
+# Get the dataframes from indices and save to file
+dev_set_df = train_df.iloc[dev_set_idx]
+if not os.path.exists(save_generated_datasets_dir):
+    os.makedirs(save_generated_datasets_dir)
+dev_set_df.to_csv(os.path.join(save_generated_datasets_dir, 'dev.csv'), sep='\t', index=False)
+
+# Use remaining to construct folds during training
+full_train_set_idx = np.array(list(set(np.arange(len(train_df_use))) - set(dev_set_idx)))
+# train_df_use = train_df_use.iloc[full_train_set_idx]
+
+# Construct folds - use provided if exists, otherwise generate folds on the fly
+if args.folds:
+    assert folds
     k = len(folds)
-    if args.kfolds and args.kfolds != k:
-        logging.warning('Provided folds does not match with provided k.')
-    logging.info(f'Loaded folds indices from {args.folds}.')
+    logging.info(f'Loading {k} training folds from file {args.folds}.')
 else:
-    if args.easy_ensemble:
-        minority_idx = np.array(train_df_use.index[train_df_use.label == 0].tolist())
-        if args.fold_size:
-            folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx, fold_size=args.fold_size)
-        else:
-            folds = easy_ensenble_generate_kfolds(L=L, k=k, minority_idx=minority_idx)
-    else:
-        folds = generate_folds(L, k)
+    k = args.kfolds
+    minority_idx = np.argwhere((train_df_use.label == 0).values).flatten()
+    folds = easy_ensenble_generate_kfolds(full_train_set_idx, k, minority_idx)
 
-    if not os.path.exists(args.output_model_dir):
-        os.makedirs(args.output_model_dir)
-    with open(os.path.join(args.output_model_dir, 'folds.txt'), 'w+') as fp:
-        for item in folds:
-            fp.write(' '.join(list(map(str, item))) + '\n')
+# Write folds indices to file
+with open(os.path.join(save_generated_datasets_dir, 'folds.txt'), 'w+') as fp:
+    fp.write(' '.join(list(map(str, dev_set_idx))) + '\n')
+    for item in folds:
+        fp.write(' '.join(list(map(str, item))) + '\n')
+for fi in range(k):
+    train_df_single_fold = train_df_use.iloc[folds[fi]]
+    train_df_single_fold.to_csv(os.path.join(save_generated_datasets_dir, f'train_{fi}.csv'), sep='\t', index=False)
+    # construct dataset objects for each fold
 
-logging.info(f'Set up {k}-fold CV.')
+# Set up dev set dataset object
+logging.info('Setting up dev set.')
+dev = DatasetWithAuxiliaryEmbeddings(df=dev_set_df, **DEV_DATASET_CONFIGS)
+dev.prepare_dataset()
 
-val_accuracies = []
+# Set up test set dataset object
 if args.perform_testing:
-    logits = []
+    logging.info('Setting up test dataset to run predictions on.')
+    test = DatasetWithAuxiliaryEmbeddings(df=test_df, **TEST_DATASET_CONFIGS)
+    test.prepare_dataset()
 
-irange = range(k) if not args.resume_fold_idx else range(args.resume_fold_idx-1, k)
+### ----------------------------- TRAINING -----------------------------
+# Set up training 
+n_fold_use = args.n_fold_used if args.n_fold_used else k
+logging.info(f'When training each individual model, {n_fold_use} out of {k} folds of data will be used.')
+n_models = args.num_ensemble_models
 
-for i in irange:
-    val_idx = folds[i]
-    logging.info(f'Training stage {i+1}/{k} ...')
-    logging.info(f'Constructing {k}-fold training dataset object, with the following config:')
-    logging.info(train_dataset_config)
-    train = DatasetWithAuxiliaryEmbeddings(df=train_df_use, **train_dataset_config)
-    train.tokenize()
-    train.construct_dataset(val_idx=val_idx)
-    single_layer_cls = True if args.single_layer_cls_head else False
-    concat = False if args.add_up_hiddens else True
+if args.perform_testing:
+    test_set_logits = []
 
-    if args.ner_model_name:
-        model = AutoModelWithNER(
-            model=args.model_name, 
-            ner_model=args.ner_model_name, 
-            n_labels=2, 
-            single_layer_cls=single_layer_cls, 
-            concatenate=concat,
-        )
-    elif args.add_crf_head:
-        model = BertWithCRFHead(
-            args.model_name, 
-            n_labels=args.num_labels, 
-            single_layer_cls=single_layer_cls, 
-            calibration_temperature=args.calibration_temperature, 
-        )
-    else:
-        model = AutoModelWithClassificationHead(
-            args.model_name, 
-            n_labels=args.num_labels, 
-            single_layer_cls=single_layer_cls, 
-            token_level=args.token_level_model, 
-            calibration_temperature=args.calibration_temperature, 
-        )
-        # model = AutoModelForSequenceClassification(args.model_name, num_labels=args.num_labels)
-    if args.checkpoint is not None and i == args.resume_fold_idx - 1:
-        if not args.from_another_run:
-            assert 'fold'+str(args.resume_fold_idx-1) in args.checkpoint
-        state_dict = torch.load(args.checkpoint, map_location=device)
-        model.load_state_dict(state_dict, strict=False) 
-    model.cuda()
+for i in range(n_models):
+    logging.info('=' * 50 + f'Training stage {i+1}/{n_models}' + '=' * 50)
+    # Set up training set
+    fold_idx = np.random.choice(range(k), size=n_fold_use, replace=False)
+    train_idx_single_model = folds[fold_idx].flatten()
+    train_df_single_model = train_df_use.iloc[train_idx_single_model].drop_duplicates()
+    logging.info(f'Constructing {i+1} training dataset object')
+    train = DatasetWithAuxiliaryEmbeddings(df=train_df_single_model, **TRAIN_DATASET_CONFIGS)
+    train.prepare_dataset()
 
+    model = AutoModelWithClassificationHead(
+        bert_model=args.model_name,
+        n_labels=args.num_labels, 
+        single_layer_cls=args.single_layer_cls_head, 
+    )
 
-    logging.info('Defining TrainingArguments.')
-    # Define training arguments
-    output_dir = os.path.join(args.output_model_dir, 'fold'+str(i))
+    if 'cuda' in DEVICE.type:
+        model.cuda()
+
+    # Construct required directories
+    single_model_output_dir = os.path.join(args.output_model_dir, 'model'+str(i))
+    if not os.path.exists(single_model_output_dir):
+        os.makedirs(single_model_output_dir)
+    with open(os.path.join(single_model_output_dir, 'used_fold_indices.txt'), 'w+') as f:
+        f.write(' '.join(list(map(str, fold_idx))))
     # Initialise tensorboard
-    tb_writer = SummaryWriter(os.path.join(output_dir, 'runs'))
+    tb_writer = SummaryWriter(os.path.join(single_model_output_dir, 'runs'))
+
+    # Define training arguments
+    logging.info('Defining TrainingArguments.')
     seed = args.seed if args.seed else 42
     metric_for_best_model = 'F1' if args.best_by_f1 else 'loss'
     arguments = MyTrainingArguments(
-        output_dir=output_dir,  # output directory
+        output_dir=single_model_output_dir, 
         per_device_train_batch_size=args.batch_size, 
         per_device_eval_batch_size=args.batch_size, 
-        num_train_epochs=args.epoch,
+        num_train_epochs=args.num_epochs,
+        logging_steps=100, 
         evaluation_strategy="epoch", # run validation at the end of each epoch
         save_strategy="epoch",  # save checkpoint at each epoch
         learning_rate=args.lr, 
-        load_best_model_at_end=True,
-        metric_for_best_model=metric_for_best_model, 
+        load_best_model_at_end=True, 
         label_names=['labels'],   # need to specify this to pass the labels to the trainer
         epsilon=args.adversarial_training_param, 
         alpha=args.alpha, 
@@ -251,12 +301,12 @@ for i in irange:
     )
 
     trainer = ImbalancedTrainer(
-        model=model, 
+        model=model,
         args=arguments, 
         train_dataset=train.dataset['train'], 
-        eval_dataset=train.dataset['val'],  
+        eval_dataset=dev.dataset['train'],
         tokenizer=train.tokenizer, 
-        compute_metrics=compute_metrics
+        compute_metrics=compute_metrics, 
     )
 
     trainer.add_callback(EarlyStoppingCallback(
@@ -268,37 +318,27 @@ for i in irange:
     # Train the model
     trainer.train()
 
-    # Get soft labels of dev set 
-    # dev_labels = np.argmax(trainer.predict(train.dataset['val']).predictions, axis=1)
-    # soft_labels.append(dev_labels)
-    
-    # Get pred accuracy on the dev set 
-    val_pred_logits = trainer.predict(train.dataset['val']).predictions[0]
-    val_pred = extract_predictions(val_pred_logits)
-    val_accuracy = (val_pred == train.dataset['val']['labels'].numpy()).mean()
-    val_accuracies.append(val_accuracy)
-
     if args.perform_testing:
         # Get logits on the test set
-        hiddens = trainer.predict(test.dataset['train']).predictions[0]
-        if hiddens.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
-            hiddens = postprocess_logits(hiddens, test.dataset['train']['attention_mask'], args.calibration_tempreture)
-        logits.append(hiddens)
+        test_set_hiddens = trainer.predict(test.dataset['train']).predictions[0]
+        if test_set_hiddens.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
+            test_set_hiddens = postprocess_logits(test_set_hiddens, test.dataset['train']['attention_mask'], args.calibration_tempreture)
+        test_set_logits.append(test_set_hiddens)
 
     del model
     torch.cuda.empty_cache()
 
-
 if args.perform_testing:
-    logging.info('Doing predictions on test set ...')
+    logging.info('Aggregating predictions on test set ...')
     # Ensemble by logits
     # predictions = averaging(logits, val_accuracies, weighted=args.weighted_averaging)
-    hiddens = np.array(logits).mean(0)
-    predictions = np.argmax(hiddens, 1)
-    result = pd.DataFrame(predictions, columns=['label'])
+    test_set_logits_agg = np.array(test_set_logits).mean(0)
+    test_set_predictions = np.argmax(test_set_logits_agg, 1)
+    test_set_result = pd.DataFrame(test_set_predictions, columns=['label'])
+    test_set_result['id'] = range(1, 1+len(test_set_result))
 
     # Write results
     out_path = os.path.join(args.pred_output_dir, 'submission.csv')
 
-    with open(out_path, 'a') as f:
-        result.to_csv(out_path, index=False)
+    with open(out_path, 'w+') as f:
+        test_set_result.to_csv(out_path, index=False, sep='\t')

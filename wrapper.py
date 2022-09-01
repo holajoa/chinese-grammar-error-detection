@@ -136,7 +136,7 @@ class ImbalancedTrainer(Trainer):
         focal_loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma, pass_pred_labels=pass_pred_labels)
         if 'sequence_logits' in outputs.keys():
             sequence_logits = outputs['sequence_logits']
-            local_loss = token_label_loss(sequence_logits, true_labels, hyperparam=self.args.local_loss_param)
+            local_loss = token_label_loss(sequence_logits, true_labels, hyperparam=self.args.local_loss_param, alpha=self.args.alpha)
         else: 
             local_loss = 0
         loss = focal_loss + local_loss
@@ -144,14 +144,14 @@ class ImbalancedTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
 
 
-def token_label_loss(sequence_logits, true_labels, sum=True, hyperparam=2e-3):
+def token_label_loss(sequence_logits, true_labels, sum=True, hyperparam=2e-3, alpha=1):
     pos_idx = torch.Tensor(true_labels == 1).long()
     neg_idx = torch.Tensor(true_labels == 0).long()
 
     logits_difference = sequence_logits[..., 1] - sequence_logits[..., 0]
 
     # For positive examples, maximise difference between max logit difference and min logit difference
-    loss_pos = (logits_difference.min(-1).values - logits_difference.max(-1).values) / 2 * pos_idx   
+    loss_pos = alpha * (logits_difference.min(-1).values - logits_difference.max(-1).values) / 2 * pos_idx   
 
     # For negative examples, minimise logit differences
     loss_neg = logits_difference.mean(-1) * neg_idx

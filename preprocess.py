@@ -5,6 +5,9 @@ from typing import List, Dict
 import nlpcda
 from nlpcda.tools.Basetool import Basetool
 import jieba
+import logging 
+from copy import deepcopy
+
 
 class DataPreprocessor:
     def __init__(
@@ -130,9 +133,11 @@ class WordPositionExchange(Basetool):
 
 
 class DataAugmentation:
-    def __init__(self, configs:Dict[str, dict]) -> None:
+    def __init__(self, configs_:Dict[str, dict]) -> None:
+        logging.info(f'Initialising data augumentatation operations, including: {list(configs_.keys())}')
         self.entity_swap, self.random_del, self.random_swap = None, None, None
 
+        configs = deepcopy(configs_)
         if 'random_entity' in configs.keys():
             self.entity_swap_p = configs['random_entity'].pop('prop')
             self.entity_swap = nlpcda.Similarword(**(configs['random_entity']))
