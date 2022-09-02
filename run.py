@@ -11,7 +11,8 @@ from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
-from models import AutoModelWithNER, AutoModelWithClassificationHead, BertWithCRFHead
+from models import AutoModelWithClassificationHead
+from time import time
 
 import argparse
 import os
@@ -43,7 +44,6 @@ parser.add_argument('--emoji_to_text', default=False, action='store_true', help=
 parser.add_argument('--kfolds', type=int, default=5, help='k-fold k', required=False)
 parser.add_argument('--folds', type=str, help='Directory to txt file storing the fold indices used for training.')
 parser.add_argument('--fold_size', type=int, help='Number of examples in a fold', required=False)
-
 ## training parameters
 parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
 parser.add_argument('--seed', type=int)
@@ -107,13 +107,13 @@ DATA_AUG_CONFIGS = {
     'random_entity':{
         'base_file':entities_file, 
         'create_num':2, 
-        'change_rate':0.5, 
+        'change_rate':0.2, 
         'seed':1024, 
         'prop':0.2,  
     }, 
     'random_delete_char':{
         'create_num':2, 
-        'change_rate':0.05, 
+        'change_rate':0.1, 
         'seed':1024, 
         'prop':0.1, 
     }, 
@@ -126,7 +126,7 @@ DATA_AUG_CONFIGS = {
     'random_swap_order':{
         'create_num':2,
         'char_gram':5,  
-        'change_rate':0.05, 
+        'change_rate':0.2, 
         'seed':1024, 
         'prop':0.5, 
     }
@@ -251,6 +251,7 @@ if args.perform_testing:
 for i in range(n_models):
     logging.info('=' * 50 + f'Training stage {i+1}/{n_models}' + '=' * 50)
     # Set up training set
+    np.random.seed(int(time()))
     fold_idx = np.random.choice(range(k), size=n_fold_use, replace=False)
     train_idx_single_model = folds[fold_idx].flatten()
     train_df_single_model = train_df_use.iloc[train_idx_single_model].drop_duplicates()
@@ -286,10 +287,15 @@ for i in range(n_models):
         per_device_eval_batch_size=args.batch_size, 
         num_train_epochs=args.num_epochs,
         logging_steps=100, 
-        evaluation_strategy="epoch", # run validation at the end of each epoch
-        save_strategy="epoch",  # save checkpoint at each epoch
+        # evaluation_strategy="epoch", # run validation at the end of each epoch
+        evaluation_strategy="steps",
+        eval_steps=500, 
+        # save_strategy="epoch",  # save checkpoint at each epoch
+        save_strategy="steps",
+        save_steps=500, 
         learning_rate=args.lr, 
         load_best_model_at_end=True, 
+        metric_for_best_model=metric_for_best_model, 
         label_names=['labels'],   # need to specify this to pass the labels to the trainer
         epsilon=args.adversarial_training_param, 
         alpha=args.alpha, 

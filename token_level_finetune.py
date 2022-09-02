@@ -10,7 +10,7 @@ from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
-from models import AutoModelWithNER, AutoModelWithClassificationHead, BertWithCRFHead
+from models import AutoModelWithNER, AutoModelWithClassificationHead
 import random
 
 import argparse

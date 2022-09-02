@@ -27,10 +27,10 @@ parser = argparse.ArgumentParser(description='Model and Training Config')
 parser.add_argument('--model_name', type=str, help='Huggingface model code for the Bert model', required=True)
 parser.add_argument('--num_labels', type=int, default=2, help='Number of classes in the dataset', required=True)
 parser.add_argument('--ner_model_name', type=str, help='Finetuned model for named entities recognition boosting')
-parser.add_argument('--single_layer_cls_head', default=False, action='store_true')
 parser.add_argument('--add_up_hiddens', default=False, action='store_true')
 parser.add_argument('--add_crf_head', default=False, action='store_true')
 parser.add_argument('--token_level_model', default=False, action='store_true')
+parser.add_argument('--pooling_mode', default='cls', type=str)
 
 ## dataset parameters
 parser.add_argument('--data_dir', type=str, help='Path to directory storing train.csv and test.csv files.', required=True)
@@ -188,7 +188,6 @@ for i in irange:
     train = DatasetWithAuxiliaryEmbeddings(df=train_df_use, **train_dataset_config)
     train.tokenize()
     train.construct_dataset(val_idx=val_idx)
-    single_layer_cls = True if args.single_layer_cls_head else False
     concat = False if args.add_up_hiddens else True
 
     if args.ner_model_name:
@@ -196,23 +195,21 @@ for i in irange:
             model=args.model_name, 
             ner_model=args.ner_model_name, 
             n_labels=2, 
-            single_layer_cls=single_layer_cls, 
             concatenate=concat,
         )
     elif args.add_crf_head:
         model = BertWithCRFHead(
             args.model_name, 
             n_labels=args.num_labels, 
-            single_layer_cls=single_layer_cls, 
             calibration_temperature=args.calibration_temperature, 
         )
     else:
         model = AutoModelWithClassificationHead(
             args.model_name, 
             n_labels=args.num_labels, 
-            single_layer_cls=single_layer_cls, 
             token_level=args.token_level_model, 
             calibration_temperature=args.calibration_temperature, 
+            pooling_mode=args.pooling_mode, 
         )
         # model = AutoModelForSequenceClassification(args.model_name, num_labels=args.num_labels)
     if args.checkpoint is not None and i == args.resume_fold_idx - 1:

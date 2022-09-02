@@ -1,18 +1,21 @@
 python run.py \
-    --model_name hfl/chinese-macbert-base \
+    --model_name uer/roberta-base-word-chinese-cluecorpussmall \
     --num_labels 2 \
     --single_layer_cls_head \
     --data_dir data/data-org \
     --maxlength 64 \
     --kfolds 10 \
     --pred_output_dir submissions \
-    --output_model_dir finetuned_models/ensemble \
+    --output_model_dir finetuned_models/word-based-roberta \
     --n_fold_used 5 \
     --num_ensemble_models 5 \
     --num_epochs 5 \
-    --batch_size 64 \
+    --batch_size 32 \
     --lr 1e-5 \
-    --alpha 1 \
-    --gamma 2 \
+    --alpha 1.25 \
+    --gamma 1   \
+    --pooling_mode cls \
     --local_loss_param 1e-3 \
-    --perform_testing \
+    --early_stopping_patience 3 \
+    --best_by_f1  \
+    --perform_testing 

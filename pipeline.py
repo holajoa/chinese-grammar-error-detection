@@ -205,18 +205,27 @@ class PipelineGED:
         if majority_vote:
             return self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities, majority_vote=True)
         probs, seq_probs = self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
-        err_char_lst = self.display_error_chars(seq_probs, test.texts.values, display=display)
+        err_char_lst = self.display_error_chars(seq_probs, test, display=display)
         return probs, seq_probs, err_char_lst
 
     @staticmethod
-    def display_error_chars(seq_probs, texts, display=True):
+    def display_error_chars(seq_probs, test:DatasetWithAuxiliaryEmbeddings, display=True):
+        import matplotlib.pyplot as plt
+
         err_char_lst = []
-        for probs, txt in zip(seq_probs, texts):
-            err_idx = np.argwhere(probs[:(2+len(txt)), 1] > probs[:(2+len(txt)), 0])
-            err_chars = np.array(['[CLS]'] + list(txt) + ['[SEP]'])[err_idx].flatten()
+        for probs, txt_ids, mask in zip(seq_probs, test.inputs['input_ids'], test.inputs['attention_mask']):
+            txt_ids = txt_ids.masked_select(mask.bool())
+            err_idx = np.argwhere(probs[:txt_ids.size(-1), 1] > probs[:txt_ids.size(-1), 0]).flatten()
+            err_chars = test.tokenizer.convert_ids_to_tokens(txt_ids[err_idx])
             if display:
-                print(txt)
+                print(' '.join(test.tokenizer.convert_ids_to_tokens(txt_ids)))
                 print(err_chars)
             err_char_lst.append(err_chars)
+        if display:
+            masks = test.inputs['attention_mask'].cpu().numpy()
+            max_len = masks.sum(1).max()
+            seq_probs_masked = seq_probs[..., 1] * masks
+            plt.figure(figsize=(20, 1))
+            plt.imshow(seq_probs_masked[:, :max_len], cmap='binary')
         return err_char_lst
             

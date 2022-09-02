@@ -125,11 +125,11 @@ class ImbalancedTrainer(Trainer):
         outputs = model(**inputs)
 
         true_labels = inputs['labels']
-        if self.model.token_level:
-            logits = outputs['sequence_logits']
-        elif 'logits' in outputs.keys():
+        # if self.model.token_level:
+        #     logits = outputs['sequence_logits']
+        try:
             logits = outputs['logits']
-        else:
+        except:
             logits = outputs['predictions']
         pass_pred_labels = 'predictions' in outputs.keys()
 
