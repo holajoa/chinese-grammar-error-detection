@@ -1,3 +1,4 @@
+from math import ceil
 import numpy as np
 import torch
 import logging
@@ -24,7 +25,7 @@ def generate_folds(L, k=5):
 def easy_ensenble_generate_kfolds(indices, k, minority_idx, fold_size=None):
     s_fold = fold_size if fold_size else len(indices) // k 
     majority_idx = np.array(list(set(indices) - set(minority_idx)))
-    minor_samples = np.random.choice(minority_idx, size=(k, s_fold//2), replace=True)
+    minor_samples = np.random.choice(minority_idx, size=(k, ceil(s_fold/2)), replace=True)
     major_samples = np.random.choice(majority_idx, size=(k, s_fold//2), replace=False)
     folds = np.concatenate((minor_samples, major_samples), axis=1)
     folds = folds[:, np.random.permutation(range(s_fold))]

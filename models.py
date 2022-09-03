@@ -16,8 +16,8 @@ class AutoModelWithClassificationHead(nn.Module):
         self.calibration_temperature = calibration_temperature
         self.token_level = token_level
         self.pooling_mode = pooling_mode
-        if self.pooling_model not in ['cls', 'max']:
-            raise NotImplementedError("Choose pooling_model from ['cls', 'max'].")
+        if self.pooling_mode not in ['cls', 'max', 'hybrid']:
+            raise NotImplementedError("Choose pooling_model from ['cls', 'max', 'hybrid'].")
         self.classifier = nn.Linear(self.base_model.config.hidden_size, n_labels)
 
     def forward(self, input_ids, attention_mask, **kwargs):
@@ -29,6 +29,8 @@ class AutoModelWithClassificationHead(nn.Module):
             output = sequence_logits[:, 0, :]
         elif self.pooling_mode == 'max':
             output = postprocess_logits(sequence_logits, attention_mask, self.calibration_temperature)
+        elif self.pooling_mode == 'hybrid':
+            output = sequence_logits[:, 0, :] + postprocess_logits(sequence_logits, attention_mask, self.calibration_temperature)
         return {'logits':output, 'sequence_logits':sequence_logits}
 
 
@@ -71,44 +73,25 @@ class BertWithNER(nn.Module):
         return {'logits':output}
 
 
-class AutoModelWithNER(nn.Module):
-    def __init__(self, model, ner_model, n_labels=2, single_layer_cls=False, concatenate=True):
-        super(AutoModelWithNER, self).__init__()
+class AutoModelWithOOBModel(nn.Module):
+    def __init__(self, model, oob_model, n_labels=2, concatenate=True):
+        super(AutoModelWithOOBModel, self).__init__()
         self.base_model = AutoModel.from_pretrained(model)
-        self.ner = BertModel.from_pretrained(ner_model)
-        self.concatenate = concatenate
-        for param in self.ner.parameters():
+        self.oob_model = BertModel.from_pretrained(oob_model)
+        for param in self.oob_model.parameters():
             param.requires_grad = False 
+        self.classifier = nn.Linear(self.base_model.config.hidden_size + self.oob_model.config.hidden_size, n_labels)
+        self.concatenate = concatenate
+        # self.pooling_mode = pooling_mode
 
-        if single_layer_cls:
-            self.classifier = nn.Linear(768*2, n_labels) if self.concatenate else nn.Linear(768, n_labels)
-        else:
-            if self.concatenate:
-                self.classifier = nn.Sequential(
-                    nn.Dropout(p=0.1),
-                    nn.Linear(768*2, 768, bias=True),
-                    # nn.Tanh(),
-                    nn.ReLU(), 
-                    nn.Dropout(p=0.1),
-                    nn.Linear(768, n_labels, bias=True)
-                )
-            else:
-                self.classifier = nn.Sequential(
-                    nn.Dropout(p=0.1),
-                    nn.Linear(768, 768, bias=True),
-                    # nn.Tanh(),
-                    nn.ReLU(), 
-                    nn.Dropout(p=0.1),
-                    nn.Linear(768, n_labels, bias=True)
-                )
 
     def forward(self, input_ids, attention_mask, auxiliary_input_ids, **kwargs):
         logits_base = self.base_model(input_ids, attention_mask=attention_mask).last_hidden_state[:, 0, :]
-        logits_ner = self.ner(auxiliary_input_ids, attention_mask=attention_mask).last_hidden_state[:, 0, :]
+        logits_oob = self.oob_model(auxiliary_input_ids, attention_mask=attention_mask).last_hidden_state[:, 0, :]
         if self.concatenate:
-            concatenated_vectors = torch.concat((logits_base, logits_ner), axis=1)
+            concatenated_vectors = torch.concat((logits_base, logits_oob), axis=1)
         else: 
-            concatenated_vectors = logits_base + logits_ner
+            concatenated_vectors = logits_base + logits_oob
         output = self.classifier(concatenated_vectors)
         return {'logits':output}
 

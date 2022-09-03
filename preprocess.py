@@ -4,6 +4,7 @@ import pandas as pd
 from typing import List, Dict
 import nlpcda
 from nlpcda.tools.Basetool import Basetool
+from nlpcda.config import similarword_path
 import jieba
 import logging 
 from copy import deepcopy
@@ -132,6 +133,62 @@ class WordPositionExchange(Basetool):
         return sentences
 
 
+
+class AddSimilarWord(Basetool):
+    '''
+    句中随意添加近义词，生成【语义重复】类型病句。
+    '''
+
+    def __init__(self, base_file=similarword_path, create_num=5, change_rate=0.05, seed=1):
+        super(AddSimilarWord, self).__init__(base_file, create_num, change_rate, seed)
+
+
+    def load_paser_base_file(self):
+        combine_dict = {}
+        for line in open(self.base_file, "r", encoding='utf-8'):
+            seperate_word = line.strip().split(" ")
+            # 仅保留真正近义词，过滤相关词和独立词
+            if not seperate_word[0].endswith("="):
+                continue
+            num = len(seperate_word)
+            for i in range(1, num):
+                wi = seperate_word[i]
+                # add to user dict
+                if len(wi) > 1: self.add_word(wi)
+                combine_dict[wi] = seperate_word[1:]
+        print('load :%s done' % (self.base_file))
+        return combine_dict
+
+    def replace(self, replace_str:str):
+        replace_str = replace_str.replace('\n', '').strip()
+        seg_list = self.jieba.cut(replace_str, cut_all=False)
+        words = list(seg_list)
+        sentences = [replace_str]
+        t = 0
+        while len(sentences) < self.create_num:
+            t += 1
+            a_sentence = ''
+            for word in words:
+                a_sentence += self.s1(word)
+            if a_sentence not in sentences:
+                sentences.append(a_sentence)
+            if t > self.create_num * self.loop_t / self.change_rate:
+                break
+        return sentences
+
+    def s1(self, word:str):
+        # 替换所有在combine_dict中的
+        if len(word) == 1: return word
+        if word in self.base_file_mapobj and self.random.random() < self.change_rate:
+            wi = self.random.randint(0, len(self.base_file_mapobj[word]) - 1)
+            place = self.base_file_mapobj[word][wi]
+            if place == word:
+                return word
+            return word + place if self.random.random() < 0.5 else place + word
+        else:
+            return word
+
+
 class DataAugmentation:
     def __init__(self, configs_:Dict[str, dict]) -> None:
         logging.info(f'Initialising data augumentatation operations, including: {list(configs_.keys())}')
@@ -150,24 +207,35 @@ class DataAugmentation:
         if 'random_swap_order' in configs.keys():
             self.random_swap_order_p = configs['random_swap_order'].pop('prop')
             self.random_swap_order = WordPositionExchange(**(configs['random_swap_order']))
+        if 'random_add_similar' in configs.keys():
+            self.random_add_similar_p = configs['random_add_similar'].pop('prop')
+            self.random_add_similar = AddSimilarWord(**(configs['random_add_similar']))
+        if 'random_swap_logic_words' in configs.keys():
+            self.random_swap_logic_words_p = configs['random_swap_logic_words'].pop('prop')
+            self.random_swap_logic_words = nlpcda.Similarword(**(configs['random_swap_logic_words']))
 
     def aug(self, df_full:pd.DataFrame, permute=True, seed=1024) -> pd.DataFrame:
         df_pos = df_full[df_full.label == 1]
         df_neg = df_full[df_full.label == 0]
 
-        L = len(df_pos)
+        L_pos = len(df_pos)
         if self.entity_swap:
-            df_pos_aug = self.aug_single(df_pos, L, self.entity_swap_p, self.entity_swap)
+            df_pos_aug = self.aug_single(df_pos, L_pos, self.entity_swap_p, self.entity_swap)
         # if self.random_swap_order:
-        #     df_pos_aug = self.aug_single(df_pos_aug, L, self.random_swap_order_p, self.random_swap_order)
+        #     df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_swap_order_p, self.random_swap_order)
         if self.random_del:
-            df_pos_aug = self.aug_single(df_pos_aug, L, self.random_del_p, self.random_del)
+            df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_del_p, self.random_del)
         if self.random_swap:
-            df_pos_aug = self.aug_single(df_pos_aug, L, self.random_swap_p, self.random_swap)
+            df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_swap_p, self.random_swap)
+        if self.random_add_similar:
+            df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_add_similar_p, self.random_add_similar)
 
         df_neg_aug = self.split_long_sentence(df_neg, label=0)
+        L_neg = len(df_neg_aug)
         if self.random_swap_order:
-            df_neg_aug = self.aug_single(df_neg_aug, len(df_neg_aug), self.random_swap_order_p, self.random_swap_order, new_label=1)
+            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_order_p, self.random_swap_order, new_label=1)
+        if self.random_swap_logic_words:
+            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_logic_words_p, self.random_swap_logic_words, new_label=1)
         augmented_df = pd.concat((df_neg_aug, df_pos_aug))
         # ----------------------------------------------
         # with pd.option_context('display.max_rows', None, 'display.max_columns', None, ):

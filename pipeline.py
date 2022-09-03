@@ -80,7 +80,7 @@ class POSTaggingPipeline:
             
 
 class PipelineGED:
-    def __init__(self, model_name:str, model_architecture:str='bert_with_clf_head', data_configs=None, single_layer_cls=True):
+    def __init__(self, model_name:str, model_architecture:str='bert_with_clf_head', data_configs=None, pooling_mode='cls'):
         # self.model = AutoModelForSequenceClassification.from_pretrained(
         #     model_name, num_labels=2, 
         # )
@@ -88,13 +88,12 @@ class PipelineGED:
             self.model = AutoModelWithClassificationHead(
                 model_name, 
                 n_labels=2, 
-                single_layer_cls=single_layer_cls, 
+                pooling_mode=pooling_mode, 
             )
         elif model_architecture == 'bert_with_crf_head':
             self.model = BertWithCRFHead(
                 model_name, 
                 n_labels=2, 
-                single_layer_cls=single_layer_cls, 
             )
         else:
             print(f'Model architecture {model_architecture} is not implemented.')
@@ -159,7 +158,15 @@ class PipelineGED:
                 output_sequence_logits.append(torch.concat(sequence_logits, dim=0))
         if pass_logits:
             output_sequence_logits_agg = torch.stack(output_sequence_logits, dim=3).mean(-1)
-            output_logits_agg = postprocess_logits(output_sequence_logits_agg, ds.dataset['train']['attention_mask'])
+            if self.model.pooling_mode == 'max':
+                output_logits_agg = postprocess_logits(output_sequence_logits_agg, ds.dataset['train']['attention_mask'])
+            elif self.model.pooling_mode == 'cls':
+                output_logits_agg = output_sequence_logits_agg[:, 0, :]
+            elif self.model.pooling_mode == 'hybrid':
+                output = output_sequence_logits_agg[:, 0, :] + \
+                    postprocess_logits(output_sequence_logits_agg, ds.dataset['train']['attention_mask'])
+            else:
+                raise NotImplementedError(f'pooling mode {self.model.pooling_mode} is not implemented.')
             if majority_vote:
                 return voting(torch.stack(output_tensors))
             else:

@@ -27,7 +27,7 @@ parser = argparse.ArgumentParser(description='Model and Training Config')
 parser.add_argument('--model_name', type=str, help='Huggingface model code for the Bert model', required=True)
 parser.add_argument('--num_labels', type=int, default=2, help='Number of classes in the dataset', required=True)
 parser.add_argument('--ner_model_name', type=str, help='Finetuned model for named entities recognition boosting')
-parser.add_argument('--single_layer_cls_head', default=False, action='store_true')
+parser.add_argument('--pooling_mode', default='cls', type=str)
 parser.add_argument('--add_up_hiddens', default=False, action='store_true')
 parser.add_argument('--token_level_model', default=False, action='store_true')
 
@@ -44,6 +44,7 @@ parser.add_argument('--emoji_to_text', default=False, action='store_true', help=
 parser.add_argument('--kfolds', type=int, default=5, help='k-fold k', required=False)
 parser.add_argument('--folds', type=str, help='Directory to txt file storing the fold indices used for training.')
 parser.add_argument('--fold_size', type=int, help='Number of examples in a fold', required=False)
+
 ## training parameters
 parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
 parser.add_argument('--seed', type=int)
@@ -126,7 +127,7 @@ DATA_AUG_CONFIGS = {
     'random_swap_order':{
         'create_num':2,
         'char_gram':5,  
-        'change_rate':0.2, 
+        'change_rate':0.05, 
         'seed':1024, 
         'prop':0.5, 
     }
@@ -144,7 +145,7 @@ TRAIN_DATASET_CONFIGS = {
     'to_simplified':args.to_simplified, 
     'emoji_to_text':args.emoji_to_text,
     'device':DEVICE, 
-    'split_words':True, 
+    'split_words':False, 
     'cut_all':False, 
     'da_configs':DATA_AUG_CONFIGS, 
 }
@@ -161,7 +162,7 @@ DEV_DATASET_CONFIGS = {
     'to_simplified':args.to_simplified, 
     'emoji_to_text':args.emoji_to_text,
     'device':DEVICE, 
-    'split_words':True, 
+    'split_words':False, 
     'cut_all':False, 
 }
 
@@ -177,7 +178,7 @@ TEST_DATASET_CONFIGS = {
     'to_simplified':args.to_simplified, 
     'emoji_to_text':args.emoji_to_text,
     'device':DEVICE, 
-    'split_words':True, 
+    'split_words':False, 
     'cut_all':False, 
 }
 
@@ -262,7 +263,7 @@ for i in range(n_models):
     model = AutoModelWithClassificationHead(
         bert_model=args.model_name,
         n_labels=args.num_labels, 
-        single_layer_cls=args.single_layer_cls_head, 
+        pooling_mode=args.pooling_mode, 
     )
 
     if 'cuda' in DEVICE.type:
@@ -328,7 +329,10 @@ for i in range(n_models):
         # Get logits on the test set
         test_set_hiddens = trainer.predict(test.dataset['train']).predictions[0]
         if test_set_hiddens.ndim > 2:  # get the logits pair with highest difference in logits (1 higher than)
-            test_set_hiddens = postprocess_logits(test_set_hiddens, test.dataset['train']['attention_mask'], args.calibration_tempreture)
+            if args.pooling_mode == 'cls':
+                test_set_hiddens = test_set_hiddens[:, 0, :]
+            elif args.pooling_mode == 'max':
+                test_set_hiddens = postprocess_logits(test_set_hiddens, test.dataset['train']['attention_mask'], args.calibration_tempreture)
         test_set_logits.append(test_set_hiddens)
 
     del model
@@ -342,6 +346,7 @@ if args.perform_testing:
     test_set_predictions = np.argmax(test_set_logits_agg, 1)
     test_set_result = pd.DataFrame(test_set_predictions, columns=['label'])
     test_set_result['id'] = range(1, 1+len(test_set_result))
+    test_set_result = test_set_result[['id', 'label']]
 
     # Write results
     out_path = os.path.join(args.pred_output_dir, 'submission.csv')

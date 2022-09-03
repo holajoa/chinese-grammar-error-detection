@@ -102,3 +102,7 @@ python run.py \
    - https://huggingface.co/KoichiYasuoka/chinese-bert-wwm-ext-upos
 4. CLS与后面error_char一致的为简单样本，不一致的为困难样本，困难样本是否可以进行二次训练
 5. 用正确的句子训练pos tagger + clf，然后用clf层预测likelihood
+
+## 尝试的想法
+1. token level local loss
+2. whole word model - 语义识别不好

@@ -16,6 +16,16 @@
 	"launch": {
 		"version": "0.2.0",
 		"configurations": [
+			
+			{
+				"name": "notebooks",
+				"type": "python",
+				"request": "launch",
+				"python": "D:/Apps/Anaconda3/envs/general-torch/python.exe", 
+				"console": "integratedTerminal",
+				"justMyCode": false, 
+				"args":[]
+			}, 
 			{
 				"name": "With Local Loss",
 				"type": "python",

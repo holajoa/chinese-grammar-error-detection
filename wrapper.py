@@ -133,10 +133,11 @@ class ImbalancedTrainer(Trainer):
             logits = outputs['predictions']
         pass_pred_labels = 'predictions' in outputs.keys()
 
+        attention_mask = inputs['attention_mask']
         focal_loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma, pass_pred_labels=pass_pred_labels)
         if 'sequence_logits' in outputs.keys():
             sequence_logits = outputs['sequence_logits']
-            local_loss = token_label_loss(sequence_logits, true_labels, hyperparam=self.args.local_loss_param, alpha=self.args.alpha)
+            local_loss = token_label_loss(sequence_logits, true_labels, hyperparam=self.args.local_loss_param, alpha=self.args.alpha, attention_mask=attention_mask)
         else: 
             local_loss = 0
         loss = focal_loss + local_loss
@@ -144,7 +145,9 @@ class ImbalancedTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
 
 
-def token_label_loss(sequence_logits, true_labels, sum=True, hyperparam=2e-3, alpha=1):
+def token_label_loss(sequence_logits, true_labels, attention_mask, sum=True, hyperparam=2e-3, alpha=1):
+    from torch.distributions import Categorical
+
     pos_idx = torch.Tensor(true_labels == 1).long()
     neg_idx = torch.Tensor(true_labels == 0).long()
 
@@ -155,6 +158,13 @@ def token_label_loss(sequence_logits, true_labels, sum=True, hyperparam=2e-3, al
 
     # For negative examples, minimise logit differences
     loss_neg = logits_difference.mean(-1) * neg_idx
+
+    # entropies = Categorical(logits=sequence_logits).entropy()
+    # # For positive examples, minimise entropy
+    # loss_pos = alpha * entropies*attention_mask / attention_mask.sum(1).view(-1, 1) * pos_idx.view(-1, 1)
+
+    # # For negative examples, maximise entropy
+    # loss_neg = - entropies*attention_mask / (attention_mask.sum(1).view(-1, 1)) * neg_idx.view(-1, 1)
 
     if sum:
         loss_pos = torch.sum(loss_pos)
