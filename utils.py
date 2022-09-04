@@ -22,11 +22,13 @@ def generate_folds(L, k=5):
     permuted = np.random.permutation(np.arange(L))
     return np.array_split(permuted, k)
 
-def easy_ensenble_generate_kfolds(indices, k, minority_idx, fold_size=None):
+def easy_ensenble_generate_kfolds(indices, k, minority_idx, fold_size=None, minor_major_ratio=1.):
     s_fold = fold_size if fold_size else len(indices) // k 
     majority_idx = np.array(list(set(indices) - set(minority_idx)))
-    minor_samples = np.random.choice(minority_idx, size=(k, ceil(s_fold/2)), replace=True)
-    major_samples = np.random.choice(majority_idx, size=(k, s_fold//2), replace=False)
+    minor_proportion = minor_major_ratio / (1. + minor_major_ratio)
+    num_minor_samples = int(s_fold*minor_proportion)
+    minor_samples = np.random.choice(minority_idx, size=(k, num_minor_samples), replace=True)
+    major_samples = np.random.choice(majority_idx, size=(k, s_fold-num_minor_samples), replace=False)
     folds = np.concatenate((minor_samples, major_samples), axis=1)
     folds = folds[:, np.random.permutation(range(s_fold))]
     print(f'Using easy ensemble - each fold has {minor_samples.shape[1]} negatives in the training set, paired with {major_samples.shape[1]} positives')

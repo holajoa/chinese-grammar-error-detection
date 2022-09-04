@@ -1,0 +1,22 @@
+python run-oob.py \
+    --model_name hfl/chinese-macbert-base \
+    --oob_model_name KoichiYasuoka/chinese-bert-wwm-ext-upos \
+    --num_labels 2 \
+    --data_dir data/data-org \
+    --maxlength 64 \
+    --kfolds 10 \
+    --folds finetuned_models/macbert_with_wwm_upos/data/folds.txt \
+    --resume_model_idx 4 \
+    --minor_major_ratio 0.75 \
+    --pred_output_dir submissions \
+    --output_model_dir finetuned_models/macbert_with_wwm_upos \
+    --n_fold_used 5 \
+    --num_ensemble_models 5 \
+    --num_epochs 10 \
+    --batch_size 32 \
+    --lr 1e-5 \
+    --alpha 1 \
+    --gamma 1 \
+    --early_stopping_patience 4 \
+    --best_by_f1  \
+    --perform_testing 

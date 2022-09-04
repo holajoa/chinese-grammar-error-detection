@@ -40,6 +40,7 @@ parser.add_argument('--emoji_to_text', default=False, action='store_true', help=
 parser.add_argument('--kfolds', type=int, default=5, help='k-fold k', required=False)
 parser.add_argument('--folds', type=str, help='Directory to txt file storing the fold indices used for training.')
 parser.add_argument('--fold_size', type=int, help='Number of examples in a fold', required=False)
+parser.add_argument('--minor_major_ratio', type=float, default=1.)
 
 ## training parameters
 parser.add_argument('--output_model_dir', type=str, help='Directory to store finetuned models', required=True)
@@ -54,9 +55,7 @@ parser.add_argument('--adversarial_training_param', type=int, default=0, help='A
 parser.add_argument('--alpha', type=float, default=1, help='alpha parameter for focal loss. Change the weights of positive examples.')
 parser.add_argument('--gamma', type=float, default=0, help='gamma parameter for focal loss. Change how strict the positive labelling is.')
 parser.add_argument('--early_stopping_patience', type=int, default=4)
-parser.add_argument('--resume_fold_idx', type=int, help='On which fold to resume training.')
-parser.add_argument('--checkpoint', type=str, help='previous model checkpoint.')
-parser.add_argument('--from_another_run', default=False, action='store_true')
+parser.add_argument('--resume_model_idx', type=int, help='On which fold to resume training.')
 
 ## output parameters
 parser.add_argument('--perform_testing', help='Whether to use the trained model on a test set', default=False, action='store_true')
@@ -125,16 +124,16 @@ DATA_AUG_CONFIGS = {
     }, 
     'random_add_similar':{
         'create_num':2,
-        'change_rate':0.1, 
+        'change_rate':0.2, 
         'seed':1024, 
         'prop':0.25, 
     }, 
     'random_swap_logic_words':{
         'base_file':logic_pairs_file, 
         'create_num':2,
-        'change_rate':0.1, 
+        'change_rate':0.5, 
         'seed':1024, 
-        'prop':0.25, 
+        'prop':0.5, 
     }, 
 }
 
@@ -197,9 +196,13 @@ if args.folds:
     with open(args.folds, 'r') as f:
         lines = f.readlines()
         folds = [np.array(list(map(int, line.rstrip().split(' ')))) for line in lines]
-        dev_set_idx, folds = folds[0], folds[1:]
-    assert sum(map(len, folds)) == len(train_df_use), \
-        'Provided dev set and training fold indices does not match with number of training examples.'
+        if sum(map(len, folds)) != len(train_df_use):
+            logging.warning(
+                f'Number of provided dev set and training fold indices ({sum(map(len, folds))}) ' 
+                f'does not match with number of training examples ({len(train_df_use)}).'
+            )
+        dev_set_idx, folds = np.array(folds[0]), np.array(folds[1:])
+    
 
 # Otherwise, randomly cast aside 1/10 of the original training data as dev set
 dev_set_idx = np.random.choice(np.arange(len(train_df_use)), size=len(train_df_use)//10, replace=False)
@@ -216,13 +219,13 @@ full_train_set_idx = np.array(list(set(np.arange(len(train_df_use))) - set(dev_s
 
 # Construct folds - use provided if exists, otherwise generate folds on the fly
 if args.folds:
-    assert folds
+    assert folds is not None
     k = len(folds)
     logging.info(f'Loading {k} training folds from file {args.folds}.')
 else:
     k = args.kfolds
     minority_idx = np.argwhere((train_df_use.label == 0).values).flatten()
-    folds = easy_ensenble_generate_kfolds(full_train_set_idx, k, minority_idx)
+    folds = easy_ensenble_generate_kfolds(full_train_set_idx, k, minority_idx, minor_major_ratio=args.minor_major_ratio)
 
 # Write folds indices to file
 with open(os.path.join(save_generated_datasets_dir, 'folds.txt'), 'w+') as fp:
@@ -255,7 +258,10 @@ n_models = args.num_ensemble_models
 if args.perform_testing:
     test_set_logits = []
 
-for i in range(n_models):
+
+irange = range(args.resume_model_idx, n_models) if args.resume_model_idx else range(n_models)
+
+for i in irange:
     logging.info('=' * 50 + f'Training stage {i+1}/{n_models}' + '=' * 50)
     # Set up training set
     np.random.seed(int(time()))

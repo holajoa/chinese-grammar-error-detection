@@ -1,10 +1,10 @@
 from transformers import AutoModelForTokenClassification
-from typing import List, Union
+from typing import List, Union, Tuple
 
 from utils import *
 from dataset import *
 from torch.utils.data import DataLoader
-from models import BertWithCRFHead, AutoModelWithClassificationHead
+from models import AutoModelWithOOBModel, BertWithCRFHead, AutoModelWithClassificationHead
 
 
 def map_to_df(texts:str) -> pd.DataFrame:
@@ -80,10 +80,11 @@ class POSTaggingPipeline:
             
 
 class PipelineGED:
-    def __init__(self, model_name:str, model_architecture:str='bert_with_clf_head', data_configs=None, pooling_mode='cls'):
+    def __init__(self, model_name:str, oob_model_name=None, model_architecture:str='bert_with_clf_head', data_configs=None, pooling_mode='cls'):
         # self.model = AutoModelForSequenceClassification.from_pretrained(
         #     model_name, num_labels=2, 
         # )
+        
         if model_architecture == 'bert_with_clf_head':
             self.model = AutoModelWithClassificationHead(
                 model_name, 
@@ -94,6 +95,13 @@ class PipelineGED:
             self.model = BertWithCRFHead(
                 model_name, 
                 n_labels=2, 
+            )
+        elif model_architecture == 'bert_with_oob_model':
+            self.model = AutoModelWithOOBModel(
+                model=model_name, 
+                oob_model=oob_model_name, 
+                n_labels=2, 
+                concatenate=True,
             )
         else:
             print(f'Model architecture {model_architecture} is not implemented.')
@@ -112,9 +120,51 @@ class PipelineGED:
                 'split_words':False, 
                 'cut_all':False, 
         }
+        if oob_model_name:
+            self.data_configs['aux_model_name'] = oob_model_name
+        self.model_architecture = model_architecture
+        self.feedforward = self._feedforward_seq if model_architecture == 'bert_with_oob_model' else self._feedforward_token
+    
+    def _feedforward_seq(
+        self, 
+        ds:DatasetWithAuxiliaryEmbeddings, 
+        checkpoints:List[str], 
+        device:torch.device, 
+        raw_outputs:bool=True, 
+        output_probabilities:bool=False, 
+    ) -> np.ndarray:
+        from tqdm import tqdm
+
+        output_tensors = []
+        for cp in checkpoints:
+            state_dict = torch.load(cp, map_location=device)
+            missing_keys, unexpected_keys = self.model.load_state_dict(state_dict, strict=False)
+            if bool(missing_keys) | bool(unexpected_keys):
+                print(f'Warning: state_dict does not match perfectly. \nMissing keys: {missing_keys}\nUnexpected keys: {unexpected_keys}')
+            if 'cuda' in device.type:
+                self.model.cuda()
+
+            logits = []
+            dataloader = DataLoader(ds.dataset['train'].with_format('torch'), batch_size=16)
+
+            for batch in tqdm(dataloader):
+                inputs = {k:v.to(device) for k,v in batch.items()
+                        if k in ds.tokenizer.model_input_names or k == 'auxiliary_input_ids'}
+                with torch.no_grad():
+                    output = self.model(**inputs)
+                logits.append(output['logits'])    
+            output_tensors.append(torch.concat(logits))
+        output_logits_agg = torch.dstack(output_tensors).mean(-1)
+
+        if output_probabilities:
+            from torch.nn import Softmax
+            return Softmax(dim=1)(output_logits_agg).cpu().numpy(), 
+        if raw_outputs:
+            return output_logits_agg.cpu().numpy()
+        return output_logits_agg.argmax(1).cpu().numpy()
 
     
-    def feedforward(
+    def _feedforward_token(
         self, 
         ds:DatasetWithAuxiliaryEmbeddings, 
         checkpoints:List[str], 
@@ -122,7 +172,7 @@ class PipelineGED:
         raw_outputs:bool=True, 
         output_probabilities:bool=False, 
         majority_vote=False, 
-    ) -> np.ndarray:
+    ) -> Tuple[np.ndarray]:
         output_tensors = []
         output_sequence_logits = []
         from tqdm import tqdm
@@ -211,9 +261,12 @@ class PipelineGED:
         test.prepare_dataset()
         if majority_vote:
             return self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities, majority_vote=True)
-        probs, seq_probs = self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
-        err_char_lst = self.display_error_chars(seq_probs, test, display=display)
-        return probs, seq_probs, err_char_lst
+        if self.model_architecture != 'bert_with_oob_model':
+            probs, seq_probs = self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
+            err_char_lst = self.display_error_chars(seq_probs, test, display=display)
+            return probs, seq_probs, err_char_lst
+        else:
+            return self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
 
     @staticmethod
     def display_error_chars(seq_probs, test:DatasetWithAuxiliaryEmbeddings, display=True):
