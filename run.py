@@ -6,6 +6,8 @@ from torch.utils.tensorboard import SummaryWriter
 from transformers import EarlyStoppingCallback
 from transformers.integrations import TensorBoardCallback
 
+from collections import OrderedDict
+
 from utils import *
 from dataset import *
 from preprocess import *
@@ -23,6 +25,7 @@ parser = argparse.ArgumentParser(description='Model and Training Config')
 ## model parameters
 parser.add_argument('--model_name', type=str, help='Huggingface model code for the Bert model', required=True)
 parser.add_argument('--checkpoint', type=str)
+parser.add_argument('--base_model_checkpoint', type=str)
 parser.add_argument('--num_labels', type=int, default=2, help='Number of classes in the dataset', required=True)
 parser.add_argument('--oob_model_name', type=str, help='Finetuned model for zero-shot extra information')
 parser.add_argument('--add_hidden_states', default=False, action='store_true')
@@ -205,10 +208,23 @@ for i in irange:
             n_labels=args.num_labels, 
             hidden_layer_size=args.maxlength, 
         )
-    
+
     if args.checkpoint:
-        state_dict = torch.load(os.path.join(args.checkpoint, 'pytorch_model.bin'), map_location=DEVICE)
+        state_dict = torch.load(os.path.join(args.checkpoint, 'pytorch_model.bin'), map_location=DEVICE)            
         missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
+        if bool(missing_keys) | bool(unexpected_keys):
+            print(f'Warning: state_dict does not match perfectly. \nMissing keys: {missing_keys}\nUnexpected keys: {unexpected_keys}')
+
+    if args.base_model_checkpoint:
+        state_dict = torch.load(os.path.join(args.base_model_checkpoint, 'pytorch_model.bin'), map_location=DEVICE)
+        new_state_dict = OrderedDict()
+        for k, v in state_dict.items():
+            if k.startswith('bert'):
+                new_state_dict[k[5:]] = v
+            else:
+                new_state_dict[k] = v
+        del state_dict
+        missing_keys, unexpected_keys = model.base_model.load_state_dict(new_state_dict, strict=False)
         if bool(missing_keys) | bool(unexpected_keys):
             print(f'Warning: state_dict does not match perfectly. \nMissing keys: {missing_keys}\nUnexpected keys: {unexpected_keys}')
 

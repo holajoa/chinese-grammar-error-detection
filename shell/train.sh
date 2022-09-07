@@ -1,6 +1,6 @@
 python run.py \
     --model_name uer/roberta-base-word-chinese-cluecorpussmall \
-    --checkpoint finetuned_models/ww-baseline/checkpoint-3882 \
+    --base_model_checkpoint finetuned_models/ww-baseline/checkpoint-3882 \
     --num_labels 2 \
     --data_dir data/data-org \
     --maxlength 64 \

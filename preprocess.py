@@ -282,7 +282,10 @@ class SwitchLogicOrder(Basetool):
         words = list(seg_list)
         for k in self.keywords:
             if k in words:
-                return self.switch_logic(replace_str, k)
+                try:    
+                    return self.switch_logic(replace_str, k)
+                except:
+                    continue
         return replace_str
 
     @staticmethod
