@@ -3,7 +3,6 @@ import torch
 from transformers import TrainingArguments, Trainer
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
-from utils import postprocess_logits
 
 
 class MyTrainingArguments(TrainingArguments):
@@ -145,6 +144,61 @@ class ImbalancedTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
 
 
+
+class MLMWithSimilarityTrainer(Trainer):
+    def log(self, logs):
+        """Overwrite original log method to log to external file."""
+        if self.state.epoch is not None:
+            logs["epoch"] = round(self.state.epoch, 2)
+
+        output = {**logs, **{"step": self.state.global_step}}
+        self.state.log_history.append(output)
+        self.control = self.callback_handler.on_log(self.args, self.state, self.control, logs)
+
+        # log to external file
+        logging.info(output)
+    
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        """
+        How the loss is computed by Trainer. By default, all models return the loss in the first element.
+        Subclass and override for custom behavior.
+        """
+        outputs = model(**inputs)
+
+        attention_mask = inputs['attention_mask']
+        input_ids = inputs['input_ids']
+        
+        output_token_ids = outputs['logits'].argmax(-1)
+
+        # ===================== need to modify with attention mask ====================
+        org_emb = model.base_model.bert.embeddings.word_embeddings(input=input_ids)
+        pred_emb = model.base_model.bert.embeddings.word_embeddings(input=output_token_ids)
+        
+        sentence_similarity = torch.nn.CosineSimilarity(dim=2)(org_emb, pred_emb)
+        # ===================== need to modify with attention mask ====================
+
+        loss = - torch.log(sentence_similarity.mean(1)).sum(0)
+
+
+        # try:
+        #     logits = outputs['logits']
+        # except:
+        #     logits = outputs['predictions']
+        # pass_pred_labels = 'predictions' in outputs.keys()
+
+        # attention_mask = inputs['attention_mask']
+        # focal_loss = binary_focal_loss(logits, true_labels, alpha=self.args.alpha, gamma=self.args.gamma, pass_pred_labels=pass_pred_labels)
+        # if 'sequence_logits' in outputs.keys():
+        #     sequence_logits = outputs['sequence_logits']
+        #     local_loss = token_label_loss(sequence_logits, true_labels, hyperparam=self.args.local_loss_param, alpha=self.args.alpha, attention_mask=attention_mask)
+        # else: 
+        #     local_loss = 0
+        # loss = focal_loss + local_loss
+
+        return (loss, outputs) if return_outputs else loss
+
+
 def token_label_loss(sequence_logits, true_labels, attention_mask, sum=True, hyperparam=2e-3, alpha=1):
     from torch.distributions import Categorical
 
@@ -207,4 +261,3 @@ def binary_focal_loss(logits, true_labels, alpha=1, gamma=0, sum=True, pass_pred
     loss = loss_pos + loss_neg
     
     return loss
-

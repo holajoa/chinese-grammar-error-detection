@@ -1,5 +1,6 @@
 import torch
 from transformers import AutoTokenizer
+from transformers import DataCollatorForLanguageModeling
 from datasets import DatasetDict, Dataset
 import numpy as np
 from preprocess import *
@@ -73,14 +74,13 @@ class SimpleDataset(torch.utils.data.Dataset):
     
     def __len__(self):
         return len(self.texts)
-    
 
-class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
+
+class CustomBaseDataset(torch.utils.data.Dataset):
     def __init__(
         self, 
         df:pd.DataFrame, 
         model_name:str, 
-        aux_model_name:str=None, 
         maxlength:int=128, 
         train_val_split:Union[float, int]=-1, 
         test:bool=False, 
@@ -90,7 +90,6 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
         **kwargs
     ):
         self.model_name = model_name
-        self.aux_model_name = aux_model_name
         self.maxlength = maxlength
         self.test_stage = test
         self.train_val_split = train_val_split
@@ -113,11 +112,6 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
             self.texts.tolist(), padding='max_length', max_length=self.maxlength,  
             truncation=True, return_tensors='pt', 
         ).to(self.device)
-        if self.aux_model_name:
-            self.inputs['auxiliary_input_ids'] = self.aux_tokenizer(
-                self.texts.tolist(), padding='max_length', max_length=self.maxlength,  
-                truncation=True, return_tensors='pt', 
-            )['input_ids'].to(self.device)
 
     def eda(self, df, **kwargs):
         cleaned = df.text.map(DataPreprocessor(**kwargs))
@@ -125,8 +119,6 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
 
     def initialise_tokenizer(self):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        if self.aux_model_name:
-            self.aux_tokenizer = AutoTokenizer.from_pretrained(self.aux_model_name)
 
     def __getitem__(self, index):
         data_dict = {}
@@ -163,3 +155,91 @@ class DatasetWithAuxiliaryEmbeddings(torch.utils.data.Dataset):
     
     def __len__(self):
         return len(self.texts)
+
+
+class DatasetForMLMFinetuning(CustomBaseDataset):
+    def tokenize(self):
+        self.initialise_tokenizer()
+        data_collector = DataCollatorForLanguageModeling(
+            tokenizer=self.tokenizer, mlm_probability=0.15, return_tensors='pt', 
+        )
+        self.inputs = data_collector(self.texts.tolist()).to(self.device)
+
+
+class DatasetWithAuxiliaryEmbeddings(CustomBaseDataset):
+    def __init__(
+        self, 
+        df:pd.DataFrame, 
+        model_name:str, 
+        aux_model_name:str=None, 
+        maxlength:int=128, 
+        train_val_split:Union[float, int]=-1, 
+        test:bool=False, 
+        eda:bool=False, 
+        device:str='cpu',
+        da_configs:Dict[str, dict]=None, 
+        **kwargs, 
+    ):
+        super().__init__(df, model_name, maxlength, train_val_split, test, eda, device, da_configs)
+        self.aux_model_name = aux_model_name
+
+    def initialise_tokenizer(self):
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        if self.aux_model_name:
+            self.aux_tokenizer = AutoTokenizer.from_pretrained(self.aux_model_name)
+    
+    def tokenize(self):
+        self.initialise_tokenizer()
+        self.inputs = self.tokenizer(
+            self.texts.tolist(), padding='max_length', max_length=self.maxlength,  
+            truncation=True, return_tensors='pt', 
+        ).to(self.device)
+        if self.aux_model_name:
+            self.inputs['auxiliary_input_ids'] = self.aux_tokenizer(
+                self.texts.tolist(), padding='max_length', max_length=self.maxlength,  
+                truncation=True, return_tensors='pt', 
+            )['input_ids'].to(self.device)
+
+
+class DualDataset(CustomBaseDataset):
+    def __init__(
+        self, 
+        df:pd.DataFrame, 
+        model_name:str, 
+        second_model_name:str, 
+        maxlength:int=128, 
+        train_val_split:Union[float, int]=-1, 
+        test:bool=False, 
+        eda:bool=False, 
+        device:str='cpu',
+        da_configs:Dict[str, dict]=None, 
+        **kwargs, 
+    ):
+        super().__init__(df, model_name, maxlength, train_val_split, test, eda, device, da_configs, **kwargs)
+        self.second_model_name = second_model_name
+    
+    def tokenize(self):
+        self.initialise_tokenizer()
+        inputs_1 = self.tokenizer(
+            self.texts.tolist(), padding='max_length', max_length=self.maxlength,  
+            truncation=True, return_tensors='pt', 
+        ).to(self.device)
+        for k, v in inputs_1:
+            self.inputs[k+'_1'] = v
+
+        inputs_2 = self.tokenizer_2(
+            self.texts.tolist(), padding='max_length', max_length=self.maxlength,  
+            truncation=True, return_tensors='pt', 
+        ).to(self.device)
+        for k, v in inputs_2:
+            self.inputs[k+'_2'] = v
+        
+        self.inputs['input_ids'] = torch.concat((self.inputs['input_ids_1'], self.inputs['input_ids_2']), 1)
+        del self.inputs['input_ids_1']
+        del self.inputs['input_ids_2']
+
+        self.inputs['input_length'] = self.maxlength
+
+    def initialise_tokenizer(self):
+        self.tokenizer_1 = AutoTokenizer.from_pretrained(self.model_name)
+        self.tokenizer_2 = AutoTokenizer.from_pretrained(self.second_model_name)

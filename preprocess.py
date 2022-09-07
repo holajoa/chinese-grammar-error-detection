@@ -6,7 +6,10 @@ import nlpcda
 from nlpcda.tools.Basetool import Basetool
 from nlpcda.config import similarword_path
 import jieba
+import synonyms
 import logging 
+
+from tqdm import tqdm
 from copy import deepcopy
 
 
@@ -70,7 +73,6 @@ class DataPreprocessor:
     def _jieba_split(x, cut_all=True):
         import jieba
         return ' '.join(jieba.cut(x, cut_all=cut_all))
-
 
 
 class WordPositionExchange(Basetool):
@@ -147,8 +149,8 @@ class AddSimilarWord(Basetool):
         combine_dict = {}
         for line in open(self.base_file, "r", encoding='utf-8'):
             seperate_word = line.strip().split(" ")
-            # 仅保留真正近义词，过滤相关词和独立词
-            if not seperate_word[0].endswith("="):
+            # 仅保留近义词和相关词，过滤独立词
+            if seperate_word[0].endswith("@") or seperate_word[0][0] in ['A', 'B', 'C', 'D']:
                 continue
             num = len(seperate_word)
             for i in range(1, num):
@@ -189,6 +191,123 @@ class AddSimilarWord(Basetool):
             return word
 
 
+class ReplaceWithSynonym(Basetool):
+    '''
+    随机替换同义词。
+    '''
+
+    def __init__(self, base_file=None, create_num=5, change_rate=0.05, seed=1):
+        super(ReplaceWithSynonym, self).__init__(base_file, create_num, change_rate, seed)
+
+    def replace(self, replace_str:str, thresh=0.75):
+        replace_str = replace_str.replace('\n', '').strip()
+        seg_list = self.jieba.cut(replace_str, cut_all=False)
+        words = list(seg_list)
+        sentences = [replace_str]
+        t = 0
+        while len(sentences) < self.create_num:
+            t += 1
+            a_sentence = ''
+            for word in words:
+                a_sentence += self.retrieve_synonym(word, thresh)
+            if a_sentence not in sentences:
+                sentences.append(a_sentence)
+            if t > self.create_num * self.loop_t / self.change_rate:
+                break
+        return sentences
+
+    def retrieve_synonym(self, word:str, thresh:float):
+        if len(word) == 1:  # 跳过单字
+            return word
+        if self.random.random() < self.change_rate:
+            try:
+                syn_results = synonyms.nearby(word, size=1)
+                place, score = syn_results[0][1], syn_results[1][1]
+                place = place if score > thresh else word
+            except:
+                place = word
+            return place
+        return word
+
+
+class ReplaceWithAntonym(Basetool):
+    '''
+    随机替换反义词。
+    '''
+
+    def __init__(self, base_file='D:/Apps/Anaconda3/envs/general-torch/Lib/site-packages/nlpcda/data/antonym.txt', create_num=5, change_rate=0.05, seed=1):
+        super(ReplaceWithAntonym, self).__init__(base_file, create_num, change_rate, seed)
+
+    def load_paser_base_file(self):
+        combine_dict = {}
+        for line in open(self.base_file, "r", encoding='utf-8'):
+            k, v = [its for its in line.strip().split(" ") if its]
+            if k not in combine_dict.keys():
+                combine_dict[k] = [v]
+            else:
+                combine_dict[k].append(v)
+        print('load :%s done' % (self.base_file))
+        return combine_dict
+
+    def replace(self, replace_str:str):
+        replace_str = replace_str.replace('\n', '').strip()
+        words = list(jieba.cut(replace_str))
+        sentences = [replace_str]
+        t = 0
+        while len(sentences) < self.create_num:
+            t += 1
+            a_sentence = ''
+            for word in words:
+                if word in self.base_file_mapobj and self.random.random() < self.change_rate:
+                    wi = self.random.randint(0, len(self.base_file_mapobj[word]) - 1)
+                    place = self.base_file_mapobj[word][wi]
+                else:
+                    place = word
+                a_sentence += place
+            if a_sentence not in sentences:
+                sentences.append(a_sentence)
+            if t > self.create_num * self.loop_t / self.change_rate:
+                break
+        return sentences
+
+
+class SwitchLogicOrder(Basetool):
+    def __init__(self, base_file=None, create_num=1, change_rate=1, seed=1, keywords=['并', '并且']):
+        super(SwitchLogicOrder, self).__init__(base_file, create_num, change_rate, seed)
+        self.keywords = keywords
+
+    def replace(self, replace_str:str, thresh=0.75):
+        replace_str = replace_str.replace('\n', '').strip()
+        seg_list = self.jieba.cut(replace_str, cut_all=False)
+        words = list(seg_list)
+        for k in self.keywords:
+            if k in words:
+                return self.switch_logic(replace_str, k)
+        return replace_str
+
+    @staticmethod
+    def _split_subsentences(text):
+        return [s for s in text.replace('，', '，！').replace('。', '。！').replace('；', '；！').split('！') if s]
+
+    def switch_logic(self, s:str, keyword:str='并'):
+        ss = self._split_subsentences(s)
+        output_sentences = []
+        for sen in ss:
+            words = list(self.jieba.cut(sen))
+            new_s = []
+            for i, w in enumerate(words):
+                if i == 0 and w == keyword:
+                    output_sentences = output_sentences[:-1] + [words[1:-1] + ['，']] + [[keyword] + output_sentences[-1][:-1] + [sen[-1]]]
+                    break
+                elif w == keyword:
+                    new_s = new_s[:-1] + [words[i+1]] + [keyword, new_s[-1]]
+                    break
+                else:
+                    new_s.append(w)
+            output_sentences.append(new_s)
+        return ''.join([''.join(new_s) for new_s in output_sentences])
+
+
 class DataAugmentation:
     def __init__(self, configs_:Dict[str, dict]) -> None:
         logging.info(f'Initialising data augumentatation operations, including: {list(configs_.keys())}')
@@ -203,7 +322,7 @@ class DataAugmentation:
             self.random_del = nlpcda.RandomDeleteChar(**(configs['random_delete_char']))
         if 'random_swap' in configs.keys():
             self.random_swap_p = configs['random_swap'].pop('prop')
-            self.random_swap = nlpcda.Similarword(**(configs['random_swap']))
+            self.random_swap = ReplaceWithSynonym(**(configs['random_swap']))
         if 'random_swap_order' in configs.keys():
             self.random_swap_order_p = configs['random_swap_order'].pop('prop')
             self.random_swap_order = WordPositionExchange(**(configs['random_swap_order']))
@@ -213,6 +332,13 @@ class DataAugmentation:
         if 'random_swap_logic_words' in configs.keys():
             self.random_swap_logic_words_p = configs['random_swap_logic_words'].pop('prop')
             self.random_swap_logic_words = nlpcda.Similarword(**(configs['random_swap_logic_words']))
+        if 'random_swap_logic_order' in configs.keys():
+            self.random_swap_logic_order_p = configs['random_swap_logic_order'].pop('prop')
+            self.random_swap_logic_order = SwitchLogicOrder(**(configs['random_swap_logic_order']))
+        if 'random_replace_antonym' in configs.keys():
+            self.random_replace_antonym_p = configs['random_replace_antonym'].pop('prop')
+            self.random_replace_antonym = ReplaceWithSynonym(**(configs['random_replace_antonym']))
+
 
     def aug(self, df_full:pd.DataFrame, permute=True, seed=1024) -> pd.DataFrame:
         df_pos = df_full[df_full.label == 1]
@@ -227,15 +353,23 @@ class DataAugmentation:
             df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_del_p, self.random_del)
         if self.random_swap:
             df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_swap_p, self.random_swap)
-        if self.random_add_similar:
-            df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_add_similar_p, self.random_add_similar)
 
         df_neg_aug = self.split_long_sentence(df_neg, label=0)
         L_neg = len(df_neg_aug)
+        if self.random_swap:
+            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_p, self.random_swap, new_label=0)
+        if self.random_del:
+            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_del_p, self.random_del, new_label=1)
         if self.random_swap_order:
             df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_order_p, self.random_swap_order, new_label=1)
         if self.random_swap_logic_words:
             df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_logic_words_p, self.random_swap_logic_words, new_label=1)
+        if self.random_swap_logic_order:
+            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_logic_order_p, self.random_swap_logic_order, new_label=1)
+        if self.random_add_similar:
+            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_add_similar_p, self.random_add_similar, new_label=1)
+        if self.random_replace_antonym:
+            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_replace_antonym_p, self.random_replace_antonym, new_label=1)
         augmented_df = pd.concat((df_neg_aug, df_pos_aug))
         # ----------------------------------------------
         # with pd.option_context('display.max_rows', None, 'display.max_columns', None, ):
@@ -246,23 +380,59 @@ class DataAugmentation:
             augmented_df = augmented_df.sample(frac=1, random_state=seed).reset_index(drop=True)
         return augmented_df
 
-    def aug_single(self, df:pd.DataFrame, L:int, p:float, tool, new_label=None) -> pd.DataFrame:
+    def aug_for_structure_pred(self, df_full:pd.DataFrame, permute=True, seed=1024) -> pd.DataFrame:
+        df_pos = df_full[df_full.label == 1]
+        df_neg = df_full[df_full.label == 0]
+
+        df_pos_aug = df_pos.copy(deep=True)
+        L_pos = len(df_pos_aug)
+        # if self.entity_swap:
+        #     df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.entity_swap_p, self.entity_swap)
+        # if self.random_swap_order:
+        #     df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_swap_order_p, self.random_swap_order)
+        if self.random_del:
+            df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_del_p, self.random_del, keep_original=False)
+        if self.random_swap:
+            df_pos_aug = self.aug_single(df_pos_aug, len(df_pos_aug), self.random_swap_p, self.random_swap)
+        if self.random_add_similar:
+            df_pos_aug = self.aug_single(df_pos_aug, len(df_pos_aug), self.random_add_similar_p, self.random_add_similar)
+
+        df_neg_aug = self.split_long_sentence(df_neg, label=0)
+        L_neg = len(df_neg_aug)
+        if self.random_swap:
+            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_p, self.random_swap, new_label=0)
+        if self.random_swap_order:
+            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_order_p, self.random_swap_order, new_label=1)
+        # if self.random_swap_logic_words:
+        #     df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_logic_words_p, self.random_swap_logic_words, new_label=1)
+        augmented_df = pd.concat((df_neg_aug, df_pos_aug))
+        # ----------------------------------------------
+        # with pd.option_context('display.max_rows', None, 'display.max_columns', None, ):
+        #     pd.options.display.max_colwidth = 100
+        #     display(augmented_df[-200:])
+        # ----------------------------------------------
+        if permute:
+            augmented_df = augmented_df.sample(frac=1, random_state=seed).reset_index(drop=True)
+        return augmented_df
+
+    def aug_single(self, df:pd.DataFrame, L:int, p:float, tool, new_label=None, keep_original=True) -> pd.DataFrame:
         """input L: original df length. Avoid augmentation on newly constructed data. """
         idx = np.random.choice(range(L), size=int(L*p))
         slice_df = df.iloc[idx]
         transformed_slice_df = self.get_transformed_df(slice_df, tool, new_label)
-        augmented_df = pd.concat((df, transformed_slice_df))
-        return augmented_df
+        return pd.concat((df, transformed_slice_df)) if keep_original else transformed_slice_df
 
     def text_seq_transform(self, tool, texts:List[str]) -> List[str]:
         out = []
-        for text in texts:
+        for text in tqdm(texts):
             transformed_text = tool.replace(text)[-1]
             if transformed_text != text:
                 out.append(transformed_text)
         return np.array(out)
     
     def get_transformed_df(self, slice_df:pd.DataFrame, tool, new_label) -> pd.DataFrame:
+        if not slice_df.any().any():
+            return slice_df
         label, text = slice_df[['label', 'text']].values.T
         transformed_text = self.text_seq_transform(tool, text)
         transformed_slice_df = pd.DataFrame({'text':transformed_text, 'label':label[0]})

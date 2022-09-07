@@ -1,0 +1,35 @@
+python run.py \
+    --model_name hfl/chinese-macbert-base \
+    --num_labels 2 \
+    --data_dir data/data-org \
+    --maxlength 128 \
+    --kfolds 10 \
+    --minor_major_ratio 0.5 \
+    --output_model_dir finetuned_models/ensemble/macbert \
+    --n_fold_used 2 \
+    --num_ensemble_models 10 \
+    --num_epochs 10 \
+    --batch_size 32 \
+    --lr 2e-5 \
+    --alpha 0.5 \
+    --gamma 1 \
+    --early_stopping_patience 2 \
+    --do_pred_on_dev_set \
+
+python run.py \
+    --model_name uer/roberta-base-word-chinese-cluecorpussmall \
+    --num_labels 2 \
+    --data_dir data/data-org \
+    --maxlength 64 \
+    --kfolds 10 \
+    --minor_major_ratio 0.5 \
+    --output_model_dir finetuned_models/ensemble/roberta_word_based \
+    --n_fold_used 2 \
+    --num_ensemble_models 10 \
+    --num_epochs 10 \
+    --batch_size 32 \
+    --lr 2e-5 \
+    --alpha 0.5 \
+    --gamma 1.5 \
+    --early_stopping_patience 2 \
+    --do_pred_on_dev_set \

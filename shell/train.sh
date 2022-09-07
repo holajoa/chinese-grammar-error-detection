@@ -1,16 +1,19 @@
-python run-v2.py \
-    --model_name hfl/chinese-macbert-base \
+python run.py \
+    --model_name uer/roberta-base-word-chinese-cluecorpussmall \
+    --checkpoint finetuned_models/ww-baseline/checkpoint-3882 \
     --num_labels 2 \
-    --data_dir data/data-aug-trunc \
+    --data_dir data/data-org \
     --maxlength 64 \
-    --pred_output_dir submissions-aug \
-    --output_model_dir finetuned_models/local_loss_unbalanced \
-    --epoch 4 \
-    --batch_size 64 \
     --kfolds 10 \
-    --lr 1e-5 \
-    --alpha 0.5 \
-    --gamma 0.5 \
-    --local_loss_param 1e-3 \
-    --perform_testing \
-    --single_layer_cls \
+    --minor_major_ratio 0.5 \
+    --pred_output_dir submissions \
+    --output_model_dir finetuned_models/rww \
+    --n_fold_used 5 \
+    --num_ensemble_models 5 \
+    --num_epochs 10 \
+    --batch_size 32 \
+    --lr 2e-5 \
+    --alpha 1 \
+    --gamma 2 \
+    --early_stopping_patience 3 \
+    --do_pred_on_dev_set \

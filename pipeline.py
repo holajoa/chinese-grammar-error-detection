@@ -4,7 +4,7 @@ from typing import List, Union, Tuple
 from utils import *
 from dataset import *
 from torch.utils.data import DataLoader
-from models import AutoModelWithOOBModel, BertWithCRFHead, AutoModelWithClassificationHead
+from models import *
 
 
 def map_to_df(texts:str) -> pd.DataFrame:
@@ -80,28 +80,35 @@ class POSTaggingPipeline:
             
 
 class PipelineGED:
-    def __init__(self, model_name:str, oob_model_name=None, model_architecture:str='bert_with_clf_head', data_configs=None, pooling_mode='cls'):
+    def __init__(self, model_name:str, oob_model_name=None, model_architecture:str='bert_with_clf_head', data_configs=None, pooling_mode='cls', **kwargs):
         # self.model = AutoModelForSequenceClassification.from_pretrained(
         #     model_name, num_labels=2, 
         # )
         
         if model_architecture == 'bert_with_clf_head':
-            self.model = AutoModelWithClassificationHead(
+            self.model = AutoModelBaseline(
                 model_name, 
                 n_labels=2, 
-                pooling_mode=pooling_mode, 
+                **kwargs, 
             )
-        elif model_architecture == 'bert_with_crf_head':
-            self.model = BertWithCRFHead(
+        elif model_architecture == 'bert_word_based':
+            self.model = AutoModelBaseline(
                 model_name, 
                 n_labels=2, 
+                **kwargs, 
             )
+        # elif model_architecture == 'bert_with_crf_head':
+        #     self.model = BertWithCRFHead(
+        #         model_name, 
+        #         n_labels=2, 
+        #     )
         elif model_architecture == 'bert_with_oob_model':
             self.model = AutoModelWithOOBModel(
                 model=model_name, 
                 oob_model=oob_model_name, 
                 n_labels=2, 
                 concatenate=True,
+                **kwargs, 
             )
         else:
             print(f'Model architecture {model_architecture} is not implemented.')
@@ -123,7 +130,7 @@ class PipelineGED:
         if oob_model_name:
             self.data_configs['aux_model_name'] = oob_model_name
         self.model_architecture = model_architecture
-        self.feedforward = self._feedforward_seq if model_architecture == 'bert_with_oob_model' else self._feedforward_token
+        self.feedforward = self._feedforward_seq if model_architecture != 'bert_with_crf_head' else self._feedforward_token
     
     def _feedforward_seq(
         self, 
@@ -132,6 +139,7 @@ class PipelineGED:
         device:torch.device, 
         raw_outputs:bool=True, 
         output_probabilities:bool=False, 
+        aggregate=True, 
     ) -> np.ndarray:
         from tqdm import tqdm
 
@@ -154,15 +162,16 @@ class PipelineGED:
                     output = self.model(**inputs)
                 logits.append(output['logits'])    
             output_tensors.append(torch.concat(logits))
-        output_logits_agg = torch.dstack(output_tensors).mean(-1)
+        output_logits_agg = torch.dstack(output_tensors)
 
-        if output_probabilities:
-            from torch.nn import Softmax
-            return Softmax(dim=1)(output_logits_agg).cpu().numpy(), 
-        if raw_outputs:
-            return output_logits_agg.cpu().numpy()
-        return output_logits_agg.argmax(1).cpu().numpy()
-
+        if aggregate:
+            if output_probabilities:
+                from torch.nn import Softmax
+                return Softmax(dim=1)(output_logits_agg.mean(-1)).cpu().numpy(), 
+            if raw_outputs:
+                return output_logits_agg.mean(-1).cpu().numpy()
+            return output_logits_agg.mean(-1).argmax(1).cpu().numpy()
+        return output_logits_agg
     
     def _feedforward_token(
         self, 
@@ -256,17 +265,18 @@ class PipelineGED:
         output_probabilities:bool=False, 
         display=True, 
         majority_vote=False, 
+        aggregate=True, 
     ) -> np.ndarray:
         test = DatasetWithAuxiliaryEmbeddings(df=map_to_df(texts), **self.data_configs)
         test.prepare_dataset()
         if majority_vote:
             return self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities, majority_vote=True)
-        if self.model_architecture != 'bert_with_oob_model':
+        if self.model_architecture == 'bert_with_crf_head':
             probs, seq_probs = self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
             err_char_lst = self.display_error_chars(seq_probs, test, display=display)
             return probs, seq_probs, err_char_lst
         else:
-            return self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities)
+            return self.feedforward(test, checkpoints, device, raw_outputs, output_probabilities, aggregate=aggregate)
 
     @staticmethod
     def display_error_chars(seq_probs, test:DatasetWithAuxiliaryEmbeddings, display=True):

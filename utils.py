@@ -1,7 +1,6 @@
 from math import ceil
 import numpy as np
 import torch
-import logging
 
 
 def ntf(file="https://notificationsounds.com/storage/sounds/file-sounds-1228-so-proud.mp3"):
