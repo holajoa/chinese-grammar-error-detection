@@ -5,7 +5,7 @@ python run.py \
     --data_dir data/data-org \
     --maxlength 64 \
     --kfolds 10 \
-    --minor_major_ratio 0.5 \
+    --minor_major_ratio 0.75 \
     --pred_output_dir submissions \
     --output_model_dir finetuned_models/rww \
     --n_fold_used 5 \

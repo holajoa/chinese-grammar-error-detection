@@ -218,11 +218,11 @@ for i in irange:
     if args.base_model_checkpoint:
         state_dict = torch.load(os.path.join(args.base_model_checkpoint, 'pytorch_model.bin'), map_location=DEVICE)
         new_state_dict = OrderedDict()
-        for k, v in state_dict.items():
-            if k.startswith('bert'):
-                new_state_dict[k[5:]] = v
+        for key, value in state_dict.items():
+            if key.startswith('bert'):
+                new_state_dict[key[5:]] = value
             else:
-                new_state_dict[k] = v
+                new_state_dict[key] = value
         del state_dict
         missing_keys, unexpected_keys = model.base_model.load_state_dict(new_state_dict, strict=False)
         if bool(missing_keys) | bool(unexpected_keys):
