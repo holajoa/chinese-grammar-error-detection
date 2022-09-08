@@ -12,7 +12,7 @@ from utils import *
 from dataset import *
 from preprocess import *
 from wrapper import *
-from models import AutoModelWithOOBModel, AutoModelBaseline
+from models import AutoModelWithOOBModel, AutoModelBaseline, AutoModelBiGRU
 from data_configs import get_dataset_configs
 
 import argparse
@@ -31,6 +31,7 @@ parser.add_argument('--oob_model_name', type=str, help='Finetuned model for zero
 parser.add_argument('--add_hidden_states', default=False, action='store_true')
 parser.add_argument('--similarity_model', default=False, action='store_true')
 parser.add_argument('--dual_model', default=False, action='store_true')
+parser.add_argument('--bigru', default=False, action='store_true')
 parser.add_argument('--second_model_name', type=str)
 
 ## dataset parameters
@@ -57,7 +58,7 @@ parser.add_argument('--num_epochs', type=int, default=10, help='epoch', required
 parser.add_argument('--lr', type=float, default=2e-5, help='Learning rate ', required=False)
 parser.add_argument('--batch_size', type=int, default=8, help='batch size', required=False)
 parser.add_argument('--best_by_f1', default=False, action='store_true', help='Call back to best model by F1 score.')
-parser.add_argument('--adversarial_training_param', type=int, default=0, help='Adversarial training parameter. If passed 0 then switched off adversarial traiing.')
+parser.add_argument('--adversarial_training_param', type=float, default=0, help='Adversarial training parameter. If passed 0 then switched off adversarial traiing.')
 parser.add_argument('--alpha', type=float, default=1, help='alpha parameter for focal loss. Change the weights of positive examples.')
 parser.add_argument('--gamma', type=float, default=0, help='gamma parameter for focal loss. Change how strict the positive labelling is.')
 parser.add_argument('--early_stopping_patience', type=int, default=4)
@@ -195,12 +196,21 @@ for i in irange:
     train = DatasetWithAuxiliaryEmbeddings(df=train_df_single_model, **TRAIN_DATASET_CONFIGS)
     train.prepare_dataset()
 
+    train_df_single_model_aug = pd.DataFrame(data={'label':train.labels, 'text':train.texts})
+    train_df_single_model_aug.to_csv(os.path.join(save_generated_datasets_dir, f'model_{i}.csv'), sep='\t', index=False)
+
     if args.oob_model_name:
         model = AutoModelWithOOBModel(
             model=args.model_name, 
             oob_model=args.oob_model_name, 
             n_labels=args.num_labels, 
             concatenate=~(args.add_hidden_states), 
+        )
+    elif args.bigru:
+        model = AutoModelBiGRU(
+            model=args.model_name, 
+            n_labels=args.num_labels, 
+            hidden_layer_size=args.maxlength, 
         )
     else:
         model = AutoModelBaseline(

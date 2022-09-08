@@ -4,9 +4,6 @@ from transformers import BertModel, AutoModel, AutoModelForMaskedLM
 from transformers.models.bert.modeling_bert import BertPreTrainedModel
 from layers import DynamicCRF
 from utils import postprocess_logits
-from torchcrf import CRF
-from numpy import array
-import synonyms
 
 from typing import List
 
@@ -69,12 +66,16 @@ class AutoModelBaseline(nn.Module):
     def __init__(self, model, hidden_layer_size=128, n_labels=2):
         super(AutoModelBaseline, self).__init__()
         self.base_model = AutoModel.from_pretrained(model)
+        # self.classifier = nn.Sequential(
+        #     nn.Dropout(p=0.1),
+        #     nn.Linear(self.base_model.config.hidden_size, hidden_layer_size, bias=True),
+        #     nn.Tanh(),
+        #     nn.Dropout(p=0.1),
+        #     nn.Linear(hidden_layer_size, n_labels, bias=True)
+        # )
         self.classifier = nn.Sequential(
             nn.Dropout(p=0.1),
-            nn.Linear(self.base_model.config.hidden_size, hidden_layer_size, bias=True),
-            nn.Tanh(),
-            nn.Dropout(p=0.1),
-            nn.Linear(hidden_layer_size, n_labels, bias=True)
+            nn.Linear(self.base_model.config.hidden_size, n_labels, bias=True)
         )
 
     def forward(self, input_ids, attention_mask, **kwargs):
@@ -83,12 +84,41 @@ class AutoModelBaseline(nn.Module):
         return {'logits':output}
 
 
-class Similarity(nn.Module):
-    def __init__(self):
-        super(Similarity, self).__init__()
+class AutoModelBiGRU(nn.Module):
+    def __init__(self, model, hidden_layer_size=128, n_labels=2):
+        """hidden_layer_size is in fact the seq_length"""
+        super(AutoModelBiGRU, self).__init__()
+        self.base_model = AutoModel.from_pretrained(model)
+        # self.classifier = nn.Sequential(
+        #     nn.Dropout(p=0.1),
+        #     nn.Linear(self.base_model.config.hidden_size, hidden_layer_size, bias=True),
+        #     nn.Tanh(),
+        #     nn.Dropout(p=0.1),
+        #     nn.Linear(hidden_layer_size, n_labels, bias=True)
+        # )
 
-    def forward(self, s1, s2):
-        return synonyms.compare(s1, s2)
+        self.gru = nn.GRU(
+            input_size=self.base_model.config.hidden_size, 
+            hidden_size=self.base_model.config.hidden_size, 
+            num_layers=1, 
+            batch_first=True, 
+            dropout=0.1, 
+            bidirectional=True, 
+        )
+
+        self.token_tagger = nn.Sequential(
+            nn.Linear(self.base_model.config.hidden_size*2, n_labels, bias=True), 
+            nn.Sigmoid()
+        )
+
+        self.classifier = nn.Linear(hidden_layer_size, n_labels, bias=True)
+
+    def forward(self, input_ids, attention_mask, **kwargs):
+        logits_base = self.base_model(input_ids, attention_mask=attention_mask).last_hidden_state # [:, 0, :]
+        gru_hidden_states = self.gru(input=logits_base)[0]
+        token_tags = self.token_tagger(gru_hidden_states)[..., 1]
+        output = self.classifier(token_tags)
+        return {'logits':output}
 
 
 class MLMWithSimilarity(nn.Module):

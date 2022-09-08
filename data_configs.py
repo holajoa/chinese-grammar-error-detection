@@ -28,7 +28,7 @@ DATA_AUG_CONFIGS = {
     'random_swap_order':{
         'create_num':2,
         'char_gram':5,  
-        'change_rate':0.2, 
+        'change_rate':0.05, 
         'seed':1024, 
         'prop':0.4, 
     }, 
@@ -41,9 +41,9 @@ DATA_AUG_CONFIGS = {
     'random_swap_logic_words':{
         'base_file':logic_pairs_file, 
         'create_num':2,
-        'change_rate':0.5, 
+        'change_rate':0.75, 
         'seed':1024, 
-        'prop':0.75, 
+        'prop':1, 
     }, 
     'random_swap_logic_order':{
         'create_num':2,
@@ -55,13 +55,14 @@ DATA_AUG_CONFIGS = {
         'create_num':2,
         'change_rate':0.2, 
         'seed':1024, 
-        'prop':0.4, 
+        'prop':0.5, 
     }, 
 }
 
 def get_dataset_configs(args, device, mlm_finetune=False):    
     oob_model_name = None if mlm_finetune else args.oob_model_name
     da_configs = None if mlm_finetune else DATA_AUG_CONFIGS
+    print(da_configs)
 
     TRAIN_DATASET_CONFIGS = {
         'model_name':args.model_name,

@@ -110,6 +110,12 @@ class PipelineGED:
                 concatenate=True,
                 **kwargs, 
             )
+        elif model_architecture == 'bert_with_bigru':
+            self.model = AutoModelBiGRU(
+                model=model_name, 
+                n_labels=2, 
+                **kwargs, 
+            )
         else:
             print(f'Model architecture {model_architecture} is not implemented.')
         if data_configs:

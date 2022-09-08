@@ -268,22 +268,25 @@ class ReplaceWithAntonym(Basetool):
                 sentences.append(a_sentence)
             if t > self.create_num * self.loop_t / self.change_rate:
                 break
+        # if sentences[-1] != replace_str:
+        #     print(sentences[-1])
         return sentences
 
 
 class SwitchLogicOrder(Basetool):
-    def __init__(self, base_file=None, create_num=1, change_rate=1, seed=1, keywords=['并', '并且']):
+    def __init__(self, base_file=None, create_num=1, change_rate=1, seed=1, keywords=['并', '并且', '而且']):
         super(SwitchLogicOrder, self).__init__(base_file, create_num, change_rate, seed)
         self.keywords = keywords
 
-    def replace(self, replace_str:str, thresh=0.75):
+    def replace(self, replace_str:str):
         replace_str = replace_str.replace('\n', '').strip()
         seg_list = self.jieba.cut(replace_str, cut_all=False)
         words = list(seg_list)
         for k in self.keywords:
             if k in words:
                 try:    
-                    return self.switch_logic(replace_str, k)
+                    tw = self.switch_logic(replace_str, k)
+                    return tw
                 except:
                     continue
         return replace_str
@@ -303,7 +306,11 @@ class SwitchLogicOrder(Basetool):
                     output_sentences = output_sentences[:-1] + [words[1:-1] + ['，']] + [[keyword] + output_sentences[-1][:-1] + [sen[-1]]]
                     break
                 elif w == keyword:
-                    new_s = new_s[:-1] + [words[i+1]] + [keyword, new_s[-1]]
+                    try:
+                        new_s = new_s[:-1] + [words[i+1]] + [keyword, new_s[-1]] + words[i+2:]
+                    except:
+                        print(s)
+                        new_s = new_s[:-1] + [words[i+1]] + [keyword, new_s[-1]]
                     break
                 else:
                     new_s.append(w)
@@ -340,7 +347,7 @@ class DataAugmentation:
             self.random_swap_logic_order = SwitchLogicOrder(**(configs['random_swap_logic_order']))
         if 'random_replace_antonym' in configs.keys():
             self.random_replace_antonym_p = configs['random_replace_antonym'].pop('prop')
-            self.random_replace_antonym = ReplaceWithSynonym(**(configs['random_replace_antonym']))
+            self.random_replace_antonym = ReplaceWithAntonym(**(configs['random_replace_antonym']))
 
 
     def aug(self, df_full:pd.DataFrame, permute=True, seed=1024) -> pd.DataFrame:
@@ -374,6 +381,12 @@ class DataAugmentation:
         if self.random_replace_antonym:
             df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_replace_antonym_p, self.random_replace_antonym, new_label=1)
         augmented_df = pd.concat((df_neg_aug, df_pos_aug))
+
+        def remove_starting_punc(s):
+            return s[1:] if s[0] in ['。', '，', '？'] else s
+
+        augmented_df.text = augmented_df.text.map(remove_starting_punc)
+        augmented_df = augmented_df[augmented_df.text.map(lambda s: s != '')]
         # ----------------------------------------------
         # with pd.option_context('display.max_rows', None, 'display.max_columns', None, ):
         #     pd.options.display.max_colwidth = 100
@@ -383,40 +396,40 @@ class DataAugmentation:
             augmented_df = augmented_df.sample(frac=1, random_state=seed).reset_index(drop=True)
         return augmented_df
 
-    def aug_for_structure_pred(self, df_full:pd.DataFrame, permute=True, seed=1024) -> pd.DataFrame:
-        df_pos = df_full[df_full.label == 1]
-        df_neg = df_full[df_full.label == 0]
+    # def aug_for_structure_pred(self, df_full:pd.DataFrame, permute=True, seed=1024) -> pd.DataFrame:
+    #     df_pos = df_full[df_full.label == 1]
+    #     df_neg = df_full[df_full.label == 0]
 
-        df_pos_aug = df_pos.copy(deep=True)
-        L_pos = len(df_pos_aug)
-        # if self.entity_swap:
-        #     df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.entity_swap_p, self.entity_swap)
-        # if self.random_swap_order:
-        #     df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_swap_order_p, self.random_swap_order)
-        if self.random_del:
-            df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_del_p, self.random_del, keep_original=False)
-        if self.random_swap:
-            df_pos_aug = self.aug_single(df_pos_aug, len(df_pos_aug), self.random_swap_p, self.random_swap)
-        if self.random_add_similar:
-            df_pos_aug = self.aug_single(df_pos_aug, len(df_pos_aug), self.random_add_similar_p, self.random_add_similar)
+    #     df_pos_aug = df_pos.copy(deep=True)
+    #     L_pos = len(df_pos_aug)
+    #     # if self.entity_swap:
+    #     #     df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.entity_swap_p, self.entity_swap)
+    #     # if self.random_swap_order:
+    #     #     df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_swap_order_p, self.random_swap_order)
+    #     if self.random_del:
+    #         df_pos_aug = self.aug_single(df_pos_aug, L_pos, self.random_del_p, self.random_del, keep_original=False)
+    #     if self.random_swap:
+    #         df_pos_aug = self.aug_single(df_pos_aug, len(df_pos_aug), self.random_swap_p, self.random_swap)
+    #     if self.random_add_similar:
+    #         df_pos_aug = self.aug_single(df_pos_aug, len(df_pos_aug), self.random_add_similar_p, self.random_add_similar)
 
-        df_neg_aug = self.split_long_sentence(df_neg, label=0)
-        L_neg = len(df_neg_aug)
-        if self.random_swap:
-            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_p, self.random_swap, new_label=0)
-        if self.random_swap_order:
-            df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_order_p, self.random_swap_order, new_label=1)
-        # if self.random_swap_logic_words:
-        #     df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_logic_words_p, self.random_swap_logic_words, new_label=1)
-        augmented_df = pd.concat((df_neg_aug, df_pos_aug))
-        # ----------------------------------------------
-        # with pd.option_context('display.max_rows', None, 'display.max_columns', None, ):
-        #     pd.options.display.max_colwidth = 100
-        #     display(augmented_df[-200:])
-        # ----------------------------------------------
-        if permute:
-            augmented_df = augmented_df.sample(frac=1, random_state=seed).reset_index(drop=True)
-        return augmented_df
+    #     df_neg_aug = self.split_long_sentence(df_neg, label=0)
+    #     L_neg = len(df_neg_aug)
+    #     if self.random_swap:
+    #         df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_p, self.random_swap, new_label=0)
+    #     if self.random_swap_order:
+    #         df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_order_p, self.random_swap_order, new_label=1)
+    #     # if self.random_swap_logic_words:
+    #     #     df_neg_aug = self.aug_single(df_neg_aug, L_neg, self.random_swap_logic_words_p, self.random_swap_logic_words, new_label=1)
+    #     augmented_df = pd.concat((df_neg_aug, df_pos_aug))
+    #     # ----------------------------------------------
+    #     # with pd.option_context('display.max_rows', None, 'display.max_columns', None, ):
+    #     #     pd.options.display.max_colwidth = 100
+    #     #     display(augmented_df[-200:])
+    #     # ----------------------------------------------
+    #     if permute:
+    #         augmented_df = augmented_df.sample(frac=1, random_state=seed).reset_index(drop=True)
+    #     return augmented_df
 
     def aug_single(self, df:pd.DataFrame, L:int, p:float, tool, new_label=None, keep_original=True) -> pd.DataFrame:
         """input L: original df length. Avoid augmentation on newly constructed data. """
